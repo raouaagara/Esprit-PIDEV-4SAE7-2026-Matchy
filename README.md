@@ -11,13 +11,10 @@
 ## 📋 Table of Contents
 
 - [About](#about)
-- [Problem Statement](#problem-statement)
 - [Core Innovations](#core-innovations)
 - [Key Features](#key-features)
-- [Architecture](#architecture)
 - [Technology Stack](#technology-stack)
 - [Getting Started](#getting-started)
-- [Modules Overview](#modules-overview)
 - [Team](#team)
 - [License](#license)
 
@@ -28,33 +25,6 @@
 Matchy is an intelligent freelance marketplace designed to revolutionize how freelancers and clients connect, collaborate, and succeed. Built with cutting-edge AI technology and a user-first approach, Matchy addresses critical pain points in the $1.5 trillion global freelance economy.
 
 **Vision:** To create an intelligent, transparent, and efficient ecosystem that empowers freelancers to build sustainable careers while enabling clients to discover and collaborate with the perfect talent for their projects.
-
----
-
-## 🔍 Problem Statement
-
-The global freelance economy, despite its $1.5 trillion market size and 1.57 billion freelancers worldwide, faces significant challenges:
-
-### Freelancer Pain Points
-- **Discovery Crisis**: Hard to stand out in oversaturated markets
-- **Financial Instability**: High platform fees (up to 20%), payment delays, unstable income
-- **Limited Growth**: No clear career progression paths or skill development tools
-- **Time Waste**: Manual proposal writing, scattered tools, inefficient workflows
-- **Trust Issues**: Scope creep, client disappearances, poor dispute resolution
-
-### Client Challenges
-- **Talent Verification**: Can't verify real skills, 42-day average hiring cycle
-- **Quality Risks**: 28% project failure rate due to skill mismatches
-- **Cost Uncertainty**: Hidden fees, budget overruns, unclear pricing
-- **Management Complexity**: Scattered tools, difficult progress tracking
-- **Retention Problems**: Can't maintain relationships with quality freelancers
-
-### Market Impact
-- **$180B** in economic value loss from inefficiencies
-- **$2,400/year** average freelancer loss to platform fees
-- **$15,000** average cost per failed project for clients
-
----
 
 ## 💡 Core Innovations
 
@@ -111,32 +81,6 @@ Features specifically designed to facilitate long-term collaborations, team buil
 
 ---
 
-## 🏗️ Architecture
-
-Matchy follows a modern **three-tier microservices architecture**:
-
-### Presentation Layer (Frontend)
-- **Technology**: Angular + TypeScript
-- **Purpose**: User interface for freelancers, clients, and admins
-- **Communication**: RESTful APIs
-
-### Application Layer (Backend)
-- **Technology**: Spring Boot (Java)
-- **Purpose**: Business logic, request processing, data management
-- **Features**: AI/ML integration, API endpoints, authentication
-
-### Data Layer
-- **Primary Database**: MySQL (structured data)
-- **Caching**: Redis (session management, performance)
-- **AI/ML**: TensorFlow (matching algorithms, recommendations)
-
-### Infrastructure
-- **Containerization**: Docker
-- **Orchestration**: Kubernetes
-- **Cloud**: AWS/Google Cloud (cloud-native)
-- **Scalability**: 10,000+ concurrent users
-
----
 
 ## 🛠️ Technology Stack
 
@@ -214,62 +158,7 @@ SENDGRID_API_KEY=your_sendgrid_key
 # Security
 JWT_SECRET=your_jwt_secret
 ENCRYPTION_KEY=your_encryption_key
-```
 
----
-
-## 📦 Modules Overview
-
-### 1. User & Project Management
-- User profiles (freelancer/client/company)
-- Project creation and listings
-- AI-powered smart matching
-- Advanced search and filters
-
-### 2. Communication & Collaboration
-- Real-time messaging system
-- Discussion forums
-- Project-specific communication threads
-- File sharing and collaboration
-
-### 3. Proposal & Milestone Management
-- Proposal submission and evaluation
-- AI-powered proposal assistant
-- Milestone tracking and validation
-- Progress monitoring
-
-### 4. Contract & Payment
-- Automated contract generation
-- Secure escrow system
-- Multi-currency support
-- Automated invoicing and payment analytics
-
-### 5. Learning & Resources
-- Educational content library
-- Skill certification programs
-- Personalized learning paths
-- AI-driven content recommendations
-
-### 6. Review & Support
-- Mutual review system
-- Reputation scoring
-- 24/7 support ticket management
-- AI-powered review integrity monitoring
-
----
-
-## 📊 Non-Functional Requirements
-
-| Category | Requirement | Target |
-|----------|-------------|--------|
-| **Performance** | Page load time | < 8 seconds |
-| **Performance** | Search response | < 500ms |
-| **Scalability** | Concurrent users | 10,000+ |
-| **Availability** | System uptime | 99.9% |
-| **Security** | Data encryption | AES-256 |
-| **Usability** | Mobile responsive | 100% |
-
----
 
 ## 👥 Team
 
@@ -288,16 +177,6 @@ ENCRYPTION_KEY=your_encryption_key
 
 **Academic Year:** 2025/2026
 
----
-
-## 📈 Market Opportunity
-
-- **Global Market Size**: $1.5 trillion (2024)
-- **Expected Growth**: 17% CAGR through 2028
-- **Active Freelancers**: 1.57 billion worldwide
-- **Target Market Gap**: $50B+ opportunity for modern, AI-driven solution
-
----
 
 ## 🔐 Security & Compliance
 
@@ -327,4 +206,4 @@ For more information about the Matchy platform, please reach out to the project 
 
 ---
 
-**Built with ❤️ by the Matchy Team | Academic Year 2025/2026
+Built with ❤️ by the Matchy Team | Academic Year 2025/2026
