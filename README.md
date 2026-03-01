@@ -1,6 +1,4 @@
-# Matchy 🤝
-
-**Smart Freelance and Matching Platform**
+# Matchy 🤝 – Smart Freelance and Matching Platform
 
 [![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 [![Status](https://img.shields.io/badge/status-in%20development-yellow.svg)]()
@@ -10,25 +8,29 @@
 
 ## 📋 Table of Contents
 
-- [About](#about)
+- [Overview](#overview)
 - [Core Innovations](#core-innovations)
-- [Key Features](#key-features)
-- [Technology Stack](#technology-stack)
+- [Features](#features)
+- [Tech Stack](#tech-stack)
+- [Architecture](#architecture)
+- [Contributors](#contributors)
+- [Academic Context](#academic-context)
 - [Getting Started](#getting-started)
-- [Team](#team)
-- [License](#license)
+- [Acknowledgments](#acknowledgments)
 
 ---
 
-## 🎯 About
+## Overview
+
+This project was developed as part of the **PIDEV – 4th Year Engineering Program** at **Esprit School of Engineering** (Academic Year 2025–2026).
 
 Matchy is an intelligent freelance marketplace designed to revolutionize how freelancers and clients connect, collaborate, and succeed. Built with cutting-edge AI technology and a user-first approach, Matchy addresses critical pain points in the $1.5 trillion global freelance economy.
 
 **Vision:** To create an intelligent, transparent, and efficient ecosystem that empowers freelancers to build sustainable careers while enabling clients to discover and collaborate with the perfect talent for their projects.
 
-## 💡 Core Innovations
+---
 
-Matchy introduces six game-changing innovations:
+## 💡 Core Innovations
 
 ### 1. 🤖 AI-Powered Smart Matching
 Machine learning algorithms analyze skills, experience, work history, communication style, and past outcomes to calculate real-time compatibility scores and predict project success.
@@ -50,50 +52,81 @@ Features specifically designed to facilitate long-term collaborations, team buil
 
 ---
 
-## ✨ Key Features
+## ✨ Features
 
 ### For Freelancers
-- ✓ AI-powered job matching with compatibility scores
-- ✓ Comprehensive profile and portfolio showcase
-- ✓ Integrated project management tools
-- ✓ Skill verification and certification programs
-- ✓ Career development resources and analytics
-- ✓ Fair pricing (8-12% platform fee)
-- ✓ Secure escrow payment system
-- ✓ Professional networking and events
+- AI-powered job matching with compatibility scores
+- Comprehensive profile and portfolio showcase
+- Integrated project management tools
+- Skill verification and certification programs
+- Career development resources and analytics
+- Secure escrow payment system
 
 ### For Clients
-- ✓ Smart talent discovery with success prediction
-- ✓ Multi-layer quality assurance
-- ✓ Milestone-based project tracking
-- ✓ Integrated communication tools
-- ✓ Automated contract generation
-- ✓ Transparent pricing and invoicing
-- ✓ Team management capabilities
-- ✓ Trusted freelancer networks
+- Smart talent discovery with success prediction
+- Multi-layer quality assurance
+- Milestone-based project tracking
+- Automated contract generation
+- Team management capabilities
 
 ### For Platform
-- ✓ Advanced review and reputation system
-- ✓ 24/7 support ticket management
-- ✓ Fraud detection and prevention
-- ✓ Analytics and reporting dashboard
-- ✓ Community forums and resources
+- Advanced review and reputation system
+- 24/7 support ticket management
+- Fraud detection and prevention
+- Analytics and reporting dashboard
 
 ---
 
+## Tech Stack
 
-## 🛠️ Technology Stack
+### Frontend
+- Angular, TypeScript, HTML5, CSS3
 
-| Layer | Technology |
-|-------|-----------|
-| **Frontend** | Angular, TypeScript, HTML5, CSS3 |
-| **Backend** | Spring Boot, Java |
-| **Database** | MySQL, Redis |
-| **AI/ML** | TensorFlow, Scikit-learn, NLP libraries |
-| **Authentication** | Multi-Factor Authentication (MFA), OAuth 2.0 |
-| **Payments** | Stripe, PayPal (PCI-DSS compliant) |
-| **DevOps** | Docker, Kubernetes, CI/CD pipelines |
-| **Security** | AES-256 encryption, GDPR/CCPA compliance |
+### Backend
+- Spring Boot, Java
+- Spring Security / JWT, OAuth 2.0
+
+### Database
+- MySQL, Redis
+
+### AI/ML
+- TensorFlow, Scikit-learn, NLP libraries
+
+### DevOps
+- Docker, Kubernetes, CI/CD pipelines
+
+### Security
+- AES-256 encryption, GDPR/CCPA compliance, MFA
+
+---
+
+## Architecture
+
+The application follows a **client-server architecture** with a RESTful API backend (Spring Boot) consumed by an Angular SPA frontend. AI/ML services are integrated as microservices for smart matching and career analytics.
+
+---
+
+## Contributors
+
+| Name | GitHub |
+|------|--------|
+| Raouaa GARA | [@raouaagara](https://github.com/raouaagara) |
+| Amine Abdellah | [@amine52a](https://github.com/amine52a) |
+| Soumaya Mchita | [@soumaya-afk](https://github.com/soumaya-afk) |
+| Asma Ibrahim | [@asmaibr](https://github.com/asmaibr) |
+| Sourour Alaimi | [@alaimi-sourour](https://github.com/alaimi-sourour) |
+| Salma Haouari | [@salmahaouarii](https://github.com/salmahaouarii) |
+
+**Supervised by:**
+- Mr. Alaa RAMI
+- Ms. Chahnez SARDOUK
+
+---
+
+## Academic Context
+
+Developed at **Esprit School of Engineering – Tunisia**  
+**PIDEV** – 4SAE7 | 2025–2026
 
 ---
 
@@ -103,33 +136,18 @@ Features specifically designed to facilitate long-term collaborations, team buil
 - Node.js (v18+)
 - Java 17+
 - MySQL 8.0+
-- Docker & Kubernetes (for deployment)
+- Docker (for deployment)
 
 ### Installation
 
 ```bash
 # Clone the repository
-git clone https://github.com/yourusername/matchy.git
-cd matchy
+git clone https://github.com/raouaagara/Esprit-PIDEV-4SAE7-2026-Matchy.git
+cd Esprit-PIDEV-4SAE7-2026-Matchy
 
-# Install frontend dependencies
-cd frontend
-npm install
-
-# Install backend dependencies
-cd ../backend
-./mvnw install
-
-# Set up database
-mysql -u root -p < database/schema.sql
-
-# Configure environment variables
-cp .env.example .env
-# Edit .env with your configuration
-
-# Run the application
 # Frontend
 cd frontend
+npm install
 npm start
 
 # Backend
@@ -140,70 +158,25 @@ cd backend
 ### Environment Variables
 
 ```env
-# Database
 DB_HOST=localhost
 DB_PORT=3306
 DB_NAME=matchy
 DB_USER=your_user
 DB_PASSWORD=your_password
-
-# Redis
 REDIS_HOST=localhost
 REDIS_PORT=6379
-
-# API Keys
-STRIPE_SECRET_KEY=your_stripe_key
-SENDGRID_API_KEY=your_sendgrid_key
-
-# Security
 JWT_SECRET=your_jwt_secret
-ENCRYPTION_KEY=your_encryption_key
-
-
-## 👥 Team
-
-**Prepared by:**
-- Raouaa GARA
-- Sourour ALAIMI
-- Asma IBRAHIM
-- Amine ABDELLAH
-- Soumaya MCHITA
-
-**Supervised by:**
-- Mr. Alaa RAMI
-- Ms. Chahnez SARDOUK
-
-**Institution:** The Private Higher School of Engineering and Technology
-
-**Academic Year:** 2025/2026
-
-
-## 🔐 Security & Compliance
-
-- AES-256 encryption for sensitive data
-- Multi-factor authentication (MFA)
-- Identity verification protocols
-- PCI-DSS compliant payment processing
-- GDPR and CCPA data protection compliance
+STRIPE_SECRET_KEY=your_stripe_key
+```
 
 ---
 
-## 📝 License
+## Acknowledgments
 
-This project is part of an academic program at The Private Higher School of Engineering and Technology.
-
----
-
-## 🤝 Contributing
-
-This is an academic project. For questions or collaboration inquiries, please contact the project supervisors.
+- **Esprit School of Engineering** for the academic framework and support
+- Mr. Alaa RAMI and Ms. Chahnez SARDOUK for their supervision
+- All contributors and teammates
 
 ---
 
-## 📧 Contact
-
-For more information about the Matchy platform, please reach out to the project team or supervisors at The Private Higher School of Engineering and Technology.
-
----
-
-Built with ❤️ by the Matchy Team | Academic Year 2025/2026
+Built with ❤️ by the Matchy Team | Esprit School of Engineering | Academic Year 2025–2026
