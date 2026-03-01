@@ -87,7 +87,7 @@ Features specifically designed to facilitate long-term collaborations, team buil
 - Spring Security / JWT, OAuth 2.0
 
 ### Database
-- MySQL, Redis
+- MySQL
 
 ### AI/ML
 - TensorFlow, Scikit-learn, NLP libraries
@@ -95,10 +95,6 @@ Features specifically designed to facilitate long-term collaborations, team buil
 ### DevOps
 - Docker, Kubernetes, CI/CD pipelines
 
-### Security
-- AES-256 encryption, GDPR/CCPA compliance, MFA
-
----
 
 ## Architecture
 
@@ -116,12 +112,6 @@ The application follows a **client-server architecture** with a RESTful API back
 | Asma Ibrahim | [@asmaibr](https://github.com/asmaibr) |
 | Sourour Alaimi | [@alaimi-sourour](https://github.com/alaimi-sourour) |
 | Salma Haouari | [@salmahaouarii](https://github.com/salmahaouarii) |
-
-**Supervised by:**
-- Mr. Alaa RAMI
-- Ms. Chahnez SARDOUK
-
----
 
 ## Academic Context
 
