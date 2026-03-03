@@ -1,0 +1,18 @@
+.bo-layout {
+  display: flex;
+  min-height: 100vh;
+  background: var(--bo-bg-primary);
+  font-family: var(--font-body);
+}
+.bo-main {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  overflow: hidden;
+}
+.bo-content {
+  flex: 1;
+  padding: 24px 28px;
+  overflow-y: auto;
+}

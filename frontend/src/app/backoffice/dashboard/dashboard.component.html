@@ -1,0 +1,272 @@
+<div class="dashboard">
+
+  <!-- ══ HEADER ═══════════════════════════════════════════ -->
+  <div class="page-header">
+    <div class="h-left">
+      <p class="h-eyebrow">Matchy Platform</p>
+      <h1 class="page-title">Admin Dashboard</h1>
+      <p class="page-sub">Global overview · real-time stats</p>
+    </div>
+    <div class="h-right">
+      <div class="theme-toggle" [class.on]="!isDark" (click)="toggleTheme()">
+        <div class="tog-track"><div class="tog-knob"></div></div>
+        <span class="tog-label">{{ isDark ? 'DARK' : 'LIGHT' }}</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ SKELETON ══════════════════════════════════════════ -->
+  <ng-container *ngIf="isLoading">
+    <div class="skel-kpis">
+      <div class="skel-card" *ngFor="let x of [1,2,3,4,5,6,7,8]"></div>
+    </div>
+    <div class="skel-charts">
+      <div class="skel-chart"></div>
+      <div class="skel-chart"></div>
+      <div class="skel-chart"></div>
+    </div>
+  </ng-container>
+
+  <ng-container *ngIf="!isLoading">
+
+    <!-- ══ KPI GRID ═══════════════════════════════════════ -->
+    <div class="kpi-grid">
+      <div class="kpi-card"
+           *ngFor="let s of stats; let i = index"
+           [class.ready]="chartsReady"
+           [style.--delay]="(i * 60) + 'ms'"
+           [style.--glow]="s.glow">
+        <div class="kpi-bg-glow" [style.background]="s.bg.replace('.15','.08')"></div>
+        <div class="kpi-top">
+          <div class="kpi-icon" [style.background]="s.bg">{{ s.icon }}</div>
+          <span class="kpi-change" [class]="s.changeType">{{ s.change }}</span>
+        </div>
+        <div class="kpi-value">{{ s.animated }}{{ s.suffix || '' }}</div>
+        <div class="kpi-label">{{ s.label }}</div>
+        <div class="kpi-sub">{{ s.sub }}</div>
+        <div class="kpi-bar">
+          <div class="kpi-bar-fill"
+               [class.go]="chartsReady"
+               [style.background]="s.color"
+               [style.--w]="s.barW">
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ CHARTS ROW ════════════════════════════════════ -->
+    <div class="charts-row">
+
+      <!-- Bar chart -->
+      <div class="card">
+        <div class="card-head">
+          <div>
+            <h3 class="card-title">Monthly Registrations</h3>
+            <p class="card-sub">New users per month · 2024</p>
+          </div>
+          <span class="card-pill">12 months</span>
+        </div>
+        <div class="barchart-wrap">
+          <div class="y-axis">
+            <span class="y-tick" *ngFor="let l of [24,18,12,6,0]">{{ l }}</span>
+          </div>
+          <div class="bars-wrap">
+            <div class="gridlines">
+              <div class="gl" *ngFor="let x of [1,2,3,4,5]"></div>
+            </div>
+            <div class="bc" *ngFor="let bar of barData; let i = index">
+              <div class="bo">
+                <div class="btip">{{ bar.v }}</div>
+                <div class="bfill"
+                     [class.on]="chartsReady"
+                     [style.height.%]="barHeight(bar.v)"
+                     [style.transition-delay]="barDelay(i)">
+                </div>
+              </div>
+              <span class="bxl">{{ bar.l }}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Donut -->
+      <div class="card donut-card">
+        <div class="card-head">
+          <div>
+            <h3 class="card-title">User Split</h3>
+            <p class="card-sub">By role</p>
+          </div>
+        </div>
+        <div class="donut-body">
+          <svg class="dsvg" viewBox="0 0 120 120">
+            <circle class="dbg" cx="60" cy="60" r="52"/>
+            <circle *ngFor="let seg of donutSegs; let i = index"
+                    class="darc"
+                    [class.on]="donutAnimated"
+                    cx="60" cy="60" r="52"
+                    [attr.stroke]="seg.color"
+                    [attr.stroke-dasharray]="seg.dashArray"
+                    [attr.stroke-dashoffset]="seg.dashOffset"
+                    [style.transition-delay]="arcDelay(i)">
+            </circle>
+            <text x="60" y="54" class="dcv">{{ stats[0]?.animated || 0 }}</text>
+            <text x="60" y="67" class="dcl">USERS</text>
+          </svg>
+          <div class="dleg">
+            <div class="dleg-item" *ngFor="let seg of donutSegs">
+              <span class="dleg-dot" [style.background]="seg.color"></span>
+              <span class="dleg-name">{{ seg.label }}</span>
+              <span class="dleg-pct">{{ seg.pct }}%</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- KPI Progress -->
+      <div class="card prog-card">
+        <div class="card-head">
+          <div>
+            <h3 class="card-title">Global KPI Overview</h3>
+            <p class="card-sub">Platform key metrics</p>
+          </div>
+          <span class="card-pill">All metrics</span>
+        </div>
+        <div class="prog-list">
+          <div class="pi" *ngFor="let pb of progBars">
+            <div class="pi-head">
+              <span class="pi-title">{{ pb.title }}</span>
+              <span class="pi-pct" [style.background]="pb.gradient" style="-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text">{{ pb.pct }}%</span>
+            </div>
+            <div class="pi-track">
+              <div class="pi-fill"
+                   [class.go]="progAnimated"
+                   [style.background]="pb.gradient"
+                   [style.--w]="pb.pct + '%'">
+              </div>
+            </div>
+            <div class="pi-meta">
+              <span class="pi-mv" *ngFor="let m of pb.meta">
+                <strong>{{ m.val }}</strong> {{ m.key }}
+              </span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- ══ TABLES ROW ════════════════════════════════════ -->
+    <div class="tables-row">
+
+      <!-- Recent Users -->
+      <div class="tcard">
+        <div class="thead">
+          <div class="thead-l">
+            <span class="thead-ico">👤</span>
+            <span class="thead-title">Recent Users</span>
+            <span class="cbadge">{{ recentUsers.length }} results</span>
+          </div>
+          <div class="thead-r">
+            <div class="sinput-wrap">
+              <span class="sico">🔍</span>
+              <input class="sinput" placeholder="Search users..." [(ngModel)]="userSearch">
+            </div>
+            <button class="bexport">📄 CSV</button>
+            <button class="bexport">📊 Excel</button>
+          </div>
+        </div>
+
+        <div class="sort-strip">
+          <span class="sort-lbl">Sort by:</span>
+          <button class="sbtn"
+                  *ngFor="let btn of ['Date','Rating','Projects']"
+                  [class.active]="activeSortBtn === btn"
+                  (click)="setSort(btn)">{{ btn }}</button>
+        </div>
+
+        <div class="twrap">
+          <table>
+            <thead>
+              <tr>
+                <th>User</th><th>Email</th><th>Role</th>
+                <th>Status</th><th>Rating</th><th>Projects</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngIf="recentUsers.length === 0">
+                <td colspan="6" class="empty-row">No users registered yet</td>
+              </tr>
+              <tr class="drow"
+                  *ngFor="let u of recentUsers; let i = index"
+                  [style.animation-delay]="(i*60+400)+'ms'">
+                <td class="ucell">
+                  <div class="av" [style.background]="avatarGrad(i)">{{ getInitial(u.name) }}</div>
+                  <span class="uname">{{ u.name }}</span>
+                </td>
+                <td class="uemail">{{ u.email }}</td>
+                <td><span class="badge b-role">{{ u.role }}</span></td>
+                <td>
+                  <span class="sdot" [class]="statusDotClass(u.status)"></span>
+                  {{ u.status }}
+                </td>
+                <td>{{ u.projects || 0 }}</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Top Freelancers -->
+      <div class="tcard">
+        <div class="thead">
+          <div class="thead-l">
+            <span class="thead-ico">🏆</span>
+            <span class="thead-title">Top Freelancers</span>
+            <span class="cbadge">{{ topFreelancers.length }} freelancers</span>
+          </div>
+          <div class="thead-r">
+            <div class="sinput-wrap">
+              <span class="sico">🔍</span>
+              <input class="sinput" placeholder="Search..." [(ngModel)]="freelancerSearch">
+            </div>
+            <button class="bexport">📄 CSV</button>
+            <button class="bexport">📊 Excel</button>
+          </div>
+        </div>
+
+        <div class="twrap">
+          <table>
+            <thead>
+              <tr>
+                <th>#</th><th>Freelancer</th><th>City</th>
+                <th>Projects</th><th>Badge</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngIf="topFreelancers.length === 0">
+                <td colspan="6" class="empty-row">No freelancers yet</td>
+              </tr>
+              <tr class="drow"
+                  *ngFor="let f of topFreelancers; let i = index"
+                  [style.animation-delay]="(i*60+400)+'ms'">
+                <td><span class="rank">{{ rankLabel(i) }}</span></td>
+                <td class="ucell">
+                  <div class="av" [style.background]="avatarGrad(i)">{{ getInitial(f.name) }}</div>
+                  <span class="uname">{{ f.name }}</span>
+                </td>
+                <td class="uemail">{{ f.city || '—' }}</td>
+                <td>{{ f.projects || 0 }}</td>
+                <td>
+                  <span class="badge b-gold" *ngIf="f.badge">{{ f.badge }}</span>
+                  <span class="uemail" *ngIf="!f.badge">—</span>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+    </div>
+
+  </ng-container>
+</div>

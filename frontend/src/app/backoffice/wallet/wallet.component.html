@@ -1,0 +1,60 @@
+<div class="wallet-admin p-4">
+
+  <div *ngIf="successMessage" class="alert alert-success alert-dismissible">
+    {{ successMessage }}
+    <button type="button" class="btn-close" (click)="successMessage = ''"></button>
+  </div>
+  <div *ngIf="errorMessage" class="alert alert-danger alert-dismissible">
+    {{ errorMessage }}
+    <button type="button" class="btn-close" (click)="errorMessage = ''"></button>
+  </div>
+
+  <!-- Stats commissions -->
+  <div class="row mb-4">
+    <div class="col-md-4">
+      <div class="card border-success">
+        <div class="card-body text-center">
+          <h6 class="text-muted">Total Commissions</h6>
+          <h2 class="text-success fw-bold">{{ totalCommissions | number:'1.2-2' }} TND</h2>
+          <small class="text-muted">10% sur chaque transaction</small>
+          <br>
+          <button class="btn btn-sm btn-outline-secondary mt-2" (click)="chargerCommissions()">
+            🔄 Actualiser
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Recharger wallet -->
+  <div class="card mb-4">
+    <div class="card-header">
+      <h5 class="mb-0">💳 Recharger Wallet Client</h5>
+    </div>
+    <div class="card-body">
+      <div class="row g-3">
+        <div class="col-md-4">
+          <label class="form-label">ID Utilisateur</label>
+          <input type="number" class="form-control"
+            placeholder="ID du client"
+            [(ngModel)]="rechargeUserId">
+        </div>
+        <div class="col-md-4">
+          <label class="form-label">Montant (TND)</label>
+          <input type="number" class="form-control"
+            placeholder="Montant à créditer"
+            [(ngModel)]="rechargeMontant">
+        </div>
+        <div class="col-md-4 d-flex align-items-end">
+          <button class="btn btn-primary w-100"
+            (click)="rechargerWallet()"
+            [disabled]="loading">
+            <span *ngIf="loading" class="spinner-border spinner-border-sm me-1"></span>
+            Recharger
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>

@@ -1,0 +1,207 @@
+<div class="page">
+
+  <!-- ── Ambient orbs ── -->
+  <div class="orb orb-1"></div>
+  <div class="orb orb-2"></div>
+  <div class="orb orb-3"></div>
+
+  <!-- ═══════ HEADER ═══════ -->
+  <div class="header">
+    <div class="title-block">
+      <div class="label-tag"><span class="dot"></span>Backoffice</div>
+      <h1 class="page-title">Categories</h1>
+      <div class="stats-row">
+        <span class="stat-chip"><span>{{ stats.total }}</span> total</span>
+        <span class="sep">·</span>
+        <span class="stat-chip"><span>{{ stats.active }}</span> active</span>
+        <span class="sep">·</span>
+        <span class="stat-chip"><span>{{ stats.inactive }}</span> inactive</span>
+      </div>
+    </div>
+    <button class="btn-primary" (click)="openModal()">
+      <span class="icon">+</span> New Category
+    </button>
+  </div>
+
+  <!-- ═══════ TOOLBAR ═══════ -->
+  <div class="toolbar">
+    <div class="search-wrap">
+      <span class="search-icon">⌕</span>
+      <input
+        class="search-input"
+        type="text"
+        placeholder="Search categories…"
+        [(ngModel)]="searchTerm"
+        (ngModelChange)="onSearch()"
+      />
+    </div>
+    <div class="filter-group">
+      <button class="filter-btn" [class.active]="filterActive === null"  (click)="setFilter(null)">All</button>
+      <button class="filter-btn" [class.active]="filterActive === true"  (click)="setFilter(true)">Active</button>
+      <button class="filter-btn" [class.active]="filterActive === false" (click)="setFilter(false)">Inactive</button>
+    </div>
+  </div>
+
+  <!-- ═══════ LOADING ═══════ -->
+  <div class="loading-state" *ngIf="isLoading">
+    <div class="spinner"></div>
+    <span>Loading categories…</span>
+  </div>
+
+  <!-- ═══════ TABLE ═══════ -->
+  <div class="table-card" *ngIf="!isLoading">
+
+    <div class="empty-state" *ngIf="filtered.length === 0">
+      <div class="e-icon">🏷️</div>
+      <p>No categories found.<br>Create your first one!</p>
+    </div>
+
+    <table class="data-table" *ngIf="filtered.length > 0">
+      <thead>
+        <tr>
+          <th>#</th>
+          <th>Color</th>
+          <th>Name</th>
+          <th>Description</th>
+          <th>Status</th>
+          <th>Created</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let c of filtered; let i = index" [style.animation-delay]="(0.04 * i) + 's'">
+          <td class="td-id">{{ c.id | number:'3.0-0' }}</td>
+          <td>
+            <div class="color-dot" [style.background]="c.color || '#7c6af7'"></div>
+          </td>
+          <td>
+            <span class="name-badge">
+              <span class="name-stripe" [style.background]="c.color || '#7c6af7'"></span>
+              {{ c.name }}
+            </span>
+          </td>
+          <td class="td-desc">{{ c.description || '—' }}</td>
+          <td>
+            <span class="badge" [class.active]="c.active" [class.inactive]="!c.active">
+              {{ c.active ? 'Active' : 'Inactive' }}
+            </span>
+          </td>
+          <td class="td-date">{{ c.createdAt | date:'mediumDate' }}</td>
+          <td class="td-actions">
+            <div class="actions-group">
+              <button class="act-btn edit"   (click)="openModal(c)"    title="Edit">✏️</button>
+              <button class="act-btn toggle" (click)="toggleActive(c)" title="Toggle">{{ c.active ? '🔴' : '🟢' }}</button>
+              <button class="act-btn del"    (click)="confirmDelete(c)" title="Delete">🗑️</button>
+            </div>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- ═══════ MODAL CREATE / EDIT ═══════ -->
+  <div class="overlay" *ngIf="showModal" (click)="closeModal()">
+    <div class="modal" (click)="$event.stopPropagation()">
+
+      <div class="modal-top">
+        <div class="modal-title-group">
+          <div class="modal-icon">{{ editingId ? '✎' : '✦' }}</div>
+          <div>
+            <div class="modal-title">{{ editingId ? 'Edit Category' : 'New Category' }}</div>
+            <div class="modal-sub">{{ editingId ? 'Editing — ' + form.name : 'Fill in the details below' }}</div>
+          </div>
+        </div>
+        <button class="modal-close" (click)="closeModal()">✕</button>
+      </div>
+
+      <div class="modal-body">
+
+        <div class="fg">
+          <label>Name <span class="req">*</span></label>
+          <input class="fi" type="text" placeholder="e.g. Design" [(ngModel)]="form.name" />
+        </div>
+
+        <div class="fg">
+          <label>Color</label>
+          <div class="color-row">
+            <div class="color-input-wrap" [style.background]="form.color">
+              <input type="color" [(ngModel)]="form.color" />
+            </div>
+            <input class="color-hex" type="text" [(ngModel)]="form.color" />
+          </div>
+          <div class="swatches">
+            <div
+              class="swatch"
+              *ngFor="let c of colorSwatches"
+              [style.background]="c"
+              [class.selected]="form.color === c"
+              (click)="form.color = c"
+            ></div>
+          </div>
+        </div>
+
+        <div class="fg">
+          <label>Description</label>
+          <textarea class="fi" placeholder="Short description…" [(ngModel)]="form.description"></textarea>
+        </div>
+
+        <div class="fg" *ngIf="editingId">
+          <label>Status</label>
+          <div class="toggle-row">
+            <span class="toggle-label">Active</span>
+            <label class="toggle-switch">
+              <input type="checkbox" [(ngModel)]="form.active" />
+              <div class="toggle-track"></div>
+            </label>
+          </div>
+        </div>
+
+        <div class="form-error" *ngIf="formError">⚠️ {{ formError }}</div>
+      </div>
+
+      <div class="modal-foot">
+        <span class="modal-foot-hint">* Required field</span>
+        <div class="foot-btns">
+          <button class="btn-cancel" (click)="closeModal()">Cancel</button>
+          <button class="btn-submit" (click)="save()" [disabled]="isSaving">
+            {{ isSaving ? 'Saving…' : (editingId ? 'Save Changes →' : 'Create →') }}
+          </button>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ═══════ MODAL DELETE ═══════ -->
+  <div class="overlay" *ngIf="showDeleteConfirm" (click)="showDeleteConfirm = false">
+    <div class="modal modal-del" (click)="$event.stopPropagation()">
+
+      <div class="modal-top">
+        <div class="modal-title-group">
+          <div class="modal-icon modal-icon--danger">🗑️</div>
+          <div>
+            <div class="modal-title">Delete Category</div>
+            <div class="modal-sub">This action is permanent</div>
+          </div>
+        </div>
+        <button class="modal-close" (click)="showDeleteConfirm = false">✕</button>
+      </div>
+
+      <div class="del-body">
+        <p class="del-text">
+          Are you sure you want to delete <strong>{{ categoryToDelete?.name }}</strong>?<br>
+          All associated data will be permanently removed and this action cannot be undone.
+        </p>
+      </div>
+
+      <div class="del-foot">
+        <button class="btn-cancel" (click)="showDeleteConfirm = false">Keep it</button>
+        <button class="btn-danger" (click)="deleteConfirmed()" [disabled]="isSaving">
+          {{ isSaving ? 'Deleting…' : 'Delete →' }}
+        </button>
+      </div>
+
+    </div>
+  </div>
+
+</div>

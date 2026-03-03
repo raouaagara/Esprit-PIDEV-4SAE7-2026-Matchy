@@ -1,0 +1,12 @@
+.budget-cell { font-weight: 600; color: var(--success); }
+.progress-cell {
+  display: flex; align-items: center; gap: 8px;
+  .prog-bar { flex: 1; max-width: 80px; height: 5px; background: var(--bo-bg-primary); border-radius: 3px;
+    .prog-fill { height: 100%; background: var(--primary); border-radius: 3px; transition: width 0.5s; }
+  }
+  span { font-size: 12px; color: var(--bo-text-secondary); white-space: nowrap; }
+}
+.milestone-chip {
+  padding: 3px 10px; border-radius: 8px; font-size: 12px; font-weight: 600;
+  background: rgba(79,110,247,0.1); color: var(--primary);
+}
