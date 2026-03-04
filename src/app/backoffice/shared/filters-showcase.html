@@ -1,0 +1,172 @@
+<!-- ============================================
+     FILTERS BAR SHOWCASE - Demo of all variations
+     ============================================ -->
+
+<div style="padding: 40px; background: var(--bo-bg-primary);">
+  
+  <!-- Standard Filters Bar -->
+  <section style="margin-bottom: 40px;">
+    <h2 style="margin-bottom: 20px; color: var(--bo-text-primary);">Standard Filters Bar</h2>
+    <div class="bo-filters-bar-enhanced">
+      <div class="bo-filter-input-enhanced">
+        <span class="search-icon">🔍</span>
+        <input type="text" placeholder="Search events..." />
+        <button class="clear-btn visible">✕</button>
+      </div>
+
+      <div class="bo-filter-select-enhanced">
+        <select>
+          <option>All Types</option>
+          <option>Workshop</option>
+          <option>Training</option>
+        </select>
+        <span class="select-arrow">▼</span>
+      </div>
+
+      <div class="bo-filter-spacer"></div>
+
+      <button class="btn-export-enhanced csv">
+        <span class="export-icon">📄</span>
+        CSV
+      </button>
+      <button class="btn-export-enhanced excel">
+        <span class="export-icon">📊</span>
+        Excel
+      </button>
+    </div>
+  </section>
+
+  <!-- With Filter Icon -->
+  <section style="margin-bottom: 40px;">
+    <h2 style="margin-bottom: 20px; color: var(--bo-text-primary);">With Filter Icon</h2>
+    <div class="bo-filters-bar-enhanced">
+      <div class="bo-filter-input-enhanced">
+        <span class="search-icon">🔍</span>
+        <input type="text" placeholder="Search..." />
+      </div>
+
+      <div class="bo-filter-select-enhanced with-icon">
+        <span class="filter-icon">🔽</span>
+        <select>
+          <option>All Categories</option>
+          <option>Category 1</option>
+          <option>Category 2</option>
+        </select>
+        <span class="select-arrow">▼</span>
+      </div>
+
+      <div class="bo-filter-spacer"></div>
+
+      <button class="btn-export-enhanced">
+        <span class="export-icon">📥</span>
+        Download
+      </button>
+    </div>
+  </section>
+
+  <!-- With Filter Badge -->
+  <section style="margin-bottom: 40px;">
+    <h2 style="margin-bottom: 20px; color: var(--bo-text-primary);">With Active Filters Badge</h2>
+    <div class="bo-filters-bar-enhanced">
+      <div class="bo-filter-input-enhanced">
+        <span class="search-icon">🔍</span>
+        <input type="text" placeholder="Search..." value="workshop" />
+        <button class="clear-btn visible">✕</button>
+      </div>
+
+      <div class="bo-filter-select-enhanced" style="position: relative;">
+        <select>
+          <option>Workshop</option>
+        </select>
+        <span class="select-arrow">▼</span>
+        <span class="filter-badge">3</span>
+      </div>
+
+      <div class="bo-filter-spacer"></div>
+
+      <button class="btn-export-enhanced csv">
+        <span class="export-icon">📄</span>
+        CSV
+      </button>
+    </div>
+  </section>
+
+  <!-- With Active Filter Groups -->
+  <section style="margin-bottom: 40px;">
+    <h2 style="margin-bottom: 20px; color: var(--bo-text-primary);">With Active Filter Groups</h2>
+    <div class="bo-filters-bar-enhanced">
+      <div class="bo-filter-input-enhanced">
+        <span class="search-icon">🔍</span>
+        <input type="text" placeholder="Search..." />
+      </div>
+
+      <div class="filter-group">
+        <span class="filter-label">Type:</span>
+        <span class="filter-value">Workshop</span>
+        <button class="filter-remove">✕</button>
+      </div>
+
+      <div class="filter-group">
+        <span class="filter-label">Status:</span>
+        <span class="filter-value">Active</span>
+        <button class="filter-remove">✕</button>
+      </div>
+
+      <div class="bo-filter-spacer"></div>
+
+      <button class="btn-export-enhanced csv">
+        <span class="export-icon">📄</span>
+        CSV
+      </button>
+    </div>
+  </section>
+
+  <!-- Loading State -->
+  <section style="margin-bottom: 40px;">
+    <h2 style="margin-bottom: 20px; color: var(--bo-text-primary);">Loading State</h2>
+    <div class="bo-filters-bar-enhanced loading" style="position: relative;">
+      <div class="bo-filter-input-enhanced">
+        <span class="search-icon">🔍</span>
+        <input type="text" placeholder="Search..." />
+      </div>
+
+      <div class="bo-filter-select-enhanced">
+        <select>
+          <option>All Types</option>
+        </select>
+        <span class="select-arrow">▼</span>
+      </div>
+
+      <div class="bo-filter-spacer"></div>
+
+      <button class="btn-export-enhanced csv">
+        <span class="export-icon">📄</span>
+        CSV
+      </button>
+    </div>
+  </section>
+
+  <!-- Compact Version -->
+  <section style="margin-bottom: 40px;">
+    <h2 style="margin-bottom: 20px; color: var(--bo-text-primary);">Compact Version (Mobile)</h2>
+    <div class="bo-filters-bar-enhanced" style="max-width: 400px;">
+      <div class="bo-filter-input-enhanced">
+        <span class="search-icon">🔍</span>
+        <input type="text" placeholder="Search..." />
+      </div>
+
+      <div class="bo-filter-select-enhanced">
+        <select>
+          <option>All</option>
+        </select>
+        <span class="select-arrow">▼</span>
+      </div>
+
+      <button class="btn-export-enhanced csv" style="width: 100%;">
+        <span class="export-icon">📄</span>
+        Export
+      </button>
+    </div>
+  </section>
+
+</div>

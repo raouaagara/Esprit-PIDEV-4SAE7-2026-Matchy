@@ -1,0 +1,55 @@
+@import '../shared/enhanced-buttons.scss';
+@import '../shared/enhanced-filters.scss';
+@import '../shared/enhanced-stats.scss';
+
+.online-tag { font-size: 13px; color: var(--primary); }
+.attendance-info {
+  display: flex; align-items: center; gap: 8px;
+  .bar-track { width: 70px; height: 5px; background: var(--bo-bg-primary); border-radius: 3px;
+    .bar-fill { height: 100%; background: var(--primary); border-radius: 3px; transition: width 0.5s; }
+  }
+  span { font-size: 12px; color: var(--bo-text-secondary); white-space: nowrap; }
+}
+
+/* Statistics Button Styling */
+.btn-action-enhanced.stats {
+  background: linear-gradient(135deg, rgba(147, 112, 219, 0.1) 0%, rgba(138, 43, 226, 0.08) 100%);
+  border-color: rgba(147, 112, 219, 0.25);
+  font-size: 16px;
+
+  &:hover {
+    background: linear-gradient(135deg, rgba(147, 112, 219, 0.2) 0%, rgba(138, 43, 226, 0.15) 100%);
+    border-color: #9370db;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(147, 112, 219, 0.3);
+
+    .action-icon {
+      animation: chartPulse 0.6s ease-in-out;
+      transform: scale(1.15);
+    }
+  }
+
+  &:active {
+    transform: translateY(0) scale(0.95);
+  }
+}
+
+body.dark-mode .btn-action-enhanced.stats {
+  background: linear-gradient(135deg, rgba(147, 112, 219, 0.15) 0%, rgba(138, 43, 226, 0.12) 100%);
+  border-color: rgba(147, 112, 219, 0.3);
+
+  &:hover {
+    background: linear-gradient(135deg, rgba(147, 112, 219, 0.25) 0%, rgba(138, 43, 226, 0.2) 100%);
+    border-color: #7b68ee;
+    box-shadow: 0 4px 12px rgba(123, 104, 238, 0.4);
+  }
+}
+
+@keyframes chartPulse {
+  0%, 100% {
+    transform: scale(1.15);
+  }
+  50% {
+    transform: scale(1.3);
+  }
+}
