@@ -1,4 +1,4 @@
-# Matchy - Architecture Complète
+# Matchy - User & Project Management
 
 ## Structure
 ```
@@ -11,16 +11,12 @@ matchy-final/
 └── start-all.sh      ← Linux/Mac
 ```
 
-## Ordre de démarrage
-1. eureka-server  (attendre ~20s)
+Startup Order
+1. eureka-server (wait ~20s)
 2. api-gateway
 3. backend
 4. frontend (npm install && ng serve)
 
-## Comptes
-- admin@matchy.tn / admin123
-- sara@matchy.tn / client123
-- karim@matchy.tn / freelancer123
 
 ## URLs
 - Frontend  : http://localhost:4200
