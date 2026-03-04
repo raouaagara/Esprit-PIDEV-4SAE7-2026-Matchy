@@ -1,0 +1,95 @@
+<div class="content-list-page">
+  <div class="hero-section">
+    <h1 class="hero-title">Discover Amazing Contents</h1>
+    <p class="hero-subtitle">
+      Explore our collection of courses, articles and videos
+    </p>
+  </div>
+
+  <div class="content-section">
+    <div class="content-list-container">
+      <!-- En-tête avec boutons favoris et notifications -->
+      <div class="page-header">
+        <div class="header-left">
+          <h1>📚 Explore Contents</h1>
+          <p class="subtitle">
+            Discover our collection of courses, articles, and videos
+          </p>
+        </div>
+
+        <div class="header-actions">
+          <app-notification-panel></app-notification-panel>
+          <button class="btn-favorites" routerLink="/favorites">
+            ⭐ My Favorites
+          </button>
+        </div>
+      </div>
+
+      <div class="filter-tabs">
+        <button
+          class="filter-tab"
+          [class.active]="selectedFilter === 'all'"
+          (click)="filterContents('all')"
+        >
+          All Contents
+        </button>
+        <button
+          class="filter-tab"
+          [class.active]="selectedFilter === 'cours'"
+          (click)="filterContents('cours')"
+        >
+          Courses
+        </button>
+        <button
+          class="filter-tab"
+          [class.active]="selectedFilter === 'article'"
+          (click)="filterContents('article')"
+        >
+          Articles
+        </button>
+        <button
+          class="filter-tab"
+          [class.active]="selectedFilter === 'video'"
+          (click)="filterContents('video')"
+        >
+          Videos
+        </button>
+      </div>
+
+      <div class="section-header">
+        <h2 class="section-title">
+          {{ filteredContents.length }} Contents Available
+        </h2>
+      </div>
+
+      <div class="contents-grid">
+        <div *ngFor="let content of filteredContents" class="content-card">
+          <div class="content-date">
+            {{ getContentIcon(content.type) }}
+            {{ content.createdAt | date: "dd/MM/yyyy" }}
+          </div>
+          <h3 class="content-title">{{ content.title }}</h3>
+          <p class="content-description">{{ content.description }}</p>
+          <div class="content-meta">
+            <span
+              class="content-badge"
+              [ngClass]="getContentBadgeClass(content.type)"
+            >
+              {{ content.type }}
+            </span>
+          </div>
+          <button
+            class="btn btn-view"
+            (click)="viewContent(content.contentId!)"
+          >
+            📖 View Content
+          </button>
+        </div>
+      </div>
+
+      <div *ngIf="filteredContents.length === 0" class="no-results">
+        <p>No contents found.</p>
+      </div>
+    </div>
+  </div>
+</div>
