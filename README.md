@@ -5,7 +5,7 @@
 matchy-final/
 ├── eureka-server/    ← Service Discovery  (port 8761)
 ├── api-gateway/      ← Gateway + JWT      (port 8080)
-├── backend/          ← Monolithique       (port 8081)
+├── backend/          ← Microservices      (port 8081+)
 ├── frontend/         ← Angular 18         (port 4200)
 ├── start-all.bat     ← Windows
 └── start-all.sh      ← Linux/Mac
