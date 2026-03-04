@@ -1,5 +1,6 @@
 import { Component, OnInit, ViewChild } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
+import { Router } from '@angular/router';
 import { AuthService } from '../../core/services/auth.service';
 import { ProjectService } from '../../core/services/project.service';
 import { CategoryService, CategoryModel } from '../../core/services/cat.service';
@@ -104,10 +105,23 @@ import { environment } from '../../../environments/environment';
             </div>
           </div>
 
+          <!-- ── ESCROW PAYMENT BANNER (IN_PROGRESS) ── -->
+          <div class="escrow-banner" *ngIf="p.status === 'IN_PROGRESS'">
+            <span class="escrow-banner-icon">🔒</span>
+            <span class="escrow-banner-text">Secure your payment with Matchy Escrow</span>
+          </div>
+
           <div class="card-actions">
             <button class="btn-sm" (click)="viewProposals(p.id!)">View Proposals</button>
 
-            <!-- Delivery actions -->
+            <!-- 🔒 Escrow Payment — visible for IN_PROGRESS or DELIVERED -->
+            <button class="btn-sm btn-pay-escrow"
+              *ngIf="p.status === 'IN_PROGRESS' || p.status === 'DELIVERED'"
+              (click)="goToEscrowPayment(p.id!)">
+              🔒 Pay via Escrow
+            </button>
+
+            <!-- Delivery review -->
             <button class="btn-sm btn-confirm"
               *ngIf="p.status === 'DELIVERED'"
               (click)="openDeliveryModal(p)">
@@ -208,23 +222,22 @@ export class ClProjectsComponent implements OnInit {
   filtered:   Project[]       = [];
   categories: CategoryModel[] = [];
 
-  isLoading   = true;
-  showForm    = false;
-  isCreating  = false;
+  isLoading    = true;
+  showForm     = false;
+  isCreating   = false;
   isGenerating = false;
-  createError = '';
-  aiError     = '';
+  createError  = '';
+  aiError      = '';
   activeFilter = 'ALL';
   skillsInput  = '';
 
-  // ✅ DELIVERED ajouté dans les filtres
   statuses = ['ALL', 'OPEN', 'IN_PROGRESS', 'DELIVERED', 'COMPLETED', 'CANCELLED'];
 
   newProject: Partial<Project> = { title: '', description: '', category: undefined, status: 'OPEN' };
 
   // ── Delivery modal ──────────────────────────────
   showDeliveryModal  = false;
-  showPaymentModal   = false;   // ← nouveau : modal paiement
+  showPaymentModal   = false;
   showPaymentSuccess = false;
   paymentResult:     any = null;
   isConfirming       = false;
@@ -232,7 +245,6 @@ export class ClProjectsComponent implements OnInit {
   showRevisionInput  = false;
   revisionMessage    = '';
 
-  // Référence au composant payment-modal pour appeler showSuccess()
   @ViewChild('paymentModal') paymentModalRef: any;
 
   get deliveredProjects(): Project[] {
@@ -245,7 +257,8 @@ export class ClProjectsComponent implements OnInit {
     public  authService:     AuthService,
     private projectService:  ProjectService,
     private categoryService: CategoryService,
-    private http:            HttpClient
+    private http:            HttpClient,
+    private router:          Router,
   ) {}
 
   ngOnInit(): void { this.load(); this.loadCategories(); }
@@ -329,9 +342,14 @@ export class ClProjectsComponent implements OnInit {
     window.location.href = `/client/proposals?projectId=${projectId}`;
   }
 
+  // ── Navigate to Escrow Payment page ──────────────
+  goToEscrowPayment(projectId: number): void {
+    this.router.navigate(['/client/projects/payment', projectId]);
+  }
+
   // ── Delivery modal ────────────────────────────────
   openDeliveryModal(project: any): void {
-    this.selectedProject  = project;
+    this.selectedProject   = project;
     this.showDeliveryModal = true;
     this.showRevisionInput = false;
     this.revisionMessage   = '';
@@ -342,13 +360,11 @@ export class ClProjectsComponent implements OnInit {
     this.selectedProject   = null;
   }
 
-  // Clique sur "Confirm & Pay" dans review modal → ouvre payment modal
   confirmDelivery(): void {
     this.showDeliveryModal = false;
     this.showPaymentModal  = true;
   }
 
-  // Le payment modal a collecté le PIN → appel API backend
   onPaymentConfirm(): void {
     if (!this.selectedProject) return;
     this.projectService.completeProject(
