@@ -27,4 +27,4 @@ matchy-final/
 - Gateway   : http://localhost:8080
 - Eureka    : http://localhost:8761 (admin/admin123)
 - Backend   : http://localhost:8081
-- H2 DB     : http://localhost:8081/h2-console
+
