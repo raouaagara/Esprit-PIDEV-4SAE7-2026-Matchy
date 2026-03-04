@@ -1,0 +1,74 @@
+<aside class="fo-sidebar" [class.collapsed]="isCollapsed">
+  <!-- Sidebar Header -->
+  <div class="sidebar-header">
+    <div class="user-profile" *ngIf="!isCollapsed">
+      <div class="user-avatar">
+        {{ currentUser?.firstName?.charAt(0) || 'F' }}
+      </div>
+      <div class="user-info">
+        <h3 class="user-name">{{ currentUser?.firstName }} {{ currentUser?.lastName }}</h3>
+        <p class="user-role">Freelancer</p>
+      </div>
+    </div>
+    <div class="user-avatar-small" *ngIf="isCollapsed">
+      {{ currentUser?.firstName?.charAt(0) || 'F' }}
+    </div>
+  </div>
+
+  <!-- Notification Bell -->
+  <div class="sidebar-notification" *ngIf="!isCollapsed">
+    <app-notification-bell></app-notification-bell>
+  </div>
+
+  <!-- Navigation Menu -->
+  <nav class="sidebar-nav">
+    <a 
+      *ngFor="let item of menuItems" 
+      [routerLink]="item.route"
+      routerLinkActive="active"
+      class="nav-item"
+      [title]="isCollapsed ? item.label : ''"
+    >
+      <span class="nav-icon">{{ item.icon }}</span>
+      <div class="nav-content" *ngIf="!isCollapsed">
+        <span class="nav-label">{{ item.label }}</span>
+        <span class="nav-description">{{ item.description }}</span>
+      </div>
+    </a>
+  </nav>
+
+  <!-- Sidebar Footer -->
+  <div class="sidebar-footer">
+    <!-- Dark Mode Toggle -->
+    <button 
+      class="footer-btn dark-mode-toggle" 
+      (click)="toggleDarkMode()"
+      [title]="isCollapsed ? 'Toggle Dark Mode' : ''"
+    >
+      <span class="toggle-icon">{{ (isDarkMode$ | async) ? '☀️' : '🌙' }}</span>
+      <span *ngIf="!isCollapsed" class="toggle-label">
+        {{ (isDarkMode$ | async) ? 'Light Mode' : 'Dark Mode' }}
+      </span>
+    </button>
+
+    <!-- Collapse Toggle -->
+    <button 
+      class="footer-btn collapse-toggle" 
+      (click)="toggleSidebar()"
+      title="Toggle Sidebar"
+    >
+      <span class="toggle-icon">{{ isCollapsed ? '→' : '←' }}</span>
+      <span *ngIf="!isCollapsed" class="toggle-label">Collapse</span>
+    </button>
+
+    <!-- Logout -->
+    <button 
+      class="footer-btn logout-btn" 
+      (click)="logout()"
+      [title]="isCollapsed ? 'Logout' : ''"
+    >
+      <span class="logout-icon">🚪</span>
+      <span *ngIf="!isCollapsed" class="logout-label">Logout</span>
+    </button>
+  </div>
+</aside>

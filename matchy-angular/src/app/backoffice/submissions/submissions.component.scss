@@ -1,0 +1,20 @@
+@import '../applications/applications.component.scss';
+
+.submissions-page {
+  @extend .applications-page;
+}
+
+.submissions-grid {
+  @extend .applications-grid;
+}
+
+.submission-card {
+  @extend .application-card;
+}
+
+.description {
+  font-size: 13px;
+  color: var(--bo-text-secondary);
+  line-height: 1.5;
+  margin: 12px 0;
+}

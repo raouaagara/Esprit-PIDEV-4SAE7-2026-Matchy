@@ -1,0 +1,744 @@
+// ============================================
+// Modern Button & Icon System
+// ============================================
+
+// Color Palette
+$primary-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+$success-gradient: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+$warning-gradient: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+$danger-gradient: linear-gradient(135deg, #fa709a 0%, #fee140 100%);
+$info-gradient: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+$dark-gradient: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
+
+// Shadows
+$shadow-sm: 0 2px 4px rgba(0, 0, 0, 0.08);
+$shadow-md: 0 4px 12px rgba(0, 0, 0, 0.12);
+$shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.15);
+$shadow-xl: 0 12px 32px rgba(0, 0, 0, 0.18);
+
+// ============================================
+// Primary Action Button (New Project, etc.)
+// ============================================
+.btn-primary-action {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.875rem 2rem;
+  background: $primary-gradient;
+  color: white;
+  border: none;
+  border-radius: 12px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  overflow: hidden;
+  box-shadow: $shadow-md;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  
+  // Shine effect overlay
+  &::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(
+      90deg,
+      transparent,
+      rgba(255, 255, 255, 0.3),
+      transparent
+    );
+    transition: left 0.5s;
+  }
+  
+  // Icon styling
+  .icon {
+    font-size: 1.25rem;
+    transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+  
+  // Hover effects
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: $shadow-lg;
+    
+    &::before {
+      left: 100%;
+    }
+    
+    .icon {
+      transform: scale(1.1) rotate(5deg);
+    }
+  }
+  
+  // Active state
+  &:active {
+    transform: translateY(0);
+    box-shadow: $shadow-sm;
+  }
+  
+  // Disabled state
+  &:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+    transform: none;
+    
+    &:hover {
+      transform: none;
+      box-shadow: $shadow-md;
+    }
+  }
+}
+
+// ============================================
+// Action Icons Container
+// ============================================
+.action-icons {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+}
+
+// ============================================
+// Base Action Icon
+// ============================================
+.action-icon {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border-radius: 10px;
+  border: none;
+  cursor: pointer;
+  font-size: 1.125rem;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  background: #f8f9fa;
+  color: #6c757d;
+  box-shadow: $shadow-sm;
+  
+  // Ripple effect
+  &::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 0;
+    height: 0;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.5);
+    transform: translate(-50%, -50%);
+    transition: width 0.4s, height 0.4s;
+  }
+  
+  &:hover {
+    transform: translateY(-3px) scale(1.05);
+    box-shadow: $shadow-md;
+    
+    &::after {
+      width: 100%;
+      height: 100%;
+    }
+  }
+  
+  &:active {
+    transform: translateY(-1px) scale(0.98);
+  }
+}
+
+// ============================================
+// View/Read Icon
+// ============================================
+.action-icon-view {
+  @extend .action-icon;
+  background: linear-gradient(135deg, #e3f2fd 0%, #bbdefb 100%);
+  color: #1976d2;
+  
+  &:hover {
+    background: linear-gradient(135deg, #bbdefb 0%, #90caf9 100%);
+    color: #0d47a1;
+    box-shadow: 0 4px 12px rgba(25, 118, 210, 0.3);
+  }
+  
+  // Pulse animation on hover
+  &:hover::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    border-radius: 10px;
+    border: 2px solid #1976d2;
+    animation: pulse 1.5s infinite;
+  }
+}
+
+// ============================================
+// Edit Icon
+// ============================================
+.action-icon-edit {
+  @extend .action-icon;
+  background: linear-gradient(135deg, #fff3e0 0%, #ffe0b2 100%);
+  color: #f57c00;
+  
+  &:hover {
+    background: linear-gradient(135deg, #ffe0b2 0%, #ffcc80 100%);
+    color: #e65100;
+    box-shadow: 0 4px 12px rgba(245, 124, 0, 0.3);
+    
+    // Rotate icon slightly
+    .icon {
+      animation: wiggle 0.5s ease-in-out;
+    }
+  }
+}
+
+// ============================================
+// Delete Icon
+// ============================================
+.action-icon-delete {
+  @extend .action-icon;
+  background: linear-gradient(135deg, #ffebee 0%, #ffcdd2 100%);
+  color: #d32f2f;
+  
+  &:hover {
+    background: linear-gradient(135deg, #ffcdd2 0%, #ef9a9a 100%);
+    color: #b71c1c;
+    box-shadow: 0 4px 12px rgba(211, 47, 47, 0.3);
+    
+    // Shake animation
+    animation: shake 0.5s ease-in-out;
+  }
+}
+
+// ============================================
+// Custom Icon (Goals, etc.)
+// ============================================
+.action-icon-custom {
+  @extend .action-icon;
+  background: linear-gradient(135deg, #f3e5f5 0%, #e1bee7 100%);
+  color: #7b1fa2;
+  
+  &:hover {
+    background: linear-gradient(135deg, #e1bee7 0%, #ce93d8 100%);
+    color: #4a148c;
+    box-shadow: 0 4px 12px rgba(123, 31, 162, 0.3);
+  }
+}
+
+// ============================================
+// Success Icon
+// ============================================
+.action-icon-success {
+  @extend .action-icon;
+  background: linear-gradient(135deg, #e8f5e9 0%, #c8e6c9 100%);
+  color: #388e3c;
+  
+  &:hover {
+    background: linear-gradient(135deg, #c8e6c9 0%, #a5d6a7 100%);
+    color: #1b5e20;
+    box-shadow: 0 4px 12px rgba(56, 142, 60, 0.3);
+  }
+}
+
+// ============================================
+// Icon with Tooltip
+// ============================================
+.action-icon-tooltip {
+  position: relative;
+  
+  &::before {
+    content: attr(data-tooltip);
+    position: absolute;
+    bottom: calc(100% + 8px);
+    left: 50%;
+    transform: translateX(-50%) translateY(-5px);
+    padding: 0.5rem 0.75rem;
+    background: rgba(0, 0, 0, 0.9);
+    color: white;
+    font-size: 0.75rem;
+    font-weight: 500;
+    white-space: nowrap;
+    border-radius: 6px;
+    opacity: 0;
+    pointer-events: none;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    z-index: 1000;
+  }
+  
+  &::after {
+    content: '';
+    position: absolute;
+    bottom: calc(100% + 2px);
+    left: 50%;
+    transform: translateX(-50%);
+    border: 6px solid transparent;
+    border-top-color: rgba(0, 0, 0, 0.9);
+    opacity: 0;
+    pointer-events: none;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+  
+  &:hover::before,
+  &:hover::after {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+  }
+}
+
+// ============================================
+// Animations
+// ============================================
+@keyframes pulse {
+  0%, 100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.5;
+    transform: scale(1.05);
+  }
+}
+
+@keyframes wiggle {
+  0%, 100% {
+    transform: rotate(0deg);
+  }
+  25% {
+    transform: rotate(-5deg);
+  }
+  75% {
+    transform: rotate(5deg);
+  }
+}
+
+@keyframes shake {
+  0%, 100% {
+    transform: translateX(0);
+  }
+  25% {
+    transform: translateX(-3px);
+  }
+  75% {
+    transform: translateX(3px);
+  }
+}
+
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+// ============================================
+// Button Variants
+// ============================================
+.btn-success {
+  @extend .btn-primary-action;
+  background: $success-gradient;
+}
+
+.btn-warning {
+  @extend .btn-primary-action;
+  background: $warning-gradient;
+}
+
+.btn-danger {
+  @extend .btn-primary-action;
+  background: $danger-gradient;
+}
+
+.btn-info {
+  @extend .btn-primary-action;
+  background: $info-gradient;
+}
+
+// ============================================
+// Secondary Button (Outlined)
+// ============================================
+.btn-secondary-action {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.875rem 2rem;
+  background: white;
+  color: #667eea;
+  border: 2px solid #667eea;
+  border-radius: 12px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: $shadow-sm;
+  
+  &:hover {
+    background: #667eea;
+    color: white;
+    transform: translateY(-2px);
+    box-shadow: $shadow-md;
+  }
+  
+  &:active {
+    transform: translateY(0);
+  }
+}
+
+// ============================================
+// Icon Button (Text + Icon)
+// ============================================
+.btn-icon {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.625rem 1.25rem;
+  background: white;
+  color: #6c757d;
+  border: 1px solid #dee2e6;
+  border-radius: 8px;
+  font-size: 0.9rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  
+  .icon {
+    font-size: 1rem;
+    transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+  
+  &:hover {
+    background: #f8f9fa;
+    border-color: #adb5bd;
+    transform: translateY(-1px);
+    box-shadow: $shadow-sm;
+    
+    .icon {
+      transform: scale(1.1);
+    }
+  }
+}
+
+// ============================================
+// Floating Action Button
+// ============================================
+.btn-fab {
+  position: fixed;
+  bottom: 2rem;
+  right: 2rem;
+  width: 56px;
+  height: 56px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: $primary-gradient;
+  color: white;
+  border: none;
+  border-radius: 50%;
+  font-size: 1.5rem;
+  cursor: pointer;
+  box-shadow: $shadow-lg;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  z-index: 1000;
+  
+  &:hover {
+    transform: scale(1.1) rotate(90deg);
+    box-shadow: $shadow-xl;
+  }
+  
+  &:active {
+    transform: scale(1.05) rotate(90deg);
+  }
+}
+
+// ============================================
+// Responsive Design
+// ============================================
+@media (max-width: 768px) {
+  .btn-primary-action,
+  .btn-secondary-action {
+    padding: 0.75rem 1.5rem;
+    font-size: 0.9rem;
+  }
+  
+  .action-icon {
+    width: 36px;
+    height: 36px;
+    font-size: 1rem;
+  }
+  
+  .btn-fab {
+    width: 48px;
+    height: 48px;
+    font-size: 1.25rem;
+    bottom: 1.5rem;
+    right: 1.5rem;
+  }
+}
+
+
+// ============================================
+// Delete Confirmation Modal
+// ============================================
+.delete-modal-overlay {
+  background: rgba(0, 0, 0, 0.6);
+  backdrop-filter: blur(4px);
+  animation: fadeIn 0.3s ease-out;
+}
+
+.delete-modal-content {
+  background: white;
+  border-radius: 20px;
+  max-width: 480px;
+  width: 90%;
+  padding: 0;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+  animation: slideInScale 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+  overflow: hidden;
+}
+
+.delete-modal-icon {
+  padding: 2.5rem 2rem 1rem;
+  text-align: center;
+  background: linear-gradient(135deg, #fff5f5 0%, #ffe5e5 100%);
+}
+
+.icon-circle {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 80px;
+  height: 80px;
+  background: white;
+  border-radius: 50%;
+  box-shadow: 0 8px 24px rgba(211, 47, 47, 0.2);
+  animation: pulse 2s infinite;
+}
+
+.icon-warning {
+  font-size: 3rem;
+  animation: shake 0.5s ease-in-out;
+}
+
+.delete-modal-body {
+  padding: 1.5rem 2rem 2rem;
+  text-align: center;
+}
+
+.delete-modal-title {
+  font-size: 1.75rem;
+  font-weight: 700;
+  color: #1a1a1a;
+  margin: 0 0 1rem;
+  letter-spacing: -0.5px;
+}
+
+.delete-modal-message {
+  font-size: 1rem;
+  color: #4a5568;
+  margin: 0 0 1rem;
+  line-height: 1.6;
+  
+  strong {
+    color: #d32f2f;
+    font-weight: 600;
+  }
+}
+
+.delete-modal-warning {
+  font-size: 0.875rem;
+  color: #718096;
+  margin: 0;
+  padding: 1rem;
+  background: #f7fafc;
+  border-radius: 10px;
+  border-left: 3px solid #f59e0b;
+  line-height: 1.5;
+}
+
+.delete-modal-footer {
+  display: flex;
+  gap: 1rem;
+  padding: 0 2rem 2rem;
+}
+
+.btn-cancel-delete {
+  flex: 1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 0.875rem 1.5rem;
+  background: white;
+  color: #4a5568;
+  border: 2px solid #e2e8f0;
+  border-radius: 12px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  
+  .icon {
+    font-size: 1.125rem;
+    transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+  
+  &:hover:not(:disabled) {
+    background: #f7fafc;
+    border-color: #cbd5e0;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  }
+  
+  &:active:not(:disabled) {
+    transform: translateY(0);
+  }
+  
+  &:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+}
+
+.btn-confirm-delete {
+  flex: 1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 0.875rem 1.5rem;
+  background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+  color: white;
+  border: none;
+  border-radius: 12px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+  overflow: hidden;
+  
+  // Shine effect
+  &::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(
+      90deg,
+      transparent,
+      rgba(255, 255, 255, 0.3),
+      transparent
+    );
+    transition: left 0.5s;
+  }
+  
+  .icon {
+    font-size: 1.125rem;
+    transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+  
+  &:hover:not(:disabled) {
+    background: linear-gradient(135deg, #dc2626 0%, #b91c1c 100%);
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(239, 68, 68, 0.4);
+    
+    &::before {
+      left: 100%;
+    }
+    
+    .icon {
+      transform: scale(1.1);
+    }
+  }
+  
+  &:active:not(:disabled) {
+    transform: translateY(0);
+    box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);
+  }
+  
+  &:disabled {
+    opacity: 0.7;
+    cursor: not-allowed;
+    transform: none;
+    
+    &:hover {
+      transform: none;
+      box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);
+    }
+  }
+}
+
+// ============================================
+// Animations for Delete Modal
+// ============================================
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes slideInScale {
+  from {
+    opacity: 0;
+    transform: translateY(-20px) scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+// ============================================
+// Responsive Design for Delete Modal
+// ============================================
+@media (max-width: 768px) {
+  .delete-modal-content {
+    max-width: 90%;
+    margin: 1rem;
+  }
+  
+  .delete-modal-icon {
+    padding: 2rem 1.5rem 0.75rem;
+  }
+  
+  .icon-circle {
+    width: 70px;
+    height: 70px;
+  }
+  
+  .icon-warning {
+    font-size: 2.5rem;
+  }
+  
+  .delete-modal-title {
+    font-size: 1.5rem;
+  }
+  
+  .delete-modal-body {
+    padding: 1rem 1.5rem 1.5rem;
+  }
+  
+  .delete-modal-footer {
+    flex-direction: column;
+    padding: 0 1.5rem 1.5rem;
+    
+    .btn-cancel-delete,
+    .btn-confirm-delete {
+      width: 100%;
+    }
+  }
+}

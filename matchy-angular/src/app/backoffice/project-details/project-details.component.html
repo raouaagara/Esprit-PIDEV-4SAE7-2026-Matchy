@@ -1,0 +1,335 @@
+<div class="project-details-page">
+  <!-- Header -->
+  <div class="page-header">
+    <button class="btn-back" (click)="goBack()">← Back to Projects</button>
+    <div class="header-content">
+      <h1 class="page-title">{{ project?.title }}</h1>
+      <span class="badge" [class]="'badge-' + getStatusClass(project?.status || '')">
+        {{ project?.status }}
+      </span>
+    </div>
+  </div>
+
+  <!-- Loading State -->
+  <div *ngIf="loading" class="loading-state">
+    <div class="spinner"></div>
+    <p>Loading project details...</p>
+  </div>
+
+  <!-- Error State -->
+  <div *ngIf="error && !loading" class="error-state">
+    <span class="error-icon">⚠️</span>
+    <p>{{ error }}</p>
+    <button class="btn-retry" (click)="loadProjectDetails()">Retry</button>
+  </div>
+
+  <!-- Content -->
+  <div *ngIf="!loading && !error && project" class="content-grid">
+    <!-- Project Info Card -->
+    <div class="info-card">
+      <h3>Project Information</h3>
+      <div class="info-row">
+        <span class="label">Description:</span>
+        <span class="value">{{ project.description }}</span>
+      </div>
+      <div class="info-row">
+        <span class="label">Total Budget:</span>
+        <span class="value">{{ project.totalBudget | number:'1.2-2' }} TND</span>
+      </div>
+      <div class="info-row">
+        <span class="label">Deadline:</span>
+        <span class="value">{{ project.deadline | date:'MMM d, y' }}</span>
+      </div>
+      <div class="info-row">
+        <span class="label">Created:</span>
+        <span class="value">{{ project.createdAt | date:'MMM d, y' }}</span>
+      </div>
+    </div>
+
+    <!-- Milestones Section -->
+    <div class="section-card">
+      <div class="section-header">
+        <h3>Milestones ({{ milestones.length }})</h3>
+        <button class="btn-primary-action" (click)="openCreateMilestoneModal()">
+          <span class="icon">➕</span>
+          <span>Add Milestone</span>
+        </button>
+      </div>
+      
+      <div class="milestones-list">
+        <div *ngIf="milestones.length === 0" class="empty-state-small">
+          <p>No milestones yet. Create one to get started!</p>
+        </div>
+        
+        <div *ngFor="let milestone of milestones" class="milestone-card">
+          <div class="milestone-header">
+            <h4>{{ milestone.title }}</h4>
+            <span class="badge" [class]="'badge-' + getStatusClass(milestone.status)">
+              {{ milestone.status }}
+            </span>
+          </div>
+          <p class="milestone-desc">{{ milestone.description }}</p>
+          <div class="milestone-meta">
+            <span>💰 {{ milestone.budget | number:'1.2-2' }} TND</span>
+            <span>📅 {{ milestone.deadline | date:'MMM d, y' }}</span>
+          </div>
+          <div class="milestone-actions">
+            <button class="btn-icon" (click)="viewMilestoneApplications(milestone.id)">
+              <span class="icon">📋</span>
+              <span>Applications</span>
+            </button>
+            <button class="btn-icon" (click)="viewMilestoneSubmissions(milestone.id)">
+              <span class="icon">📦</span>
+              <span>Submissions</span>
+            </button>
+            <button class="action-icon-edit action-icon-tooltip" 
+                    data-tooltip="Edit Milestone" 
+                    (click)="openEditMilestoneModal(milestone)">
+              <span class="icon">✏️</span>
+            </button>
+            <button class="action-icon-delete action-icon-tooltip" 
+                    data-tooltip="Delete Milestone" 
+                    (click)="deleteMilestone(milestone.id)">
+              <span class="icon">🗑️</span>
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Recent Applications -->
+    <div class="section-card">
+      <h3>Recent Applications ({{ applications.length }})</h3>
+      <div class="applications-list">
+        <div *ngIf="applications.length === 0" class="empty-state-small">
+          <p>No applications yet</p>
+        </div>
+        <div *ngFor="let app of applications.slice(0, 5)" class="application-item">
+          <div class="app-info">
+            <strong>{{ app.freelancerName }}</strong>
+            <span class="app-milestone">{{ app.milestoneTitle }}</span>
+          </div>
+          <span class="badge badge-small" [class]="'badge-' + getStatusClass(app.status)">
+            {{ app.status }}
+          </span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Recent Submissions -->
+    <div class="section-card">
+      <h3>Recent Submissions ({{ submissions.length }})</h3>
+      <div class="submissions-list">
+        <div *ngIf="submissions.length === 0" class="empty-state-small">
+          <p>No submissions yet</p>
+        </div>
+        <div *ngFor="let sub of submissions.slice(0, 5)" class="submission-item">
+          <div class="sub-info">
+            <strong>{{ sub.title }}</strong>
+            <span class="sub-freelancer">by {{ sub.freelancerName }}</span>
+          </div>
+          <span class="badge badge-small" [class]="'badge-' + getStatusClass(sub.status)">
+            {{ sub.status }}
+          </span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Milestone Modal -->
+  <div class="modal-overlay" *ngIf="showMilestoneModal" (click)="closeMilestoneModal()">
+    <div class="modal-content" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <h2>{{ isEditMilestone ? 'Edit Milestone' : 'Create New Milestone' }}</h2>
+        <button class="modal-close" (click)="closeMilestoneModal()">×</button>
+      </div>
+      <div class="modal-body">
+        <div class="form-group">
+          <label>Title *</label>
+          <input type="text" [(ngModel)]="milestoneFormData.title" placeholder="Enter milestone title" class="form-input">
+        </div>
+        <div class="form-group">
+          <label>Description</label>
+          <textarea [(ngModel)]="milestoneFormData.description" placeholder="Enter description" class="form-textarea" rows="3"></textarea>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label>Budget (TND) *</label>
+            <input type="number" [(ngModel)]="milestoneFormData.budget" placeholder="0.00" class="form-input">
+          </div>
+          <div class="form-group">
+            <label>Deadline *</label>
+            <input type="date" [(ngModel)]="milestoneFormData.deadline" class="form-input">
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn-secondary" (click)="closeMilestoneModal()">Cancel</button>
+        <button class="btn-primary" (click)="saveMilestone()" [disabled]="savingMilestone">
+          {{ savingMilestone ? 'Saving...' : (isEditMilestone ? 'Update' : 'Create') }}
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Applications Modal -->
+  <div class="modal-overlay" *ngIf="showApplicationModal" (click)="closeApplicationModal()">
+    <div class="modal-content modal-large" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <h2>Applications</h2>
+        <button class="modal-close" (click)="closeApplicationModal()">×</button>
+      </div>
+      <div class="modal-body">
+        <div *ngIf="selectedApplications.length === 0" class="empty-state">
+          <p>No applications for this milestone</p>
+        </div>
+        <div *ngFor="let app of selectedApplications" class="application-card">
+          <div class="app-header">
+            <div>
+              <h4>{{ app.freelancerName }}</h4>
+              <span class="badge" [class]="'badge-' + getStatusClass(app.status)">{{ app.status }}</span>
+            </div>
+            <div class="app-budget">💰 {{ app.proposedBudget | number:'1.2-2' }} TND</div>
+          </div>
+          <div class="app-body">
+            <p><strong>Cover Letter:</strong></p>
+            <p class="cover-letter">{{ app.coverLetter }}</p>
+            <p class="app-date">Applied: {{ app.appliedAt | date:'MMM d, y h:mm a' }}</p>
+            
+            <div *ngIf="app.interviewDate" class="interview-info">
+              <p><strong>Interview Scheduled:</strong> {{ app.interviewDate | date:'MMM d, y h:mm a' }}</p>
+              <p><strong>Meet Link:</strong> <a [href]="app.meetLink" target="_blank">{{ app.meetLink }}</a></p>
+              <p *ngIf="app.freelancerConfirmed"><span class="confirmed">✓ Freelancer Confirmed</span></p>
+            </div>
+            
+            <div *ngIf="app.companyFeedback" class="feedback">
+              <p><strong>Feedback:</strong> {{ app.companyFeedback }}</p>
+            </div>
+          </div>
+          <div class="app-actions">
+            <button *ngIf="app.status === 'PENDING'" class="btn-action" (click)="openInterviewModal(app)">
+              📅 Schedule Interview
+            </button>
+            <button *ngIf="app.status === 'INTERVIEW_CONFIRMED'" class="btn-action success" (click)="acceptApplication(app)">
+              ✓ Accept
+            </button>
+            <button *ngIf="app.status === 'INTERVIEW_CONFIRMED' || app.status === 'PENDING'" class="btn-action danger" (click)="rejectApplication(app)">
+              ✗ Reject
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Interview Modal -->
+  <div class="modal-overlay" *ngIf="showInterviewModal" (click)="closeInterviewModal()">
+    <div class="modal-content" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <h2>Schedule Interview</h2>
+        <button class="modal-close" (click)="closeInterviewModal()">×</button>
+      </div>
+      <div class="modal-body">
+        <p><strong>Freelancer:</strong> {{ selectedApplication?.freelancerName }}</p>
+        <div class="form-group">
+          <label>Interview Date & Time *</label>
+          <input type="datetime-local" [(ngModel)]="interviewFormData.interviewDate" class="form-input">
+        </div>
+        <div class="form-group">
+          <label>Google Meet Link *</label>
+          <input type="url" [(ngModel)]="interviewFormData.meetLink" placeholder="https://meet.google.com/..." class="form-input">
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn-secondary" (click)="closeInterviewModal()">Cancel</button>
+        <button class="btn-primary" (click)="scheduleInterview()">Schedule</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Submissions Modal -->
+  <div class="modal-overlay" *ngIf="showSubmissionModal" (click)="closeSubmissionModal()">
+    <div class="modal-content modal-large" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <h2>Submissions</h2>
+        <button class="modal-close" (click)="closeSubmissionModal()">×</button>
+      </div>
+      <div class="modal-body">
+        <div *ngIf="selectedSubmissions.length === 0" class="empty-state">
+          <p>No submissions for this milestone</p>
+        </div>
+        <div *ngFor="let sub of selectedSubmissions" class="submission-card">
+          <div class="sub-header">
+            <div>
+              <h4>{{ sub.title }}</h4>
+              <span class="sub-author">by {{ sub.freelancerName }}</span>
+            </div>
+            <span class="badge" [class]="'badge-' + getStatusClass(sub.status)">{{ sub.status }}</span>
+          </div>
+          <div class="sub-body">
+            <p><strong>Description:</strong></p>
+            <p>{{ sub.description }}</p>
+            <p *ngIf="sub.attachmentUrl" class="sub-attachment">
+              <strong>Attachment:</strong> <a [href]="sub.attachmentUrl" target="_blank">Download</a>
+            </p>
+            <p class="sub-date">Submitted: {{ sub.submittedAt | date:'MMM d, y h:mm a' }}</p>
+            
+            <div *ngIf="sub.review" class="review-info">
+              <h5>Review</h5>
+              <p><strong>Rating:</strong> {{ sub.review.rating }}/5 ⭐</p>
+              <p><strong>Comments:</strong> {{ sub.review.comments }}</p>
+              <p><strong>Status:</strong> <span class="badge" [class]="'badge-' + getStatusClass(sub.review.status)">{{ sub.review.status }}</span></p>
+            </div>
+          </div>
+          <div class="sub-actions">
+            <button *ngIf="sub.status === 'SUBMITTED' && !sub.review" class="btn-action primary" (click)="openReviewModal(sub)">
+              ⭐ Review Work
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Review Modal -->
+  <div class="modal-overlay" *ngIf="showReviewModal" (click)="closeReviewModal()">
+    <div class="modal-content" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <h2>Review Submission</h2>
+        <button class="modal-close" (click)="closeReviewModal()">×</button>
+      </div>
+      <div class="modal-body">
+        <p><strong>Submission:</strong> {{ selectedSubmission?.title }}</p>
+        <p><strong>By:</strong> {{ selectedSubmission?.freelancerName }}</p>
+        
+        <div class="form-group">
+          <label>Rating (1-5) *</label>
+          <select [(ngModel)]="reviewFormData.rating" class="form-input">
+            <option [value]="1">1 - Poor</option>
+            <option [value]="2">2 - Fair</option>
+            <option [value]="3">3 - Good</option>
+            <option [value]="4">4 - Very Good</option>
+            <option [value]="5">5 - Excellent</option>
+          </select>
+        </div>
+        
+        <div class="form-group">
+          <label>Comments *</label>
+          <textarea [(ngModel)]="reviewFormData.comments" placeholder="Provide detailed feedback" class="form-textarea" rows="4"></textarea>
+        </div>
+        
+        <div class="form-group">
+          <label>Decision *</label>
+          <select [(ngModel)]="reviewFormData.status" class="form-input">
+            <option value="APPROVED">Approve & Pay</option>
+            <option value="REJECTED">Request Revision</option>
+          </select>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn-secondary" (click)="closeReviewModal()">Cancel</button>
+        <button class="btn-primary" (click)="submitReview()">Submit Review</button>
+      </div>
+    </div>
+  </div>
+</div>

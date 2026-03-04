@@ -1,0 +1,7 @@
+{
+  "version": 3,
+  "sources": ["angular:styles/component:css;6c7c988f16f640c2f55ada5e8260b1f4655bf9a791fb706ff8201d849952ab6f;C:/Users/abdellah/Desktop/TASKK/matchy-angular/src/app/frontoffice/layout/fo-layout.component.ts"],
+  "sourcesContent": ["\n    .fo-layout {\n      display: flex;\n      flex-direction: column;\n      min-height: 100vh;\n      background-color: var(--fo-bg-primary);\n    }\n    .fo-main {\n      flex: 1;\n      transition: margin-left 0.3s ease;\n    }\n    .fo-main.with-sidebar {\n      margin-left: 280px;\n    }\n    @media (max-width: 768px) {\n      .fo-main.with-sidebar {\n        margin-left: 0;\n      }\n    }\n  "],
+  "mappings": ";AACI,CAAC;AACC,WAAS;AACT,kBAAgB;AAChB,cAAY;AACZ,oBAAkB,IAAI;AACxB;AACA,CAAC;AACC,QAAM;AACN,cAAY,YAAY,KAAK;AAC/B;AACA,CAJC,OAIO,CAAC;AACP,eAAa;AACf;AACA,OAAO,CAAC,SAAS,EAAE;AACjB,GARD,OAQS,CAJD;AAKL,iBAAa;AACf;AACF;",
+  "names": []
+}

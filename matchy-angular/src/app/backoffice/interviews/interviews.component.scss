@@ -1,0 +1,35 @@
+@import '../applications/applications.component.scss';
+
+.interviews-page {
+  @extend .applications-page;
+}
+
+.interviews-grid {
+  @extend .applications-grid;
+}
+
+.interview-card {
+  @extend .application-card;
+}
+
+.interview-details {
+  margin: 12px 0;
+  padding: 12px;
+  background: var(--bo-bg-primary);
+  border-radius: 8px;
+  font-size: 13px;
+  
+  p {
+    margin: 6px 0;
+    color: var(--bo-text-primary);
+  }
+  
+  a {
+    color: var(--primary);
+    text-decoration: none;
+    
+    &:hover {
+      text-decoration: underline;
+    }
+  }
+}

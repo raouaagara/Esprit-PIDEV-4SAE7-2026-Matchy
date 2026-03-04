@@ -1,0 +1,30 @@
+@import '../applications/applications.component.scss';
+
+.reviews-page {
+  @extend .applications-page;
+}
+
+.reviews-grid {
+  @extend .applications-grid;
+}
+
+.review-card {
+  @extend .application-card;
+}
+
+.rating {
+  display: flex;
+  gap: 2px;
+  
+  .star {
+    font-size: 16px;
+  }
+}
+
+.feedback {
+  font-size: 13px;
+  color: var(--bo-text-secondary);
+  line-height: 1.5;
+  margin: 12px 0;
+  font-style: italic;
+}

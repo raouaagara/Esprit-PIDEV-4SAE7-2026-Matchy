@@ -1,0 +1,443 @@
+.fo-sidebar {
+  position: fixed;
+  left: 0;
+  top: 0;
+  height: 100vh;
+  width: 280px;
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(20px);
+  border-right: 1px solid rgba(0, 0, 0, 0.08);
+  display: flex;
+  flex-direction: column;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  z-index: 1000;
+  box-shadow: 2px 0 20px rgba(0, 0, 0, 0.05);
+
+  &.collapsed {
+    width: 80px;
+  }
+}
+
+// Dark Mode
+:host-context(.dark-mode) .fo-sidebar {
+  background: rgba(30, 30, 46, 0.95);
+  border-right-color: rgba(255, 255, 255, 0.1);
+}
+
+// Sidebar Header
+.sidebar-header {
+  padding: 2rem 1.5rem;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+  transition: padding 0.3s ease;
+
+  .collapsed & {
+    padding: 1.5rem 0.75rem;
+    text-align: center;
+  }
+}
+
+:host-context(.dark-mode) .sidebar-header {
+  border-bottom-color: rgba(255, 255, 255, 0.1);
+}
+
+// Notification Bell Section
+.sidebar-notification {
+  padding: 1rem 1.5rem;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+  position: relative;
+  z-index: 10000;
+
+  ::ng-deep app-notification-bell {
+    display: block;
+    position: relative;
+    z-index: 10000;
+
+    .notification-bell {
+      width: 100%;
+      position: relative;
+      z-index: 10000;
+    }
+
+    .bell-button {
+      width: 100%;
+      justify-content: flex-start;
+      padding: 0.875rem 1rem;
+      gap: 1rem;
+    }
+
+    .bell-icon {
+      font-size: 1.5rem;
+    }
+
+    .badge {
+      position: relative;
+      top: auto;
+      right: auto;
+      margin-left: auto;
+    }
+
+    .notification-dropdown {
+      position: fixed !important;
+      z-index: 10001 !important;
+    }
+  }
+}
+
+:host-context(.dark-mode) .sidebar-notification {
+  border-bottom-color: rgba(255, 255, 255, 0.1);
+}
+
+// Browse Projects CTA Button
+.browse-projects-cta {
+  padding: 1rem 1.5rem;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+
+  .cta-button {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 1rem 1.25rem;
+    background: linear-gradient(135deg, #6366f1 0%, #a855f7 100%);
+    border-radius: 12px;
+    text-decoration: none;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);
+    position: relative;
+    overflow: hidden;
+
+    &::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+      transition: left 0.5s ease;
+    }
+
+    &:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(99, 102, 241, 0.4);
+
+      &::before {
+        left: 100%;
+      }
+
+      .cta-arrow {
+        transform: translateX(4px);
+      }
+    }
+
+    &:active {
+      transform: translateY(0);
+    }
+
+    .cta-icon {
+      font-size: 1.75rem;
+      flex-shrink: 0;
+      animation: pulse 2s ease-in-out infinite;
+    }
+
+    .cta-content {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 0.25rem;
+
+      .cta-title {
+        font-size: 1rem;
+        font-weight: 700;
+        color: white;
+        line-height: 1.2;
+      }
+
+      .cta-subtitle {
+        font-size: 0.8125rem;
+        color: rgba(255, 255, 255, 0.9);
+        line-height: 1.2;
+      }
+    }
+
+    .cta-arrow {
+      font-size: 1.25rem;
+      color: white;
+      flex-shrink: 0;
+      transition: transform 0.3s ease;
+    }
+  }
+}
+
+:host-context(.dark-mode) .browse-projects-cta {
+  border-bottom-color: rgba(255, 255, 255, 0.1);
+}
+
+@keyframes pulse {
+  0%, 100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.1);
+  }
+}
+
+.user-profile {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.user-avatar,
+.user-avatar-small {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.25rem;
+  font-weight: 600;
+  flex-shrink: 0;
+  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+}
+
+.user-avatar-small {
+  margin: 0 auto;
+}
+
+.user-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.user-name {
+  font-size: 1rem;
+  font-weight: 600;
+  color: #1a202c;
+  margin: 0 0 0.25rem 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+:host-context(.dark-mode) .user-name {
+  color: #ffffff;
+}
+
+.user-role {
+  font-size: 0.875rem;
+  color: #718096;
+  margin: 0;
+}
+
+:host-context(.dark-mode) .user-role {
+  color: #a0aec0;
+}
+
+// Navigation
+.sidebar-nav {
+  flex: 1;
+  padding: 1rem 0.75rem;
+  overflow-y: auto;
+  overflow-x: hidden;
+
+  &::-webkit-scrollbar {
+    width: 6px;
+  }
+
+  &::-webkit-scrollbar-thumb {
+    background: rgba(0, 0, 0, 0.2);
+    border-radius: 3px;
+  }
+}
+
+.nav-item {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 0.875rem 1rem;
+  margin-bottom: 0.5rem;
+  border-radius: 12px;
+  text-decoration: none;
+  color: #4a5568;
+  transition: all 0.2s ease;
+  cursor: pointer;
+  position: relative;
+  overflow: hidden;
+
+  .collapsed & {
+    justify-content: center;
+    padding: 0.875rem 0.5rem;
+  }
+
+  &:hover {
+    background: rgba(102, 126, 234, 0.1);
+    color: #667eea;
+    transform: translateX(4px);
+
+    .collapsed & {
+      transform: translateX(0) scale(1.05);
+    }
+  }
+
+  &.active {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+
+    &::before {
+      content: '';
+      position: absolute;
+      left: 0;
+      top: 0;
+      width: 4px;
+      height: 100%;
+      background: white;
+      border-radius: 0 4px 4px 0;
+    }
+
+    .nav-description {
+      color: rgba(255, 255, 255, 0.8);
+    }
+  }
+}
+
+:host-context(.dark-mode) .nav-item {
+  color: #cbd5e0;
+
+  &:hover {
+    background: rgba(102, 126, 234, 0.2);
+    color: #a5b4fc;
+  }
+}
+
+.nav-icon {
+  font-size: 1.5rem;
+  flex-shrink: 0;
+  width: 32px;
+  text-align: center;
+}
+
+.nav-content {
+  display: flex;
+  flex-direction: column;
+  gap: 0.125rem;
+  flex: 1;
+  min-width: 0;
+}
+
+.nav-label {
+  font-size: 0.9375rem;
+  font-weight: 500;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.nav-description {
+  font-size: 0.75rem;
+  opacity: 0.7;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+// Sidebar Footer
+.sidebar-footer {
+  padding: 1rem 0.75rem;
+  border-top: 1px solid rgba(0, 0, 0, 0.08);
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+:host-context(.dark-mode) .sidebar-footer {
+  border-top-color: rgba(255, 255, 255, 0.1);
+}
+
+.footer-btn {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.75rem 1rem;
+  border: none;
+  border-radius: 8px;
+  background: rgba(0, 0, 0, 0.04);
+  color: #4a5568;
+  font-size: 0.875rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  width: 100%;
+
+  .collapsed & {
+    justify-content: center;
+    padding: 0.75rem 0.5rem;
+  }
+
+  &:hover {
+    background: rgba(0, 0, 0, 0.08);
+    transform: translateY(-2px);
+  }
+}
+
+:host-context(.dark-mode) .footer-btn {
+  background: rgba(255, 255, 255, 0.05);
+  color: #cbd5e0;
+
+  &:hover {
+    background: rgba(255, 255, 255, 0.1);
+  }
+}
+
+.dark-mode-toggle {
+  .toggle-icon {
+    font-size: 1.25rem;
+    transition: transform 0.3s ease;
+  }
+
+  &:hover .toggle-icon {
+    transform: rotate(20deg) scale(1.1);
+  }
+}
+
+.logout-btn {
+  background: rgba(239, 68, 68, 0.1);
+  color: #dc2626;
+
+  &:hover {
+    background: rgba(239, 68, 68, 0.2);
+  }
+}
+
+:host-context(.dark-mode) .logout-btn {
+  background: rgba(239, 68, 68, 0.15);
+  color: #f87171;
+
+  &:hover {
+    background: rgba(239, 68, 68, 0.25);
+  }
+}
+
+.toggle-icon,
+.logout-icon {
+  font-size: 1.125rem;
+  flex-shrink: 0;
+}
+
+.toggle-label,
+.logout-label {
+  font-weight: 500;
+}
+
+// Responsive
+@media (max-width: 768px) {
+  .fo-sidebar {
+    transform: translateX(-100%);
+
+    &.open {
+      transform: translateX(0);
+    }
+  }
+}

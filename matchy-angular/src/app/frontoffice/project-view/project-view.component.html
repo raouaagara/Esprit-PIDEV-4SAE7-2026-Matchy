@@ -1,0 +1,188 @@
+<div class="project-view-page">
+  <!-- Header -->
+  <div class="page-header">
+    <button class="btn-secondary-action" (click)="goBack()">
+      <span class="icon">←</span>
+      <span>Back to Projects</span>
+    </button>
+    <div class="header-content" *ngIf="project">
+      <div>
+        <h1 class="page-title">{{ project.title }}</h1>
+        <p class="company-name">by {{ project.companyName }}</p>
+      </div>
+      <span class="badge" [class]="'badge-' + getStatusClass(project.status)">
+        {{ project.status }}
+      </span>
+    </div>
+  </div>
+
+  <!-- Loading State -->
+  <div *ngIf="loading" class="loading-state">
+    <div class="spinner"></div>
+    <p>Loading project details...</p>
+  </div>
+
+  <!-- Error State -->
+  <div *ngIf="error && !loading" class="error-state">
+    <span class="error-icon">⚠️</span>
+    <p>{{ error }}</p>
+    <button class="btn-warning" (click)="loadProjectDetails()">
+      <span class="icon">🔄</span>
+      <span>Retry</span>
+    </button>
+  </div>
+
+  <!-- Content -->
+  <div *ngIf="!loading && !error && project" class="content-wrapper">
+    <!-- Project Info Card -->
+    <div class="info-card">
+      <h3>Project Information</h3>
+      <div class="info-content">
+        <div class="info-row">
+          <span class="label">Description:</span>
+          <span class="value">{{ project.description }}</span>
+        </div>
+        <div class="info-row">
+          <span class="label">Total Budget:</span>
+          <span class="value budget">{{ project.totalBudget | number:'1.2-2' }} TND</span>
+        </div>
+        <div class="info-row">
+          <span class="label">Deadline:</span>
+          <span class="value">{{ project.deadline | date:'MMMM d, y' }}</span>
+        </div>
+        <div class="info-row">
+          <span class="label">Created:</span>
+          <span class="value">{{ project.createdAt | date:'MMMM d, y' }}</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Milestones Section -->
+    <div class="milestones-section">
+      <div class="section-header">
+        <h3>Available Milestones ({{ milestones.length }})</h3>
+        <p class="section-sub">Apply to milestones that match your skills</p>
+      </div>
+
+      <div *ngIf="milestones.length === 0" class="empty-state">
+        <span class="empty-icon">📋</span>
+        <p>No milestones available yet</p>
+      </div>
+
+      <div class="milestones-grid">
+        <div *ngFor="let milestone of milestones" class="milestone-card">
+          <div class="milestone-header">
+            <div>
+              <h4>{{ milestone.title }}</h4>
+              <span class="badge badge-small" [class]="'badge-' + getStatusClass(milestone.status)">
+                {{ milestone.status }}
+              </span>
+            </div>
+            <div class="milestone-budget">
+              <span class="budget-label">Budget</span>
+              <span class="budget-value">{{ milestone.budget | number:'1.2-2' }} TND</span>
+            </div>
+          </div>
+
+          <p class="milestone-desc">{{ milestone.description }}</p>
+
+          <div class="milestone-meta">
+            <div class="meta-item">
+              <span class="meta-icon">📅</span>
+              <div>
+                <span class="meta-label">Deadline</span>
+                <span class="meta-value">{{ milestone.deadline | date:'MMM d, y' }}</span>
+              </div>
+            </div>
+            <div class="meta-item">
+              <span class="meta-icon">📊</span>
+              <div>
+                <span class="meta-label">Status</span>
+                <span class="meta-value">{{ milestone.status }}</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="milestone-actions">
+            <button 
+              *ngIf="canApply(milestone)" 
+              class="btn-success" 
+              (click)="openApplicationModal(milestone)">
+              <span class="icon">✓</span>
+              <span>Apply to this Milestone</span>
+            </button>
+            <div *ngIf="!canApply(milestone)" class="not-available">
+              <span *ngIf="milestone.status !== 'PENDING'">This milestone is {{ milestone.status.toLowerCase() }}</span>
+              <span *ngIf="currentUser?.userType !== 'FREELANCER'">Only freelancers can apply</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Application Modal -->
+  <div class="modal-overlay" *ngIf="showApplicationModal" (click)="closeApplicationModal()">
+    <div class="modal-content" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <h2>Apply to Milestone</h2>
+        <button class="modal-close" (click)="closeApplicationModal()">×</button>
+      </div>
+
+      <div class="modal-body">
+        <div class="milestone-info">
+          <h3>{{ selectedMilestone?.title }}</h3>
+          <p class="milestone-desc">{{ selectedMilestone?.description }}</p>
+          <div class="info-grid">
+            <div class="info-item">
+              <span class="info-icon">💰</span>
+              <div>
+                <span class="info-label">Budget</span>
+                <span class="info-value">{{ selectedMilestone?.budget | number:'1.2-2' }} TND</span>
+              </div>
+            </div>
+            <div class="info-item">
+              <span class="info-icon">📅</span>
+              <div>
+                <span class="info-label">Deadline</span>
+                <span class="info-value">{{ selectedMilestone?.deadline | date:'MMM d, y' }}</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label>Cover Letter *</label>
+          <textarea 
+            [(ngModel)]="applicationFormData.coverLetter" 
+            placeholder="Tell the company why you're the perfect fit for this milestone. Highlight your relevant experience, skills, and approach to completing this work..."
+            class="form-textarea" 
+            rows="8"></textarea>
+          <small class="form-hint">💡 Tip: Be specific about your experience and how you'll deliver quality work on time</small>
+        </div>
+
+        <div class="form-group">
+          <label>Proposed Budget (TND) *</label>
+          <input 
+            type="number" 
+            [(ngModel)]="applicationFormData.proposedBudget" 
+            placeholder="Enter your proposed budget" 
+            class="form-input"
+            step="0.01">
+          <small class="form-hint">Original budget: {{ selectedMilestone?.budget | number:'1.2-2' }} TND</small>
+        </div>
+      </div>
+
+      <div class="modal-footer">
+        <button class="btn-secondary-action" (click)="closeApplicationModal()">
+          <span class="icon">✗</span>
+          <span>Cancel</span>
+        </button>
+        <button class="btn-primary-action" (click)="submitApplication()" [disabled]="submitting">
+          <span class="icon">{{ submitting ? '⏳' : '✓' }}</span>
+          <span>{{ submitting ? 'Submitting...' : 'Submit Application' }}</span>
+        </button>
+      </div>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,40 @@
+<div class="reviews-page">
+  <div class="page-header">
+    <h1 class="page-title">Reviews</h1>
+    <p class="page-subtitle">Feedback and ratings for completed work</p>
+  </div>
+
+  <div class="loading" *ngIf="loading">Loading reviews...</div>
+
+  <div class="reviews-grid" *ngIf="!loading">
+    <div class="review-card" *ngFor="let review of reviews">
+      <div class="card-header">
+        <div class="freelancer-info">
+          <div class="avatar">{{ review.reviewerName?.charAt(0) || 'C' }}</div>
+          <div>
+            <h3>{{ review.reviewerName }}</h3>
+            <p class="project-title">Submission #{{ review.submissionId }}</p>
+          </div>
+        </div>
+        <div class="rating">
+          <span *ngFor="let star of getStarsArray(review.rating)" class="star">⭐</span>
+        </div>
+      </div>
+      
+      <div class="card-body">
+        <p class="milestone-title">Review for Submission #{{ review.submissionId }}</p>
+        <p class="feedback" *ngIf="review.comments">{{ review.comments }}</p>
+        <div class="card-footer">
+          <span class="date">Reviewed: {{ review.createdAt | date:'short' }}</span>
+          <span class="status-badge" [ngClass]="'status-' + review.status.toLowerCase()">{{ review.status }}</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="empty-state" *ngIf="reviews.length === 0">
+      <span class="empty-icon">⭐</span>
+      <h3>No reviews yet</h3>
+      <p>There are no reviews to display</p>
+    </div>
+  </div>
+</div>

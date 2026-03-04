@@ -1,0 +1,37 @@
+<div class="interviews-page">
+  <div class="page-header">
+    <h1 class="page-title">Interviews</h1>
+    <p class="page-subtitle">Scheduled interviews with freelancers</p>
+  </div>
+
+  <div class="loading" *ngIf="loading">Loading interviews...</div>
+
+  <div class="interviews-grid" *ngIf="!loading">
+    <div class="interview-card" *ngFor="let interview of interviews" (click)="viewProject(interview.projectId)">
+      <div class="card-header">
+        <div class="freelancer-info">
+          <div class="avatar">{{ interview.freelancerName?.charAt(0) || 'F' }}</div>
+          <div>
+            <h3>{{ interview.freelancerName }}</h3>
+            <p class="project-title">{{ interview.projectTitle }}</p>
+          </div>
+        </div>
+      </div>
+      
+      <div class="card-body">
+        <p class="milestone-title">{{ interview.milestoneTitle }}</p>
+        <div class="interview-details" *ngIf="interview.interviewDate">
+          <p><strong>📅 Date:</strong> {{ interview.interviewDate | date:'medium' }}</p>
+          <p *ngIf="interview.meetLink"><strong>🔗 Link:</strong> <a [href]="interview.meetLink" target="_blank">Join Meeting</a></p>
+        </div>
+        <button class="btn-view">View Details →</button>
+      </div>
+    </div>
+
+    <div class="empty-state" *ngIf="interviews.length === 0">
+      <span class="empty-icon">📅</span>
+      <h3>No interviews scheduled</h3>
+      <p>You don't have any upcoming interviews</p>
+    </div>
+  </div>
+</div>

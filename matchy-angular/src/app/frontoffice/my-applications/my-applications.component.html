@@ -1,0 +1,131 @@
+<div class="my-applications-container">
+  <div class="page-header">
+    <div class="header-content">
+      <h1 class="page-title">📋 My Applications</h1>
+      <p class="page-subtitle">Track all your project applications and their status</p>
+    </div>
+  </div>
+
+  <!-- Filters -->
+  <div class="filters-bar">
+    <div class="filter-group">
+      <label for="statusFilter">Filter by Status:</label>
+      <select 
+        id="statusFilter" 
+        [(ngModel)]="selectedStatus" 
+        (change)="filterByStatus()"
+        class="filter-select"
+      >
+        <option *ngFor="let opt of statusOptions" [value]="opt.value">
+          {{ opt.label }}
+        </option>
+      </select>
+    </div>
+    <div class="stats-summary">
+      <span class="stat-badge">
+        Total: <strong>{{ applications.length }}</strong>
+      </span>
+      <span class="stat-badge success">
+        Accepted: <strong>{{ (applications | filter:'status':'ACCEPTED').length }}</strong>
+      </span>
+      <span class="stat-badge warning">
+        Pending: <strong>{{ (applications | filter:'status':'PENDING').length }}</strong>
+      </span>
+    </div>
+  </div>
+
+  <!-- Loading State -->
+  <div *ngIf="loading" class="loading-state">
+    <div class="spinner"></div>
+    <p>Loading your applications...</p>
+  </div>
+
+  <!-- Error State -->
+  <div *ngIf="error && !loading" class="error-state">
+    <span class="error-icon">⚠️</span>
+    <p>{{ error }}</p>
+    <button class="btn-retry" (click)="loadApplications()">Retry</button>
+  </div>
+
+  <!-- Empty State -->
+  <div *ngIf="!loading && !error && filteredApplications.length === 0" class="empty-state">
+    <span class="empty-icon">📭</span>
+    <h3>No Applications Found</h3>
+    <p>You haven't applied to any projects yet.</p>
+    <a routerLink="/projects" class="btn-primary">Browse Projects</a>
+  </div>
+
+  <!-- Applications List -->
+  <div *ngIf="!loading && !error && filteredApplications.length > 0" class="applications-grid">
+    <div *ngFor="let app of filteredApplications" class="application-card">
+      <!-- Status Badge -->
+      <div class="card-header">
+        <span class="status-badge" [class]="getStatusClass(app.status)">
+          {{ getStatusIcon(app.status) }} {{ app.status.replace('_', ' ') }}
+        </span>
+        <span class="application-date">{{ app.appliedAt | date:'short' }}</span>
+      </div>
+
+      <!-- Project Info -->
+      <div class="card-body">
+        <h3 class="project-title">{{ app.projectTitle || 'Project' }}</h3>
+        <p class="milestone-title">
+          <strong>Milestone:</strong> {{ app.milestoneTitle || 'N/A' }}
+        </p>
+        <p class="milestone-budget">
+          <strong>Budget:</strong> {{ app.proposedBudget || 0 }} TND
+        </p>
+
+        <!-- Cover Letter -->
+        <div class="cover-letter" *ngIf="app.coverLetter">
+          <strong>Cover Letter:</strong>
+          <p>{{ app.coverLetter }}</p>
+        </div>
+
+        <!-- Proposed Amount -->
+        <div class="proposed-amount" *ngIf="app.proposedBudget">
+          <strong>Your Bid:</strong> {{ app.proposedBudget }} TND
+        </div>
+
+        <!-- Interview Details -->
+        <div class="interview-details" *ngIf="app.interviewDate">
+          <div class="interview-info">
+            <span class="interview-icon">📅</span>
+            <div>
+              <strong>Interview Scheduled</strong>
+              <p>{{ app.interviewDate | date:'full' }}</p>
+              <p *ngIf="app.meetLink">
+                <a [href]="app.meetLink" target="_blank" class="meet-link">
+                  🔗 Join Google Meet
+                </a>
+              </p>
+            </div>
+          </div>
+          <button 
+            *ngIf="app.status === 'INTERVIEW_SCHEDULED'"
+            class="btn-confirm-interview"
+            (click)="confirmInterview(app.id)"
+          >
+            ✅ Confirm Attendance
+          </button>
+        </div>
+
+        <!-- Feedback -->
+        <div class="feedback-section" *ngIf="app.companyFeedback">
+          <strong>Feedback:</strong>
+          <p class="feedback-text">{{ app.companyFeedback }}</p>
+        </div>
+      </div>
+
+      <!-- Card Footer -->
+      <div class="card-footer">
+        <a 
+          [routerLink]="['/projects', app.projectId]" 
+          class="btn-view-project"
+        >
+          👁️ View Project
+        </a>
+      </div>
+    </div>
+  </div>
+</div>

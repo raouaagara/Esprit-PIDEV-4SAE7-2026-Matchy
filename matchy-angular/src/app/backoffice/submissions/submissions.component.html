@@ -1,0 +1,50 @@
+<div class="submissions-page">
+  <div class="page-header">
+    <h1 class="page-title">Work Submissions</h1>
+    <p class="page-subtitle">Review freelancer deliverables</p>
+  </div>
+
+  <div class="filters-bar">
+    <select class="status-filter" [(ngModel)]="statusFilter" (change)="filterSubmissions()">
+      <option value="ALL">All Status</option>
+      <option value="PENDING">Pending Review</option>
+      <option value="APPROVED">Approved</option>
+      <option value="REJECTED">Rejected</option>
+      <option value="REVISION_REQUESTED">Revision Requested</option>
+    </select>
+  </div>
+
+  <div class="loading" *ngIf="loading">Loading submissions...</div>
+
+  <div class="submissions-grid" *ngIf="!loading">
+    <div class="submission-card" *ngFor="let sub of filteredSubmissions" (click)="viewProject(sub.projectId)">
+      <div class="card-header">
+        <div class="freelancer-info">
+          <div class="avatar">{{ sub.freelancerName?.charAt(0) || 'F' }}</div>
+          <div>
+            <h3>{{ sub.freelancerName }}</h3>
+            <p class="project-title">{{ sub.projectTitle }}</p>
+          </div>
+        </div>
+        <span class="status-badge" [ngClass]="getStatusClass(sub.status)">
+          {{ sub.status.replace('_', ' ') }}
+        </span>
+      </div>
+      
+      <div class="card-body">
+        <p class="milestone-title">{{ sub.milestoneTitle }}</p>
+        <p class="description" *ngIf="sub.description">{{ sub.description }}</p>
+        <div class="card-footer">
+          <span class="date">Submitted: {{ sub.submittedAt | date:'short' }}</span>
+          <button class="btn-view">Review →</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="empty-state" *ngIf="filteredSubmissions.length === 0">
+      <span class="empty-icon">📤</span>
+      <h3>No submissions found</h3>
+      <p>There are no work submissions to review</p>
+    </div>
+  </div>
+</div>

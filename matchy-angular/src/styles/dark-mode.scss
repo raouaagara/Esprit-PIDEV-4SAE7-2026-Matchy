@@ -1,0 +1,846 @@
+// ============================================
+// Dark Mode Theme System
+// ============================================
+
+// Light Mode Colors
+:root {
+  --bg-primary: #f8f9fc;
+  --bg-secondary: #f8f9fa;
+  --bg-tertiary: #f1f3f5;
+  --bg-card: #ffffff;
+  
+  --text-primary: #1a1a1a;
+  --text-secondary: #4a5568;
+  --text-tertiary: #718096;
+  
+  --border-color: #e2e8f0;
+  --border-light: #f1f3f5;
+  
+  --shadow-sm: 0 2px 4px rgba(0, 0, 0, 0.08);
+  --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.12);
+  --shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.15);
+  
+  --input-bg: #ffffff;
+  --input-border: #e2e8f0;
+  
+  --table-header-bg: #f8f9fa;
+  --table-row-hover: #f7fafc;
+  
+  --stat-card-bg: #ffffff;
+  --chart-card-bg: #ffffff;
+  
+  --empty-state-bg: #f8f9fa;
+  
+  // Transition duration
+  --theme-transition: 400ms;
+}
+
+// Dark Mode Colors - Clean & Professional
+body.dark-mode {
+  --bg-primary: #1a1d2e;
+  --bg-secondary: #27293d;
+  --bg-tertiary: #2f3349;
+  --bg-card: #27293d;
+  
+  --text-primary: #ffffff;
+  --text-secondary: #b8b9c5;
+  --text-tertiary: #8a8b9a;
+  
+  --border-color: #3a3d54;
+  --border-light: #4a4d64;
+  
+  --shadow-sm: 0 2px 4px rgba(0, 0, 0, 0.3);
+  --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.4);
+  --shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.5);
+  
+  --input-bg: #2f3349;
+  --input-border: #3a3d54;
+  
+  --table-header-bg: #2f3349;
+  --table-row-hover: #2f3349;
+  
+  --stat-card-bg: #27293d;
+  --chart-card-bg: #27293d;
+  
+  --empty-state-bg: #2f3349;
+  
+  // Backoffice specific variables
+  --bo-bg-primary: #1a1d2e;
+  --bo-bg-secondary: #27293d;
+  --bo-bg-card: #27293d;
+  --bo-text-primary: #ffffff;
+  --bo-text-secondary: #b8b9c5;
+  --bo-border: #3a3d54;
+  
+  // Force background color
+  background: #1a1d2e !important;
+}
+
+// ============================================
+// Global Transitions
+// ============================================
+body {
+  background-color: var(--bg-primary);
+  color: var(--text-primary);
+  transition: background-color var(--theme-transition) ease,
+              color var(--theme-transition) ease;
+}
+
+// Smooth transition for all themed elements
+* {
+  transition-property: background-color, border-color, color, box-shadow;
+  transition-duration: var(--theme-transition);
+  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+// Prevent transition on page load
+body.no-transition * {
+  transition: none !important;
+}
+
+// ============================================
+// Dark Mode Toggle Button
+// ============================================
+.dark-mode-toggle {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 56px;
+  height: 56px;
+  background: var(--bg-card);
+  border: 2px solid var(--border-color);
+  border-radius: 16px;
+  cursor: pointer;
+  overflow: hidden;
+  box-shadow: var(--shadow-sm);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-md);
+    border-color: #667eea;
+  }
+  
+  &:active {
+    transform: translateY(0);
+  }
+  
+  // Ripple effect
+  &::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 0;
+    height: 0;
+    border-radius: 50%;
+    background: rgba(102, 126, 234, 0.2);
+    transform: translate(-50%, -50%);
+    transition: width 0.4s, height 0.4s;
+  }
+  
+  &:active::after {
+    width: 100%;
+    height: 100%;
+  }
+}
+
+.toggle-icon {
+  position: absolute;
+  font-size: 1.75rem;
+  transition: all 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+  opacity: 0;
+  transform: scale(0) rotate(-180deg);
+  
+  &.visible {
+    opacity: 1;
+    transform: scale(1) rotate(0deg);
+  }
+}
+
+.sun-icon {
+  animation: sunRise 0.5s ease-out;
+}
+
+.moon-icon {
+  animation: moonRise 0.5s ease-out;
+}
+
+@keyframes sunRise {
+  0% {
+    opacity: 0;
+    transform: scale(0) rotate(-180deg);
+  }
+  50% {
+    transform: scale(1.2) rotate(-90deg);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1) rotate(0deg);
+  }
+}
+
+@keyframes moonRise {
+  0% {
+    opacity: 0;
+    transform: scale(0) rotate(180deg);
+  }
+  50% {
+    transform: scale(1.2) rotate(90deg);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1) rotate(0deg);
+  }
+}
+
+// ============================================
+// Component Styles
+// ============================================
+
+// Dashboard & Pages
+.dashboard,
+.projects-page,
+.users-page,
+.bo-page {
+  background-color: var(--bg-primary);
+  color: var(--text-primary);
+  min-height: 100vh;
+}
+
+// Page Headers
+.page-header,
+.bo-page-header {
+  background-color: transparent;
+  
+  .page-title,
+  h1 {
+    color: var(--text-primary) !important;
+  }
+  
+  .page-sub,
+  p {
+    color: var(--text-secondary) !important;
+  }
+}
+
+// Backoffice specific
+body.dark-mode {
+  .bo-page,
+  .projects-page,
+  .users-page {
+    background: var(--bg-primary);
+    
+    h1, h2, h3, h4, h5, h6 {
+      color: var(--text-primary) !important;
+    }
+    
+    p, span, div {
+      color: var(--text-secondary);
+    }
+  }
+}
+
+// Cards
+.table-card,
+.bo-table-card,
+.chart-card,
+.info-card,
+.ps-card {
+  background-color: var(--bg-card);
+  border-color: var(--border-color);
+  box-shadow: var(--shadow-sm);
+}
+
+// Stat Cards
+.stats-grid > div,
+.mini-stat {
+  background-color: var(--stat-card-bg);
+  border-color: var(--border-color);
+  box-shadow: var(--shadow-sm);
+  
+  .ms-val {
+    color: var(--text-primary);
+  }
+  
+  .ms-label {
+    color: var(--text-secondary);
+  }
+}
+
+// Tables
+.data-table,
+.bo-data-table {
+  background-color: var(--bg-card);
+  
+  thead {
+    background-color: var(--table-header-bg);
+    border-bottom-color: var(--border-color);
+    
+    th {
+      color: var(--text-secondary) !important;
+      border-bottom-color: var(--border-color);
+    }
+  }
+  
+  tbody {
+    tr {
+      border-bottom-color: var(--border-color);
+      
+      &:hover {
+        background-color: var(--table-row-hover);
+      }
+      
+      td {
+        color: var(--text-primary) !important;
+        border-bottom-color: var(--border-color);
+        
+        strong {
+          color: var(--text-primary) !important;
+        }
+      }
+    }
+  }
+}
+
+// Project Cell
+.project-cell {
+  .project-title {
+    color: var(--text-primary) !important;
+  }
+  
+  .project-desc {
+    color: var(--text-secondary) !important;
+  }
+}
+
+// Budget Cell
+.budget-cell {
+  color: var(--text-primary) !important;
+}
+
+// Inputs & Filters
+.filter-input,
+.bo-filter-input,
+.filter-select,
+.bo-filter-select,
+.search-input,
+.form-input,
+.form-textarea,
+.ps-input {
+  background-color: var(--input-bg);
+  border-color: var(--input-border);
+  color: var(--text-primary);
+  
+  &::placeholder {
+    color: var(--text-tertiary);
+  }
+  
+  &:focus {
+    border-color: #667eea;
+    background-color: var(--input-bg);
+  }
+}
+
+// Filters Bar
+.filters-bar,
+.bo-filters-bar {
+  background-color: var(--bg-card);
+  border-color: var(--border-color);
+}
+
+// Empty States
+.empty-state {
+  background-color: var(--empty-state-bg);
+  color: var(--text-secondary);
+  
+  .empty-icon {
+    opacity: 0.5;
+  }
+  
+  p {
+    color: var(--text-primary);
+  }
+  
+  small {
+    color: var(--text-tertiary);
+  }
+}
+
+// Loading State
+.loading-state {
+  color: var(--text-secondary);
+  
+  .spinner {
+    border-color: var(--border-color);
+    border-top-color: #667eea;
+  }
+}
+
+// Error State
+.error-state {
+  background-color: var(--bg-card);
+  border-color: var(--border-color);
+  
+  .error-icon {
+    opacity: 0.8;
+  }
+  
+  p {
+    color: var(--text-primary);
+  }
+}
+
+// Modals
+.modal-overlay {
+  background: rgba(0, 0, 0, 0.6);
+  backdrop-filter: blur(4px);
+}
+
+body.dark-mode .modal-overlay {
+  background: rgba(0, 0, 0, 0.8);
+}
+
+.modal-content,
+.delete-modal-content {
+  background-color: var(--bg-card);
+  box-shadow: var(--shadow-lg);
+  
+  .modal-header {
+    border-bottom-color: var(--border-color);
+    
+    h2 {
+      color: var(--text-primary);
+    }
+  }
+  
+  .modal-body {
+    color: var(--text-primary);
+    
+    label {
+      color: var(--text-secondary);
+    }
+  }
+  
+  .modal-footer {
+    border-top-color: var(--border-color);
+  }
+}
+
+// Delete Modal Specific
+body.dark-mode .delete-modal-icon {
+  background: linear-gradient(135deg, #3f1d1d 0%, #5a2424 100%);
+}
+
+body.dark-mode .delete-modal-warning {
+  background: #1e293b;
+  border-left-color: #f59e0b;
+  color: var(--text-secondary);
+}
+
+// Badges
+.badge {
+  &.badge-primary {
+    background: rgba(102, 126, 234, 0.15);
+    color: #667eea;
+  }
+  
+  &.badge-success {
+    background: rgba(34, 197, 94, 0.15);
+    color: #22c55e;
+  }
+  
+  &.badge-warning {
+    background: rgba(245, 158, 11, 0.15);
+    color: #f59e0b;
+  }
+  
+  &.badge-danger {
+    background: rgba(239, 68, 68, 0.15);
+    color: #ef4444;
+  }
+}
+
+body.dark-mode .badge {
+  &.badge-primary {
+    background: rgba(102, 126, 234, 0.25);
+    color: #a5b4fc;
+  }
+  
+  &.badge-success {
+    background: rgba(34, 197, 94, 0.25);
+    color: #86efac;
+  }
+  
+  &.badge-warning {
+    background: rgba(245, 158, 11, 0.25);
+    color: #fcd34d;
+  }
+  
+  &.badge-danger {
+    background: rgba(239, 68, 68, 0.25);
+    color: #fca5a5;
+  }
+}
+
+// Status Chips
+.status-chip {
+  background-color: var(--bg-tertiary);
+  color: var(--text-primary);
+  
+  .dot {
+    background-color: currentColor;
+  }
+}
+
+// Charts
+.chart-placeholder {
+  background-color: var(--bg-secondary);
+  border-color: var(--border-color);
+  
+  .empty-chart {
+    color: var(--text-tertiary);
+  }
+}
+
+// KPI Bars
+.kpi-bars {
+  .bar-track {
+    background-color: var(--bg-tertiary);
+  }
+  
+  .bar-label {
+    color: var(--text-secondary);
+  }
+}
+
+// Progress Bars
+.progress-cell {
+  .prog-bar {
+    background-color: var(--bg-tertiary);
+  }
+  
+  span {
+    color: var(--text-secondary);
+  }
+}
+
+// User Cell
+.user-cell {
+  .avatar {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+  }
+  
+  .user-name {
+    color: var(--text-primary);
+  }
+  
+  .user-city,
+  .user-info span:last-child {
+    color: var(--text-tertiary);
+  }
+}
+
+// Project Cards (Browse Projects)
+.project-card {
+  background-color: var(--bg-card);
+  border-color: var(--border-color);
+  box-shadow: var(--shadow-sm);
+  
+  &:hover {
+    box-shadow: var(--shadow-md);
+  }
+  
+  h3 {
+    color: var(--text-primary);
+  }
+  
+  .company-name,
+  .description {
+    color: var(--text-secondary);
+  }
+  
+  .meta-label {
+    color: var(--text-tertiary);
+  }
+  
+  .meta-value {
+    color: var(--text-primary);
+  }
+}
+
+// Milestone Cards
+.milestone-card {
+  background-color: var(--bg-card);
+  border-color: var(--border-color);
+  box-shadow: var(--shadow-sm);
+  
+  h4 {
+    color: var(--text-primary);
+  }
+  
+  .milestone-desc {
+    color: var(--text-secondary);
+  }
+}
+
+// Profile Settings
+.ps-setting-row {
+  border-bottom-color: var(--border-color);
+  
+  strong {
+    color: var(--text-primary);
+  }
+  
+  p {
+    color: var(--text-secondary);
+  }
+}
+
+.ps-toggle {
+  .ps-slider {
+    background-color: var(--bg-tertiary);
+  }
+  
+  input:checked + .ps-slider {
+    background-color: #667eea;
+  }
+}
+
+// ============================================
+// Lightening Effect Animation
+// ============================================
+@keyframes lighten {
+  0% {
+    filter: brightness(1);
+  }
+  50% {
+    filter: brightness(1.2);
+  }
+  100% {
+    filter: brightness(1);
+  }
+}
+
+body.dark-mode-transitioning {
+  animation: lighten 0.6s ease-out;
+}
+
+// ============================================
+// Responsive Dark Mode Toggle
+// ============================================
+@media (max-width: 768px) {
+  .dark-mode-toggle {
+    width: 48px;
+    height: 48px;
+    border-radius: 12px;
+  }
+  
+  .toggle-icon {
+    font-size: 1.5rem;
+  }
+}
+
+// ============================================
+// Scrollbar Dark Mode
+// ============================================
+body.dark-mode {
+  ::-webkit-scrollbar {
+    width: 12px;
+    height: 12px;
+  }
+  
+  ::-webkit-scrollbar-track {
+    background: var(--bg-secondary);
+  }
+  
+  ::-webkit-scrollbar-thumb {
+    background: var(--bg-tertiary);
+    border-radius: 6px;
+    
+    &:hover {
+      background: #475569;
+    }
+  }
+}
+
+// ============================================
+// Selection Color
+// ============================================
+body.dark-mode ::selection {
+  background: rgba(102, 126, 234, 0.3);
+  color: var(--text-primary);
+}
+
+
+// ============================================
+// Backoffice Specific Dark Mode
+// ============================================
+
+body.dark-mode {
+  // Backoffice Header
+  .bo-header {
+    background: var(--bg-card) !important;
+    border-bottom-color: var(--border-color) !important;
+    
+    .toggle-view {
+      background: transparent !important;
+      color: var(--text-secondary) !important;
+      border-color: var(--border-color) !important;
+      
+      &.active {
+        background: var(--primary) !important;
+        color: white !important;
+        border-color: var(--primary) !important;
+      }
+      
+      &:not(.active):hover {
+        border-color: var(--primary) !important;
+        color: var(--primary) !important;
+      }
+    }
+    
+    .btn-back {
+      background: transparent !important;
+      color: var(--text-secondary) !important;
+      border-color: var(--border-color) !important;
+      
+      &:hover {
+        border-color: var(--primary) !important;
+        color: var(--primary) !important;
+      }
+    }
+  }
+  
+  // Backoffice Sidebar
+  .bo-sidebar {
+    background: var(--bg-card) !important;
+    border-right-color: var(--border-color) !important;
+    
+    .nav-item {
+      color: var(--text-secondary) !important;
+      
+      &:hover {
+        background: var(--bg-tertiary) !important;
+        color: var(--text-primary) !important;
+      }
+      
+      &.active {
+        background: var(--primary) !important;
+        color: white !important;
+      }
+    }
+  }
+  
+  // Page Headers - Remove dark background
+  .page-header,
+  .bo-page-header {
+    background: transparent !important;
+    
+    h1, .page-title {
+      color: var(--text-primary) !important;
+      background: transparent !important;
+    }
+    
+    p, .page-sub {
+      color: var(--text-secondary) !important;
+      background: transparent !important;
+    }
+  }
+  
+  // Projects page specific
+  .projects-page {
+    .page-header {
+      background: transparent !important;
+      padding: 24px 0 !important;
+      
+      > div:first-child {
+        background: transparent !important;
+      }
+    }
+  }
+  
+  // Page Titles and Headers
+  .page-title,
+  .bo-page h1 {
+    color: var(--text-primary) !important;
+    background: transparent !important;
+  }
+  
+  .page-sub,
+  .bo-page p {
+    color: var(--text-secondary) !important;
+    background: transparent !important;
+  }
+  
+  // Table specific
+  .bo-table-card,
+  .table-card {
+    background: var(--bg-card) !important;
+    border-color: var(--border-color) !important;
+  }
+  
+  // Filters bar
+  .bo-filters-bar,
+  .filters-bar {
+    background: var(--bg-card) !important;
+    border-color: var(--border-color) !important;
+  }
+  
+  // Export buttons
+  .btn-export {
+    background: var(--bg-tertiary) !important;
+    color: var(--text-secondary) !important;
+    border-color: var(--border-color) !important;
+    
+    &:hover {
+      border-color: var(--primary) !important;
+      color: var(--primary) !important;
+    }
+  }
+  
+  // Icon buttons (CSV, Excel)
+  .btn-icon {
+    background: var(--bg-tertiary) !important;
+    color: var(--text-secondary) !important;
+    border-color: var(--border-color) !important;
+    
+    &:hover {
+      background: var(--bg-card) !important;
+      border-color: var(--primary) !important;
+      color: var(--primary) !important;
+    }
+  }
+  
+  // Stats cards
+  .mini-stat {
+    background: var(--stat-card-bg) !important;
+    border-color: var(--border-color) !important;
+    
+    .ms-val {
+      color: var(--text-primary) !important;
+    }
+    
+    .ms-label {
+      color: var(--text-secondary) !important;
+    }
+  }
+  
+  // Empty states
+  .bo-empty-row,
+  .empty-row {
+    color: var(--text-secondary) !important;
+  }
+  
+  // Action icons - keep their colors
+  .action-icon-view,
+  .action-icon-edit,
+  .action-icon-delete,
+  .action-icon-custom,
+  .action-icon-success {
+    // Keep original colors but adjust opacity for dark mode
+    opacity: 0.95;
+  }
+}

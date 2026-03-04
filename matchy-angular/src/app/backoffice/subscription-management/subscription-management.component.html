@@ -1,0 +1,57 @@
+<div class="bo-page">
+  <div class="bo-page-header">
+    <div><h1>Subscription Management</h1><p>Monitor all user subscriptions and revenue</p></div>
+    <button class="btn-primary">+ Add Plan</button>
+  </div>
+
+  <div class="stats-row">
+    <div class="mini-stat"><span class="ms-val">{{ subscriptions.length }}</span><span class="ms-label">Total Subscribers</span></div>
+    <div class="mini-stat"><span class="ms-val">{{ totalMRR }} TND</span><span class="ms-label">Monthly Revenue</span></div>
+    <div class="mini-stat"><span class="ms-val">2</span><span class="ms-label">Pro Users</span></div>
+    <div class="mini-stat"><span class="ms-val">1</span><span class="ms-label">Elite Users</span></div>
+  </div>
+
+  <div class="bo-filters-bar">
+    <input type="text" placeholder="🔍 Search subscribers..." [(ngModel)]="searchTerm" class="bo-filter-input">
+    <select [(ngModel)]="selectedPlan" class="bo-filter-select">
+      <option *ngFor="let p of plans" [value]="p">{{ p | titlecase }}</option>
+    </select>
+    <div class="bo-filter-spacer"></div>
+    <button class="btn-export">📄 CSV</button>
+    <button class="btn-export">📊 Excel</button>
+  </div>
+
+  <div class="bo-table-card">
+    <table class="bo-data-table">
+      <thead>
+        <tr><th>User</th><th>Email</th><th>Plan</th><th>Amount</th><th>Start Date</th><th>Next Billing</th><th>Status</th><th>Actions</th></tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let sub of filteredSubscriptions">
+          <td class="user-cell">
+            <div class="avatar">{{ sub.user[0] }}</div>
+            {{ sub.user }}
+          </td>
+          <td>{{ sub.email }}</td>
+          <td>
+            <span class="badge" [class]="'badge-' + getPlanClass(sub.plan)">{{ sub.plan | titlecase }}</span>
+          </td>
+          <td class="amount-cell">{{ sub.amount > 0 ? (sub.amount + ' ' + sub.currency) : 'Free' }}</td>
+          <td>{{ sub.startDate | date:'MMM d, y' }}</td>
+          <td>{{ sub.nextBilling === '-' ? '—' : (sub.nextBilling | date:'MMM d, y') }}</td>
+          <td>
+            <span class="badge" [ngClass]="sub.status === 'active' ? 'badge-success' : 'badge-danger'">
+              {{ sub.status | titlecase }}
+            </span>
+          </td>
+          <td class="bo-actions-cell">
+            <button class="btn-action view">👁</button>
+            <button class="btn-action edit">✏️</button>
+            <button class="btn-action delete">🗑</button>
+          </td>
+        </tr>
+        <tr *ngIf="filteredSubscriptions.length === 0"><td colspan="8" class="bo-empty-row">No subscriptions found</td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>

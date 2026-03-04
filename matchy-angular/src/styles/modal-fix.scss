@@ -1,0 +1,363 @@
+// ============================================
+// Modal System Fix - Ensure Proper Popup Behavior
+// ============================================
+
+// Modal Overlay - Full screen backdrop
+.modal-overlay {
+  position: fixed !important;
+  top: 0 !important;
+  left: 0 !important;
+  right: 0 !important;
+  bottom: 0 !important;
+  background: rgba(0, 0, 0, 0.6) !important;
+  backdrop-filter: blur(8px) !important;
+  -webkit-backdrop-filter: blur(8px) !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  z-index: 9999 !important;
+  padding: 20px !important;
+  overflow-y: auto !important;
+  animation: fadeIn 0.3s ease !important;
+}
+
+// Modal Content - Centered popup
+.modal-content {
+  position: relative !important;
+  background: white !important;
+  border-radius: 16px !important;
+  max-width: 600px !important;
+  width: 100% !important;
+  max-height: 90vh !important;
+  overflow-y: auto !important;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3) !important;
+  animation: slideUp 0.3s ease !important;
+  margin: auto !important;
+  z-index: 10000 !important;
+}
+
+// Large Modal
+.modal-large {
+  max-width: 900px !important;
+}
+
+// Small Modal
+.modal-small {
+  max-width: 400px !important;
+}
+
+// Dark Mode Modal
+body.dark-mode .modal-content {
+  background: #27293d !important;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.6) !important;
+}
+
+// Modal Header
+.modal-header {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  padding: 24px 28px !important;
+  border-bottom: 1px solid var(--border-color, #e2e8f0) !important;
+  
+  h2 {
+    margin: 0 !important;
+    font-size: 1.5rem !important;
+    font-weight: 700 !important;
+    color: var(--text-primary, #1a1a1a) !important;
+  }
+}
+
+body.dark-mode .modal-header {
+  border-bottom-color: var(--border-color, #3a3d54) !important;
+  
+  h2 {
+    color: var(--text-primary, #ffffff) !important;
+  }
+}
+
+// Modal Close Button
+.modal-close {
+  width: 36px !important;
+  height: 36px !important;
+  border-radius: 8px !important;
+  border: none !important;
+  background: transparent !important;
+  color: var(--text-secondary, #4a5568) !important;
+  font-size: 28px !important;
+  line-height: 1 !important;
+  cursor: pointer !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  transition: all 0.2s ease !important;
+  
+  &:hover {
+    background: rgba(0, 0, 0, 0.05) !important;
+    color: var(--text-primary, #1a1a1a) !important;
+  }
+}
+
+body.dark-mode .modal-close {
+  color: var(--text-secondary, #b8b9c5) !important;
+  
+  &:hover {
+    background: rgba(255, 255, 255, 0.1) !important;
+    color: var(--text-primary, #ffffff) !important;
+  }
+}
+
+// Modal Body
+.modal-body {
+  padding: 28px !important;
+  color: var(--text-primary, #1a1a1a) !important;
+}
+
+body.dark-mode .modal-body {
+  color: var(--text-primary, #ffffff) !important;
+}
+
+// Modal Footer
+.modal-footer {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: flex-end !important;
+  gap: 12px !important;
+  padding: 20px 28px !important;
+  border-top: 1px solid var(--border-color, #e2e8f0) !important;
+}
+
+body.dark-mode .modal-footer {
+  border-top-color: var(--border-color, #3a3d54) !important;
+}
+
+// Form Elements in Modal
+.modal-body {
+  .form-group {
+    margin-bottom: 20px !important;
+    
+    label {
+      display: block !important;
+      margin-bottom: 8px !important;
+      font-weight: 600 !important;
+      font-size: 0.9rem !important;
+      color: var(--text-secondary, #4a5568) !important;
+    }
+  }
+  
+  .form-input,
+  .form-textarea,
+  .form-select {
+    width: 100% !important;
+    padding: 12px 16px !important;
+    border: 1px solid var(--border-color, #e2e8f0) !important;
+    border-radius: 8px !important;
+    font-size: 0.95rem !important;
+    font-family: inherit !important;
+    background: var(--input-bg, #ffffff) !important;
+    color: var(--text-primary, #1a1a1a) !important;
+    transition: all 0.2s ease !important;
+    
+    &:focus {
+      outline: none !important;
+      border-color: #667eea !important;
+      box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1) !important;
+    }
+    
+    &::placeholder {
+      color: var(--text-tertiary, #718096) !important;
+    }
+  }
+  
+  .form-textarea {
+    resize: vertical !important;
+    min-height: 100px !important;
+  }
+  
+  .form-row {
+    display: grid !important;
+    grid-template-columns: 1fr 1fr !important;
+    gap: 16px !important;
+  }
+}
+
+body.dark-mode .modal-body {
+  .form-group label {
+    color: var(--text-secondary, #b8b9c5) !important;
+  }
+  
+  .form-input,
+  .form-textarea,
+  .form-select {
+    background: var(--input-bg, #2f3349) !important;
+    border-color: var(--border-color, #3a3d54) !important;
+    color: var(--text-primary, #ffffff) !important;
+    
+    &:focus {
+      border-color: #667eea !important;
+      box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.2) !important;
+    }
+  }
+}
+
+// Modal Buttons
+.modal-footer {
+  .btn-primary,
+  .btn-secondary {
+    padding: 12px 24px !important;
+    border-radius: 8px !important;
+    font-size: 0.95rem !important;
+    font-weight: 600 !important;
+    cursor: pointer !important;
+    transition: all 0.2s ease !important;
+    border: none !important;
+    font-family: inherit !important;
+  }
+  
+  .btn-primary {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
+    color: white !important;
+    
+    &:hover:not(:disabled) {
+      transform: translateY(-2px) !important;
+      box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4) !important;
+    }
+    
+    &:disabled {
+      opacity: 0.6 !important;
+      cursor: not-allowed !important;
+    }
+  }
+  
+  .btn-secondary {
+    background: white !important;
+    color: #667eea !important;
+    border: 2px solid #667eea !important;
+    
+    &:hover {
+      background: #667eea !important;
+      color: white !important;
+    }
+  }
+}
+
+body.dark-mode .modal-footer .btn-secondary {
+  background: transparent !important;
+  border-color: #667eea !important;
+  color: #667eea !important;
+  
+  &:hover {
+    background: #667eea !important;
+    color: white !important;
+  }
+}
+
+// Delete Modal Specific Styles
+.delete-modal-overlay {
+  position: fixed !important;
+  top: 0 !important;
+  left: 0 !important;
+  right: 0 !important;
+  bottom: 0 !important;
+  background: rgba(0, 0, 0, 0.7) !important;
+  backdrop-filter: blur(8px) !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  z-index: 10000 !important;
+  padding: 20px !important;
+  animation: fadeIn 0.3s ease !important;
+}
+
+.delete-modal-content {
+  position: relative !important;
+  background: white !important;
+  border-radius: 20px !important;
+  max-width: 480px !important;
+  width: 100% !important;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3) !important;
+  animation: slideInScale 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) !important;
+  overflow: hidden !important;
+  z-index: 10001 !important;
+}
+
+body.dark-mode .delete-modal-content {
+  background: #27293d !important;
+}
+
+// Animations
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes slideInScale {
+  from {
+    opacity: 0;
+    transform: translateY(-20px) scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+// Prevent body scroll when modal is open
+body.modal-open {
+  overflow: hidden !important;
+}
+
+// Responsive
+@media (max-width: 768px) {
+  .modal-content {
+    max-width: 95% !important;
+    max-height: 95vh !important;
+  }
+  
+  .modal-header {
+    padding: 20px !important;
+  }
+  
+  .modal-body {
+    padding: 20px !important;
+  }
+  
+  .modal-footer {
+    padding: 16px 20px !important;
+    flex-direction: column-reverse !important;
+    
+    button {
+      width: 100% !important;
+    }
+  }
+  
+  .modal-body .form-row {
+    grid-template-columns: 1fr !important;
+  }
+}
+
+// Ensure modals are always on top
+.modal-overlay,
+.delete-modal-overlay {
+  z-index: 9999 !important;
+}
+
+.modal-content,
+.delete-modal-content {
+  z-index: 10000 !important;
+}

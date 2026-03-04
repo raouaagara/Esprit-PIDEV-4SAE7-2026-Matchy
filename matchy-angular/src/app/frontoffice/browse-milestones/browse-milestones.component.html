@@ -1,0 +1,119 @@
+<div class="browse-milestones-page">
+  <div class="page-header">
+    <div>
+      <h1 class="page-title">Available Milestones</h1>
+      <p class="page-sub">Find and apply to projects that match your skills</p>
+    </div>
+  </div>
+
+  <!-- Search Bar -->
+  <div class="search-bar">
+    <input 
+      type="text" 
+      placeholder="🔍 Search milestones by title, description, or project..." 
+      [(ngModel)]="searchTerm" 
+      (input)="onSearch()" 
+      class="search-input">
+  </div>
+
+  <!-- Loading State -->
+  <div *ngIf="loading" class="loading-state">
+    <div class="spinner"></div>
+    <p>Loading available milestones...</p>
+  </div>
+
+  <!-- Error State -->
+  <div *ngIf="error && !loading" class="error-state">
+    <span class="error-icon">⚠️</span>
+    <p>{{ error }}</p>
+  </div>
+
+  <!-- Milestones Grid -->
+  <div *ngIf="!loading && !error" class="milestones-grid">
+    <div *ngIf="filteredMilestones.length === 0" class="empty-state">
+      <span class="empty-icon">📋</span>
+      <p>No available milestones found</p>
+      <small>Check back later for new opportunities</small>
+    </div>
+
+    <div *ngFor="let milestone of filteredMilestones" class="milestone-card">
+      <div class="card-header">
+        <div>
+          <h3>{{ milestone.title }}</h3>
+          <p class="project-name">{{ milestone.projectTitle }}</p>
+        </div>
+        <span class="badge" [class]="'badge-' + getStatusClass(milestone.status)">
+          {{ milestone.status }}
+        </span>
+      </div>
+      
+      <p class="description">{{ milestone.description }}</p>
+      
+      <div class="card-meta">
+        <div class="meta-item">
+          <span class="meta-label">💰 Budget</span>
+          <span class="meta-value">{{ milestone.budget | number:'1.2-2' }} TND</span>
+        </div>
+        <div class="meta-item">
+          <span class="meta-label">📅 Deadline</span>
+          <span class="meta-value">{{ milestone.deadline | date:'MMM d, y' }}</span>
+        </div>
+      </div>
+      
+      <div class="card-actions">
+        <button class="btn-apply" (click)="openApplicationModal(milestone)">
+          Apply Now
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Application Modal -->
+  <div class="modal-overlay" *ngIf="showApplicationModal" (click)="closeApplicationModal()">
+    <div class="modal-content" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <h2>Apply to Milestone</h2>
+        <button class="modal-close" (click)="closeApplicationModal()">×</button>
+      </div>
+      
+      <div class="modal-body">
+        <div class="milestone-info">
+          <h3>{{ selectedMilestone?.title }}</h3>
+          <p class="project-name">{{ selectedMilestone?.projectTitle }}</p>
+          <p class="milestone-desc">{{ selectedMilestone?.description }}</p>
+          <div class="info-row">
+            <span>💰 Budget: {{ selectedMilestone?.budget | number:'1.2-2' }} TND</span>
+            <span>📅 Deadline: {{ selectedMilestone?.deadline | date:'MMM d, y' }}</span>
+          </div>
+        </div>
+        
+        <div class="form-group">
+          <label>Cover Letter *</label>
+          <textarea 
+            [(ngModel)]="applicationFormData.coverLetter" 
+            placeholder="Explain why you're the best fit for this milestone. Include your relevant experience and approach..."
+            class="form-textarea" 
+            rows="6"></textarea>
+          <small class="form-hint">Tip: Mention specific skills and past projects that relate to this milestone</small>
+        </div>
+        
+        <div class="form-group">
+          <label>Proposed Budget (TND) *</label>
+          <input 
+            type="number" 
+            [(ngModel)]="applicationFormData.proposedBudget" 
+            placeholder="Enter your proposed budget" 
+            class="form-input">
+          <small class="form-hint">Original budget: {{ selectedMilestone?.budget | number:'1.2-2' }} TND</small>
+        </div>
+      </div>
+      
+      <div class="modal-footer">
+        <button class="btn-secondary" (click)="closeApplicationModal()">Cancel</button>
+        <button class="btn-primary" (click)="submitApplication()" [disabled]="submitting">
+          {{ submitting ? 'Submitting...' : 'Submit Application' }}
+        </button>
+      </div>
+    </div>
+  </div>
+</div>

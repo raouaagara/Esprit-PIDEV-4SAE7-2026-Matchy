@@ -1,0 +1,78 @@
+<div class="bo-page">
+  <div class="bo-page-header">
+    <div><h1>Events Management</h1><p>Create and manage platform events</p></div>
+    <button class="btn-primary-action">
+      <span class="icon">✨</span>
+      <span>Create Event</span>
+    </button>
+  </div>
+
+  <div class="stats-row">
+    <div class="mini-stat"><span class="ms-val">{{ events.length }}</span><span class="ms-label">Total Events</span></div>
+    <div class="mini-stat"><span class="ms-val">696</span><span class="ms-label">Total Registered</span></div>
+    <div class="mini-stat"><span class="ms-val">3</span><span class="ms-label">Online</span></div>
+    <div class="mini-stat"><span class="ms-val">2</span><span class="ms-label">In-Person</span></div>
+  </div>
+
+  <div class="bo-filters-bar">
+    <input type="text" placeholder="🔍 Search events..." [(ngModel)]="searchTerm" class="bo-filter-input">
+    <select [(ngModel)]="selectedType" class="bo-filter-select">
+      <option *ngFor="let t of types" [value]="t">{{ t | titlecase }}</option>
+    </select>
+    <div class="bo-filter-spacer"></div>
+    <button class="btn-icon">
+      <span class="icon">📄</span>
+      <span>CSV</span>
+    </button>
+    <button class="btn-icon">
+      <span class="icon">📊</span>
+      <span>Excel</span>
+    </button>
+  </div>
+
+  <div class="bo-table-card">
+    <table class="bo-data-table">
+      <thead>
+        <tr><th>Event</th><th>Type</th><th>Date</th><th>Location</th><th>Attendance</th><th>Status</th><th>Actions</th></tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let event of filteredEvents">
+          <td><strong>{{ event.title }}</strong></td>
+          <td><span class="badge badge-primary">{{ event.type | titlecase }}</span></td>
+          <td>{{ event.date | date:'MMM d, y' }}</td>
+          <td>
+            <span *ngIf="event.isOnline" class="online-tag">🌐 Online</span>
+            <span *ngIf="!event.isOnline">📍 {{ event.location }}</span>
+          </td>
+          <td>
+            <div class="attendance-info">
+              <div class="bar-track"><div class="bar-fill" [style.width.%]="getAttendancePercent(event)"></div></div>
+              <span>{{ event.attendees }}/{{ event.maxAttendees }}</span>
+            </div>
+          </td>
+          <td><span class="badge badge-success">{{ event.status | titlecase }}</span></td>
+          <td class="bo-actions-cell">
+            <div class="action-icons">
+              <button class="action-icon-view action-icon-tooltip" 
+                      data-tooltip="View Event" 
+                      aria-label="View event details">
+                <span class="icon">👁️</span>
+              </button>
+              <button class="action-icon-edit action-icon-tooltip" 
+                      data-tooltip="Edit Event" 
+                      aria-label="Edit event">
+                <span class="icon">✏️</span>
+              </button>
+              <button class="action-icon-delete action-icon-tooltip" 
+                      data-tooltip="Delete Event" 
+                      aria-label="Delete event">
+                <span class="icon">🗑️</span>
+              </button>
+            </div>
+          </td>
+        </tr>
+        <tr *ngIf="filteredEvents.length === 0"><td colspan="7" class="bo-empty-row">No events found</td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>

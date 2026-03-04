@@ -1,0 +1,148 @@
+<div class="messages-container">
+  <!-- Projects Sidebar -->
+  <div class="projects-sidebar">
+    <div class="sidebar-header">
+      <h2>Messages</h2>
+    </div>
+    
+    <div class="projects-list">
+      <div *ngIf="loading" class="loading-state">
+        <div class="spinner"></div>
+        <p>Loading projects...</p>
+      </div>
+
+      <div *ngIf="!loading && projects.length === 0" class="empty-state">
+        <span class="empty-icon">💬</span>
+        <p>No projects yet</p>
+      </div>
+
+      <div 
+        *ngFor="let project of projects"
+        class="project-item"
+        [class.active]="selectedProject?.id === project.id"
+        (click)="selectProject(project)"
+      >
+        <div class="project-avatar">
+          {{ project.title.charAt(0).toUpperCase() }}
+        </div>
+        <div class="project-info">
+          <h4>{{ project.title }}</h4>
+          <p class="project-status">{{ project.status }}</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Chat Area -->
+  <div class="chat-area">
+    <div *ngIf="!selectedProject" class="no-selection">
+      <div class="no-selection-content">
+        <span class="icon">💬</span>
+        <h3>Select a project to start chatting</h3>
+        <p>Choose a project from the list to view and send messages</p>
+      </div>
+    </div>
+
+    <div *ngIf="selectedProject" class="chat-content">
+      <!-- Chat Header -->
+      <div class="chat-header">
+        <div class="header-info">
+          <div class="project-avatar">
+            {{ selectedProject.title.charAt(0).toUpperCase() }}
+          </div>
+          <div>
+            <h3>{{ selectedProject.title }}</h3>
+            <p class="status">Project Chat</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Messages Container -->
+      <div class="messages-wrapper" #messagesContainer>
+        <div *ngIf="messages.length === 0" class="empty-messages">
+          <span class="icon">✉️</span>
+          <p>No messages yet. Start the conversation!</p>
+        </div>
+
+        <div *ngFor="let message of messages; let i = index">
+          <!-- Date Separator -->
+          <div *ngIf="shouldShowDateSeparator(i)" class="date-separator">
+            <span>{{ formatDate(message.createdAt) }}</span>
+          </div>
+
+          <!-- Message Bubble -->
+          <div class="message-row" [class.my-message]="isMyMessage(message)">
+            <div class="message-bubble">
+              <div class="message-header">
+                <span class="sender-name">{{ message.senderName }}</span>
+                <span class="message-time">{{ formatTime(message.createdAt) }}</span>
+              </div>
+              
+              <div class="message-content">
+                <p *ngIf="message.content">{{ message.content }}</p>
+                
+                <!-- Image Attachment -->
+                <div *ngIf="message.attachmentUrl && isImage(message.attachmentName || '')" class="attachment-image">
+                  <img [src]="message.attachmentUrl" [alt]="message.attachmentName" />
+                </div>
+                
+                <!-- File Attachment -->
+                <div *ngIf="message.attachmentUrl && !isImage(message.attachmentName || '')" class="attachment-file">
+                  <span class="file-icon">{{ getFileIcon(message.attachmentName || '') }}</span>
+                  <div class="file-info">
+                    <span class="file-name">{{ message.attachmentName }}</span>
+                    <a [href]="message.attachmentUrl" target="_blank" class="download-link">Download</a>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Message Input -->
+      <div class="message-input-area">
+        <div *ngIf="selectedFile" class="selected-file-preview">
+          <span class="file-icon">{{ getFileIcon(selectedFile.name) }}</span>
+          <span class="file-name">{{ selectedFile.name }}</span>
+          <button class="remove-file-btn" (click)="removeSelectedFile()">×</button>
+        </div>
+
+        <div class="input-wrapper">
+          <button 
+            class="attach-btn" 
+            (click)="triggerFileInput()"
+            [disabled]="sending || uploadingFile"
+            title="Attach file"
+          >
+            <span>📎</span>
+          </button>
+
+          <input 
+            type="file" 
+            #fileInput 
+            (change)="onFileSelected($event)"
+            style="display: none"
+          />
+
+          <textarea
+            [(ngModel)]="newMessage"
+            (keypress)="onKeyPress($event)"
+            placeholder="Type a message..."
+            rows="1"
+            [disabled]="sending || uploadingFile"
+          ></textarea>
+
+          <button 
+            class="send-btn" 
+            (click)="sendMessage()"
+            [disabled]="(!newMessage.trim() && !selectedFile) || sending || uploadingFile"
+          >
+            <span *ngIf="!sending && !uploadingFile">➤</span>
+            <span *ngIf="sending || uploadingFile" class="spinner-small"></span>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

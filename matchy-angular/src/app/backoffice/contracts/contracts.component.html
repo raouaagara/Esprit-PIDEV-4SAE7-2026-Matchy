@@ -1,0 +1,152 @@
+<div class="contracts-page">
+  <div class="page-header">
+    <h1 class="page-title">📄 My Contracts</h1>
+    <p class="page-subtitle">View and manage your project contracts</p>
+  </div>
+
+  <!-- Loading State -->
+  <div *ngIf="loading" class="loading-state">
+    <div class="spinner"></div>
+    <p>Loading contracts...</p>
+  </div>
+
+  <!-- Contracts List -->
+  <div *ngIf="!loading" class="contracts-grid">
+    <div *ngIf="contracts.length === 0" class="empty-state">
+      <span class="empty-icon">📄</span>
+      <h3>No Contracts Yet</h3>
+      <p>When a company accepts your application, a contract will be generated and appear here.</p>
+    </div>
+
+    <div *ngFor="let contract of contracts" class="contract-card" (click)="viewContract(contract)">
+      <div class="contract-header">
+        <div class="contract-info">
+          <h3>{{ contract.projectTitle }}</h3>
+          <p class="contract-number">Contract #{{ contract.contractNumber }}</p>
+        </div>
+        <span class="badge" [class]="'badge-' + getStatusClass(contract.status)">
+          {{ contract.status }}
+        </span>
+      </div>
+
+      <div class="contract-body">
+        <div class="info-row">
+          <span class="label">Company:</span>
+          <span class="value">{{ contract.companyName }}</span>
+        </div>
+        <div class="info-row">
+          <span class="label">Amount:</span>
+          <span class="value amount">{{ contract.amount | number:'1.2-2' }} TND</span>
+        </div>
+        <div class="info-row">
+          <span class="label">Duration:</span>
+          <span class="value">{{ contract.startDate | date:'MMM d, y' }} - {{ contract.endDate | date:'MMM d, y' }}</span>
+        </div>
+      </div>
+
+      <div class="contract-footer">
+        <div class="signatures">
+          <span class="signature" [class.signed]="contract.companySigned">
+            {{ contract.companySigned ? '✓' : '○' }} Company
+          </span>
+          <span class="signature" [class.signed]="contract.freelancerSigned">
+            {{ contract.freelancerSigned ? '✓' : '○' }} You
+          </span>
+        </div>
+        <button class="btn-view" (click)="viewContract(contract); $event.stopPropagation()">
+          View Details →
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Contract Modal -->
+  <div class="modal-overlay" *ngIf="showContractModal" (click)="closeModal()">
+    <div class="modal-content" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <h2>Contract Details</h2>
+        <button class="modal-close" (click)="closeModal()">×</button>
+      </div>
+
+      <div class="modal-body" *ngIf="selectedContract">
+        <div class="contract-details">
+          <div class="detail-section">
+            <h3>Project Information</h3>
+            <div class="detail-row">
+              <span class="label">Project:</span>
+              <span class="value">{{ selectedContract.projectTitle }}</span>
+            </div>
+            <div class="detail-row" *ngIf="selectedContract.milestoneTitle">
+              <span class="label">Milestone:</span>
+              <span class="value">{{ selectedContract.milestoneTitle }}</span>
+            </div>
+            <div class="detail-row">
+              <span class="label">Contract Number:</span>
+              <span class="value">{{ selectedContract.contractNumber }}</span>
+            </div>
+          </div>
+
+          <div class="detail-section">
+            <h3>Financial Terms</h3>
+            <div class="detail-row">
+              <span class="label">Amount:</span>
+              <span class="value amount-large">{{ selectedContract.amount | number:'1.2-2' }} TND</span>
+            </div>
+            <div class="detail-row">
+              <span class="label">Start Date:</span>
+              <span class="value">{{ selectedContract.startDate | date:'fullDate' }}</span>
+            </div>
+            <div class="detail-row">
+              <span class="label">End Date:</span>
+              <span class="value">{{ selectedContract.endDate | date:'fullDate' }}</span>
+            </div>
+          </div>
+
+          <div class="detail-section">
+            <h3>Terms and Conditions</h3>
+            <div class="terms-content">
+              {{ selectedContract.terms }}
+            </div>
+          </div>
+
+          <div class="detail-section">
+            <h3>Signatures</h3>
+            <div class="signatures-grid">
+              <div class="signature-box" [class.signed]="selectedContract.companySigned">
+                <div class="signature-icon">{{ selectedContract.companySigned ? '✓' : '○' }}</div>
+                <div class="signature-info">
+                  <strong>{{ selectedContract.companyName }}</strong>
+                  <span *ngIf="selectedContract.companySigned">
+                    Signed on {{ selectedContract.companySignedAt | date:'MMM d, y h:mm a' }}
+                  </span>
+                  <span *ngIf="!selectedContract.companySigned">Not signed yet</span>
+                </div>
+              </div>
+
+              <div class="signature-box" [class.signed]="selectedContract.freelancerSigned">
+                <div class="signature-icon">{{ selectedContract.freelancerSigned ? '✓' : '○' }}</div>
+                <div class="signature-info">
+                  <strong>{{ selectedContract.freelancerName }}</strong>
+                  <span *ngIf="selectedContract.freelancerSigned">
+                    Signed on {{ selectedContract.freelancerSignedAt | date:'MMM d, y h:mm a' }}
+                  </span>
+                  <span *ngIf="!selectedContract.freelancerSigned">Awaiting your signature</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="modal-footer" *ngIf="selectedContract">
+        <button class="btn-secondary" (click)="closeModal()">Close</button>
+        <button 
+          *ngIf="!selectedContract.freelancerSigned && selectedContract.status === 'PENDING_SIGNATURE'" 
+          class="btn-primary" 
+          (click)="signContract(selectedContract)">
+          ✍️ Sign Contract
+        </button>
+      </div>
+    </div>
+  </div>
+</div>

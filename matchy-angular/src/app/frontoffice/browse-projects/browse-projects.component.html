@@ -1,0 +1,167 @@
+<div class="browse-projects-container">
+  <!-- Hero Header -->
+  <div class="hero-header">
+    <div class="hero-content">
+      <div class="hero-text">
+        <h1 class="hero-title">
+          <span class="gradient-text">Discover</span> Amazing Projects
+        </h1>
+        <p class="hero-subtitle">
+          Find the perfect project that matches your skills and start earning today
+        </p>
+      </div>
+      <div class="hero-stats">
+        <div class="stat-item">
+          <span class="stat-number">{{ filteredProjects.length }}</span>
+          <span class="stat-label">Available Projects</span>
+        </div>
+        <div class="stat-divider"></div>
+        <div class="stat-item">
+          <span class="stat-number">{{ projects.length }}</span>
+          <span class="stat-label">Total Opportunities</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Search & Filters Section -->
+  <div class="search-section">
+    <div class="search-container">
+      <div class="search-box">
+        <span class="search-icon">🔍</span>
+        <input 
+          type="text" 
+          placeholder="Search by project name, description, or company..." 
+          [(ngModel)]="searchTerm" 
+          (input)="onSearch()" 
+          class="search-input"
+        />
+        <button *ngIf="searchTerm" class="clear-btn" (click)="searchTerm = ''; onSearch()">
+          ✕
+        </button>
+      </div>
+      
+      <div class="filter-group">
+        <label class="filter-label">Status</label>
+        <select [(ngModel)]="selectedStatus" (change)="onSearch()" class="filter-select">
+          <option value="ALL">All Projects</option>
+          <option value="OPEN">🟢 Open</option>
+          <option value="IN_PROGRESS">🟡 In Progress</option>
+          <option value="COMPLETED">✅ Completed</option>
+        </select>
+      </div>
+    </div>
+  </div>
+
+  <!-- Loading State -->
+  <div *ngIf="loading" class="loading-container">
+    <div class="loading-spinner"></div>
+    <p class="loading-text">Finding the best projects for you...</p>
+  </div>
+
+  <!-- Error State -->
+  <div *ngIf="error && !loading" class="error-container">
+    <div class="error-icon">⚠️</div>
+    <h3 class="error-title">Oops! Something went wrong</h3>
+    <p class="error-message">{{ error }}</p>
+    <button class="btn-retry" (click)="loadAllProjects()">
+      <span>🔄</span> Try Again
+    </button>
+  </div>
+
+  <!-- Empty State -->
+  <div *ngIf="!loading && !error && filteredProjects.length === 0" class="empty-container">
+    <div class="empty-illustration">
+      <div class="empty-icon">🔍</div>
+      <div class="empty-circle"></div>
+    </div>
+    <h3 class="empty-title">No Projects Found</h3>
+    <p class="empty-message">
+      We couldn't find any projects matching your criteria. Try adjusting your filters or check back later!
+    </p>
+    <button class="btn-reset" (click)="resetFilters()">
+      Reset Filters
+    </button>
+  </div>
+
+  <!-- Projects Grid -->
+  <div *ngIf="!loading && !error && filteredProjects.length > 0" class="projects-section">
+    <div class="section-header">
+      <h2 class="section-title">
+        <span class="title-icon">💼</span>
+        Available Projects
+      </h2>
+      <p class="section-subtitle">{{ filteredProjects.length }} project{{ filteredProjects.length !== 1 ? 's' : '' }} available</p>
+    </div>
+
+    <div class="projects-grid">
+      <div *ngFor="let project of filteredProjects" class="project-card" (click)="viewProject(project.id)">
+        <!-- Card Badge -->
+        <div class="card-badge" [class]="'badge-' + getStatusClass(project.status)">
+          <span class="badge-dot"></span>
+          {{ project.status }}
+        </div>
+
+        <!-- Card Header -->
+        <div class="card-header">
+          <div class="company-avatar">
+            {{ getCompanyInitials(project.companyName) }}
+          </div>
+          <div class="header-content">
+            <h3 class="project-title">{{ project.title }}</h3>
+            <p class="company-name">
+              <span class="company-icon">🏢</span>
+              {{ project.companyName || 'Company' }}
+            </p>
+          </div>
+        </div>
+
+        <!-- Card Body -->
+        <div class="card-body">
+          <p class="project-description">
+            {{ project.description || 'No description available' }}
+          </p>
+        </div>
+
+        <!-- Card Stats -->
+        <div class="card-stats">
+          <div class="stat-box">
+            <div class="stat-icon budget-icon">💰</div>
+            <div class="stat-info">
+              <span class="stat-label">Budget</span>
+              <span class="stat-value">{{ project.totalBudget | number:'1.0-0' }} TND</span>
+            </div>
+          </div>
+          
+          <div class="stat-box">
+            <div class="stat-icon deadline-icon">📅</div>
+            <div class="stat-info">
+              <span class="stat-label">Deadline</span>
+              <span class="stat-value">{{ project.deadline | date:'MMM d' }}</span>
+            </div>
+          </div>
+          
+          <div class="stat-box">
+            <div class="stat-icon milestone-icon">🎯</div>
+            <div class="stat-info">
+              <span class="stat-label">Milestones</span>
+              <span class="stat-value">{{ project.milestoneCount || 0 }}</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Card Footer -->
+        <div class="card-footer">
+          <button class="btn-apply">
+            <span class="btn-icon">👁️</span>
+            <span class="btn-text">View & Apply</span>
+            <span class="btn-arrow">→</span>
+          </button>
+        </div>
+
+        <!-- Hover Effect Overlay -->
+        <div class="card-overlay"></div>
+      </div>
+    </div>
+  </div>
+</div>

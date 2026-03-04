@@ -1,0 +1,106 @@
+<div class="my-projects-container">
+  <div class="page-header">
+    <div class="header-content">
+      <h1 class="page-title">💼 My Active Projects</h1>
+      <p class="page-subtitle">Projects you're currently working on</p>
+    </div>
+  </div>
+
+  <!-- Loading State -->
+  <div *ngIf="loading" class="loading-state">
+    <div class="spinner"></div>
+    <p>Loading your projects...</p>
+  </div>
+
+  <!-- Error State -->
+  <div *ngIf="error && !loading" class="error-state">
+    <span class="error-icon">⚠️</span>
+    <p>{{ error }}</p>
+    <button class="btn-retry" (click)="loadActiveProjects()">Retry</button>
+  </div>
+
+  <!-- Empty State -->
+  <div *ngIf="!loading && !error && activeProjects.length === 0" class="empty-state">
+    <span class="empty-icon">📂</span>
+    <h3>No Active Projects</h3>
+    <p>You don't have any active projects yet. Start by applying to available projects!</p>
+    <a routerLink="/projects" class="btn-primary">Browse Projects</a>
+  </div>
+
+  <!-- Projects Grid -->
+  <div *ngIf="!loading && !error && activeProjects.length > 0" class="projects-grid">
+    <div *ngFor="let project of activeProjects" class="project-card">
+      <!-- Card Header -->
+      <div class="card-header">
+        <h3 class="project-title">{{ project.title }}</h3>
+        <span class="status-badge" [class]="getStatusClass(project.status)">
+          {{ project.status.replace('_', ' ') }}
+        </span>
+      </div>
+
+      <!-- Card Body -->
+      <div class="card-body">
+        <!-- Project Description -->
+        <p class="project-description" *ngIf="project.description">
+          {{ project.description }}
+        </p>
+
+        <!-- Milestone Info -->
+        <div class="milestone-section" *ngIf="project.milestone">
+          <h4 class="section-title">📋 Current Milestone</h4>
+          <div class="milestone-info">
+            <p><strong>Title:</strong> {{ project.milestone.title }}</p>
+            <p><strong>Budget:</strong> {{ project.milestone.budget || 0 }} TND</p>
+            <p *ngIf="project.milestone.deadline">
+              <strong>Deadline:</strong> {{ project.milestone.deadline | date:'mediumDate' }}
+            </p>
+            <p *ngIf="project.milestone.description">
+              <strong>Description:</strong> {{ project.milestone.description }}
+            </p>
+          </div>
+
+          <!-- Progress Bar -->
+          <div class="progress-section">
+            <div class="progress-header">
+              <span>Progress</span>
+              <span class="progress-percentage">{{ getProgressPercentage(project.milestone) }}%</span>
+            </div>
+            <div class="progress-bar">
+              <div 
+                class="progress-fill" 
+                [style.width.%]="getProgressPercentage(project.milestone)"
+              ></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Application Info -->
+        <div class="application-section" *ngIf="project.application">
+          <h4 class="section-title">📝 Your Application</h4>
+          <div class="application-info">
+            <p><strong>Applied:</strong> {{ project.application.appliedAt | date:'short' }}</p>
+            <p *ngIf="project.application.proposedAmount">
+              <strong>Your Bid:</strong> {{ project.application.proposedAmount }} TND
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Card Footer -->
+      <div class="card-footer">
+        <button 
+          class="btn-action btn-view" 
+          (click)="viewProject(project.id)"
+        >
+          👁️ View Details
+        </button>
+        <button 
+          class="btn-action btn-submit" 
+          (click)="submitWork(project.id, project.milestone?.id)"
+        >
+          📤 Submit Work
+        </button>
+      </div>
+    </div>
+  </div>
+</div>

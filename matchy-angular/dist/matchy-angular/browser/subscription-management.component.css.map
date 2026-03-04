@@ -1,0 +1,7 @@
+{
+  "version": 3,
+  "sources": ["src/app/backoffice/subscription-management/subscription-management.component.scss"],
+  "sourcesContent": [".user-cell { display: flex; align-items: center; gap: 8px;\n  .avatar { width: 28px; height: 28px; border-radius: 50%; background: linear-gradient(135deg, var(--primary), var(--accent-secondary)); display: flex; align-items: center; justify-content: center; color: white; font-size: 11px; font-weight: 700; flex-shrink: 0; }\n}\n.amount-cell { font-weight: 600; color: var(--success); }\n"],
+  "mappings": ";AAAA,CAAA;AAAa,WAAA;AAAe,eAAA;AAAqB,OAAA;;AAC/C,CADF,UACE,CAAA;AAAU,SAAA;AAAa,UAAA;AAAc,iBAAA;AAAoB;IAAA;MAAA,MAAA;MAAA,IAAA,UAAA;MAAA,IAAA;AAA8E,WAAA;AAAe,eAAA;AAAqB,mBAAA;AAAyB,SAAA;AAAc,aAAA;AAAiB,eAAA;AAAkB,eAAA;;AAEvP,CAAA;AAAe,eAAA;AAAkB,SAAA,IAAA;;",
+  "names": []
+}

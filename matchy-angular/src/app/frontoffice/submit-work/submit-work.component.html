@@ -1,0 +1,120 @@
+<div class="submit-work-container">
+  <div class="page-header">
+    <h1 class="page-title">📤 Submit Work</h1>
+    <p class="page-subtitle">Upload your deliverables for review</p>
+  </div>
+
+  <div class="submit-form-card">
+    <form (ngSubmit)="submitWork()" #workForm="ngForm">
+      <!-- Project Selection -->
+      <div class="form-group">
+        <label for="project">Select Project *</label>
+        <select 
+          id="project" 
+          [(ngModel)]="selectedProjectId" 
+          name="project"
+          (change)="onProjectChange()"
+          required
+          class="form-control"
+        >
+          <option value="">-- Select a project --</option>
+          <option *ngFor="let project of activeProjects" [value]="project.id">
+            {{ project.title }}
+          </option>
+        </select>
+      </div>
+
+      <!-- Milestone Selection -->
+      <div class="form-group" *ngIf="selectedProjectId">
+        <label for="milestone">Select Milestone *</label>
+        <select 
+          id="milestone" 
+          [(ngModel)]="selectedMilestoneId" 
+          name="milestone"
+          required
+          class="form-control"
+        >
+          <option value="">-- Select a milestone --</option>
+          <option *ngFor="let milestone of milestones" [value]="milestone.id">
+            {{ milestone.title }} ({{ milestone.budget }} TND)
+          </option>
+        </select>
+      </div>
+
+      <!-- Work Description -->
+      <div class="form-group">
+        <label for="description">Work Description *</label>
+        <textarea 
+          id="description" 
+          [(ngModel)]="workDescription" 
+          name="description"
+          rows="6"
+          placeholder="Describe what you've completed, any challenges faced, and next steps..."
+          required
+          class="form-control"
+        ></textarea>
+      </div>
+
+      <!-- File URL -->
+      <div class="form-group">
+        <label for="fileUrl">Deliverable URL *</label>
+        <input 
+          type="url" 
+          id="fileUrl" 
+          [(ngModel)]="fileUrl" 
+          name="fileUrl"
+          placeholder="https://drive.google.com/... or https://github.com/..."
+          required
+          class="form-control"
+        />
+        <small class="form-hint">
+          Provide a link to your work (Google Drive, GitHub, Dropbox, etc.)
+        </small>
+      </div>
+
+      <!-- Notes -->
+      <div class="form-group">
+        <label for="notes">Additional Notes</label>
+        <textarea 
+          id="notes" 
+          [(ngModel)]="notes" 
+          name="notes"
+          rows="3"
+          placeholder="Any additional information for the client..."
+          class="form-control"
+        ></textarea>
+      </div>
+
+      <!-- Submit Button -->
+      <div class="form-actions">
+        <button 
+          type="button" 
+          class="btn-secondary" 
+          routerLink="/my-projects"
+        >
+          Cancel
+        </button>
+        <button 
+          type="submit" 
+          class="btn-primary" 
+          [disabled]="!workForm.valid || submitting"
+        >
+          <span *ngIf="!submitting">📤 Submit Work</span>
+          <span *ngIf="submitting">Submitting...</span>
+        </button>
+      </div>
+    </form>
+  </div>
+
+  <!-- Success Message -->
+  <div *ngIf="successMessage" class="success-message">
+    <span class="success-icon">✅</span>
+    <p>{{ successMessage }}</p>
+  </div>
+
+  <!-- Error Message -->
+  <div *ngIf="errorMessage" class="error-message">
+    <span class="error-icon">❌</span>
+    <p>{{ errorMessage }}</p>
+  </div>
+</div>
