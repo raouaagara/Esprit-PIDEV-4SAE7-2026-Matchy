@@ -1,0 +1,176 @@
+# ============================================
+# Matchy Angular + Spring Boot Project
+# ============================================
+
+# ============================================
+# Angular / Node.js
+# ============================================
+# Dependencies
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+package-lock.json
+yarn.lock
+
+# Angular build output
+dist/
+tmp/
+out-tsc/
+bazel-out/
+
+# Angular cache
+.angular/
+.sass-cache/
+
+# IDEs and editors
+.idea/
+.project
+.classpath
+.c9/
+*.launch
+.settings/
+*.sublime-workspace
+.vscode/*
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json
+.history/*
+
+# Miscellaneous
+.DS_Store
+Thumbs.db
+
+# ============================================
+# Java / Spring Boot / Maven
+# ============================================
+# Maven
+backend/target/
+backend/.mvn/
+backend/mvnw
+backend/mvnw.cmd
+backend/HELP.md
+
+eureka-server/target/
+eureka-server/.mvn/
+eureka-server/mvnw
+eureka-server/mvnw.cmd
+eureka-server/HELP.md
+
+api-gateway/target/
+api-gateway/.mvn/
+api-gateway/mvnw
+api-gateway/mvnw.cmd
+api-gateway/HELP.md
+
+# Gradle
+.gradle/
+build/
+!gradle/wrapper/gradle-wrapper.jar
+!**/src/main/**/build/
+!**/src/test/**/build/
+
+# Spring Boot
+*.log
+*.gz
+*.tmp
+
+# Java
+*.class
+*.jar
+*.war
+*.ear
+*.zip
+*.tar.gz
+*.rar
+hs_err_pid*
+
+# ============================================
+# Database
+# ============================================
+# MySQL
+*.sql.backup
+*.sql~
+
+# H2 Database
+*.db
+*.trace.db
+
+# ============================================
+# Environment & Configuration
+# ============================================
+# Environment files
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# Application properties (keep templates, ignore local overrides)
+# backend/src/main/resources/application-local.properties
+# backend/src/main/resources/application-dev.properties
+
+# ============================================
+# Operating System
+# ============================================
+# Windows
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+$RECYCLE.BIN/
+*.lnk
+
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+._*
+
+# Linux
+*~
+.directory
+.Trash-*
+
+# ============================================
+# Logs
+# ============================================
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+lerna-debug.log*
+.pnpm-debug.log*
+
+# ============================================
+# Testing
+# ============================================
+coverage/
+*.lcov
+.nyc_output/
+lib-cov/
+.grunt/
+.lock-wscript/
+
+# ============================================
+# Temporary files
+# ============================================
+*.swp
+*.swo
+*.tmp
+*.temp
+*~
+
+# ============================================
+# Documentation (optional - uncomment if needed)
+# ============================================
+# *.pdf
+# *.docx
+
+# ============================================
+# Keep these files
+# ============================================
+!.gitignore
+!README.md
+!.gitkeep
