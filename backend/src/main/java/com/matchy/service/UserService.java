@@ -2,8 +2,10 @@ package com.matchy.service;
 
 import com.matchy.entity.PasswordResetToken;
 import com.matchy.entity.User;
+import com.matchy.entity.Wallet;
 import com.matchy.repository.PasswordResetTokenRepository;
 import com.matchy.repository.UserRepository;
+import com.matchy.repository.WalletRepository;
 import com.matchy.security.JwtUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -14,11 +16,12 @@ import java.util.*;
 @Service
 public class UserService {
 
-    @Autowired private UserRepository userRepository;
-    @Autowired private BCryptPasswordEncoder passwordEncoder;
-    @Autowired private JwtUtil jwtUtil;
-    @Autowired private EmailService emailService;
+    @Autowired private UserRepository              userRepository;
+    @Autowired private BCryptPasswordEncoder       passwordEncoder;
+    @Autowired private JwtUtil                     jwtUtil;
+    @Autowired private EmailService                emailService;
     @Autowired private PasswordResetTokenRepository passwordResetTokenRepository;
+    @Autowired private WalletRepository            walletRepository; // ✅ nouveau
 
     public List<User> getAllUsers() { return userRepository.findAll(); }
     public Optional<User> getUserById(Long id) { return userRepository.findById(id); }
@@ -33,6 +36,10 @@ public class UserService {
 
         user.setPassword(passwordEncoder.encode(user.getPassword()));
         User saved = userRepository.save(user);
+
+        // ✅ Créer automatiquement un wallet pour chaque nouvel utilisateur
+        Wallet wallet = new Wallet(saved);
+        walletRepository.save(wallet);
 
         try {
             if (saved.getRole() == User.Role.FREELANCER) {
@@ -59,7 +66,10 @@ public class UserService {
         return userRepository.save(user);
     }
 
-    public void deleteUser(Long id) { userRepository.deleteById(id); }
+    public void deleteUser(Long id) {
+        walletRepository.deleteByUserId(id);
+        userRepository.deleteById(id);
+    }
 
     public User updateStatus(Long id, String status) {
         User user = userRepository.findById(id).orElseThrow(() -> new RuntimeException("User not found"));
@@ -94,23 +104,18 @@ public class UserService {
         return stats;
     }
 
-    // ── Forgot Password
     public void sendResetLink(String email) {
         Optional<User> userOpt = userRepository.findByEmail(email);
-        if (userOpt.isEmpty()) return; // Silencieux
-
+        if (userOpt.isEmpty()) return;
         String token = UUID.randomUUID().toString();
         passwordResetTokenRepository.save(new PasswordResetToken(token, email));
-
         String resetLink = "http://localhost:4200/backoffice/reset-password?token=" + token;
         emailService.sendResetPassword(email, userOpt.get().getFirstName(), resetLink);
     }
 
-    // ── Reset Password
     public boolean resetPassword(String token, String newPassword) {
         Optional<PasswordResetToken> tokenOpt = passwordResetTokenRepository.findByToken(token);
         if (tokenOpt.isEmpty() || tokenOpt.get().isExpired()) return false;
-
         String email = tokenOpt.get().getEmail();
         User user = userRepository.findByEmail(email).orElseThrow();
         user.setPassword(passwordEncoder.encode(newPassword));
