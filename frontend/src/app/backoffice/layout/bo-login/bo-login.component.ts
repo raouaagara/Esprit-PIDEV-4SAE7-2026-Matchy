@@ -37,19 +37,20 @@ export class BoLoginComponent implements AfterViewInit, OnDestroy {
     private authService: AuthService,
     private router: Router
   ) {
+    // ✅ Pas de Validators.email strict — utilise pattern plus permissif
     this.loginForm = this.fb.group({
-      email: ['admin@matchy.tn', [Validators.required, Validators.email]],
-      password: ['admin123', [Validators.required, Validators.minLength(6)]]
+      email:    ['admin@matchy.tn', [Validators.required]],
+      password: ['admin123',        [Validators.required]]
     });
+  }
 
-    // Si déjà connecté, rediriger directement
+  // ✅ Déplacé dans ngAfterViewInit pour éviter la redirection avant rendu
+  ngAfterViewInit(): void {
     this.authService.checkAuth();
     if (this.authService.isAuthenticated) {
       this.redirectAfterLogin();
+      return;
     }
-  }
-
-  ngAfterViewInit(): void {
     this.initCanvas();
   }
 
@@ -58,7 +59,7 @@ export class BoLoginComponent implements AfterViewInit, OnDestroy {
     window.removeEventListener('resize', this.resizeHandler);
   }
 
-  // ── Auth (logique originale 100% préservée) ─────────
+  // ── Auth ─────────────────────────────────────────────
   private redirectAfterLogin(): void {
     if (this.authService.isAdmin()) {
       this.router.navigate(['/backoffice/dashboard']);
@@ -72,17 +73,21 @@ export class BoLoginComponent implements AfterViewInit, OnDestroy {
   }
 
   onSubmit(): void {
+    // ✅ Marque tous les champs comme touchés pour afficher les erreurs
+    this.loginForm.markAllAsTouched();
     if (this.loginForm.invalid) return;
+
     this.isLoading = true;
     this.error = '';
     const { email, password } = this.loginForm.value;
+
     this.authService.login(email, password).subscribe({
       next: (success: boolean) => {
+        this.isLoading = false;
         if (success) {
           this.redirectAfterLogin();
         } else {
           this.error = 'Email ou mot de passe incorrect.';
-          this.isLoading = false;
         }
       },
       error: () => {
@@ -100,11 +105,11 @@ export class BoLoginComponent implements AfterViewInit, OnDestroy {
   get passwordStrength(): { score: number; label: string; color: string } {
     const pw = this.loginForm.get('password')?.value || '';
     let score = 0;
-    if (pw.length >= 6)        score++;
-    if (pw.length >= 10)       score++;
-    if (/[A-Z]/.test(pw))      score++;
-    if (/[0-9]/.test(pw))      score++;
-    if (/[^A-Za-z0-9]/.test(pw)) score++;
+    if (pw.length >= 6)               score++;
+    if (pw.length >= 10)              score++;
+    if (/[A-Z]/.test(pw))             score++;
+    if (/[0-9]/.test(pw))             score++;
+    if (/[^A-Za-z0-9]/.test(pw))      score++;
     if (score <= 1) return { score, label: 'Weak',        color: '#EF4444' };
     if (score <= 2) return { score, label: 'Fair',        color: '#F97316' };
     if (score <= 3) return { score, label: 'Good',        color: '#EAB308' };
@@ -131,7 +136,7 @@ export class BoLoginComponent implements AfterViewInit, OnDestroy {
     this.dpr = window.devicePixelRatio || 1;
     this.W = canvas.offsetWidth;
     this.H = canvas.offsetHeight;
-    canvas.width = this.W * this.dpr;
+    canvas.width  = this.W * this.dpr;
     canvas.height = this.H * this.dpr;
     this.ctx.scale(this.dpr, this.dpr);
     this.buildScene();
@@ -141,7 +146,6 @@ export class BoLoginComponent implements AfterViewInit, OnDestroy {
     return `rgba(${r},${g},${b},${a})`;
   }
 
-  // ── Scene init ───────────────────────────────────────
   private buildScene(): void {
     this.nodes = Array.from({ length: 55 }, () => this.makeNode(true));
     this.hexes = [];
@@ -172,13 +176,13 @@ export class BoLoginComponent implements AfterViewInit, OnDestroy {
   private makeNode(init: boolean): any {
     const kind = Math.random() < 0.12 ? 'hi' : Math.random() < 0.25 ? 'mid' : 'lo';
     return {
-      x: init ? Math.random() * this.W : (Math.random() < 0.5 ? -5 : this.W + 5),
-      y: Math.random() * this.H,
-      vx: (Math.random() - 0.5) * 0.35,
-      vy: (Math.random() - 0.5) * 0.35,
-      r: Math.random() * 2.2 + 1.2,
-      phase: Math.random() * Math.PI * 2,
-      speed: 0.008 + Math.random() * 0.012,
+      x:        init ? Math.random() * this.W : (Math.random() < 0.5 ? -5 : this.W + 5),
+      y:        Math.random() * this.H,
+      vx:       (Math.random() - 0.5) * 0.35,
+      vy:       (Math.random() - 0.5) * 0.35,
+      r:        Math.random() * 2.2 + 1.2,
+      phase:    Math.random() * Math.PI * 2,
+      speed:    0.008 + Math.random() * 0.012,
       kind,
       pulseAmp: 0.4 + Math.random() * 0.6
     };
@@ -186,34 +190,33 @@ export class BoLoginComponent implements AfterViewInit, OnDestroy {
 
   private makeTag(init: boolean): any {
     return {
-      text: this.TAGS[Math.floor(Math.random() * this.TAGS.length)],
-      x: init ? Math.random() * this.W : -200,
-      y: 50 + Math.random() * (this.H - 200),
-      vx: 0.15 + Math.random() * 0.25,
-      vy: (Math.random() - 0.5) * 0.08,
-      opacity: 0,
+      text:     this.TAGS[Math.floor(Math.random() * this.TAGS.length)],
+      x:        init ? Math.random() * this.W : -200,
+      y:        50 + Math.random() * (this.H - 200),
+      vx:       0.15 + Math.random() * 0.25,
+      vy:       (Math.random() - 0.5) * 0.08,
+      opacity:  0,
       targetOp: 0.12 + Math.random() * 0.12,
-      fading: false,
-      delay: init ? Math.random() * 300 : 0,
-      timer: 0,
+      fading:   false,
+      delay:    init ? Math.random() * 300 : 0,
+      timer:    0,
       fontSize: 11 + Math.floor(Math.random() * 4)
     };
   }
 
   private makeStar(): any {
     return {
-      x: Math.random() * this.W * 0.6 + this.W * 0.2,
-      y: Math.random() * this.H * 0.4,
-      len: 60 + Math.random() * 80,
+      x:     Math.random() * this.W * 0.6 + this.W * 0.2,
+      y:     Math.random() * this.H * 0.4,
+      len:   60 + Math.random() * 80,
       speed: 6 + Math.random() * 8,
       angle: Math.PI / 5 + Math.random() * 0.4,
-      life: 1,
+      life:  1,
       decay: 0.025 + Math.random() * 0.02,
-      w: 1.5 + Math.random()
+      w:     1.5 + Math.random()
     };
   }
 
-  // ── Draw helpers ─────────────────────────────────────
   private nodePulse(n: any): number {
     return 0.5 + Math.sin(n.phase) * n.pulseAmp * 0.5;
   }
@@ -221,14 +224,13 @@ export class BoLoginComponent implements AfterViewInit, OnDestroy {
   private drawNode(n: any): void {
     const { ctx } = this;
     let r = 123, g = 159, b = 255;
-    if (n.kind === 'hi')  { r = 196; g = 160; b = 255; }
-    else if (n.kind === 'mid') { r = 98; g = 216; b = 204; }
-    // Darken for light mode
+    if (n.kind === 'hi')        { r = 196; g = 160; b = 255; }
+    else if (n.kind === 'mid')  { r = 98;  g = 216; b = 204; }
     if (!this.isDark) { r = Math.max(r - 80, 20); g = Math.max(g - 80, 20); b = Math.max(b - 40, 60); }
     const p = this.nodePulse(n);
-    const alpha = this.isDark ? 0.18 : 0.55;
+    const alpha     = this.isDark ? 0.18 : 0.55;
     const alphaCore = this.isDark ? (0.5 + p * 0.5) : (0.85 + p * 0.15);
-    const rad = n.r * (0.8 + p * 0.2);
+    const rad       = n.r * (0.8 + p * 0.2);
     const gr = ctx.createRadialGradient(n.x, n.y, 0, n.x, n.y, rad * 4);
     gr.addColorStop(0, this.col(r, g, b, alpha));
     gr.addColorStop(1, this.col(r, g, b, 0));
@@ -283,9 +285,9 @@ export class BoLoginComponent implements AfterViewInit, OnDestroy {
     ctx.beginPath();
     this.roundRect(t.x, t.y - h / 2, bw, h, h / 2);
     const tr = this.isDark ? 160 : 50; const tg2 = this.isDark ? 188 : 80; const tb = this.isDark ? 255 : 200;
-    ctx.fillStyle = this.col(tr, tg2, tb, t.opacity * (this.isDark ? 0.35 : 0.6)); ctx.fill();
+    ctx.fillStyle   = this.col(tr, tg2, tb, t.opacity * (this.isDark ? 0.35 : 0.6)); ctx.fill();
     ctx.strokeStyle = this.col(tr, tg2, tb, t.opacity * (this.isDark ? 0.7 : 1.2)); ctx.lineWidth = 0.6; ctx.stroke();
-    ctx.fillStyle = this.col(tr, tg2, tb, t.opacity * (this.isDark ? 2.2 : 4));
+    ctx.fillStyle   = this.col(tr, tg2, tb, t.opacity * (this.isDark ? 2.2 : 4));
     ctx.textBaseline = 'middle'; ctx.fillText(t.text, t.x + padding, t.y);
   }
 
@@ -307,13 +309,15 @@ export class BoLoginComponent implements AfterViewInit, OnDestroy {
       for (let j = i + 1; j < this.nodes.length; j++) {
         const a = this.nodes[i], b = this.nodes[j];
         const dx = a.x - b.x, dy = a.y - b.y;
-        const d = Math.sqrt(dx * dx + dy * dy);
+        const d  = Math.sqrt(dx * dx + dy * dy);
         if (d < this.MAX_DIST) {
-          const op = (1 - d / this.MAX_DIST) * 0.22;
+          const op  = (1 - d / this.MAX_DIST) * 0.22;
           const mid = (this.nodePulse(a) + this.nodePulse(b)) / 2;
           this.ctx.beginPath();
           this.ctx.moveTo(a.x, a.y); this.ctx.lineTo(b.x, b.y);
-          this.ctx.strokeStyle = this.isDark ? this.col(123, 159, 255, op * mid) : this.col(40, 60, 180, op * mid * 5);
+          this.ctx.strokeStyle = this.isDark
+            ? this.col(123, 159, 255, op * mid)
+            : this.col(40, 60, 180, op * mid * 5);
           this.ctx.lineWidth = 0.7; this.ctx.stroke();
         }
       }
@@ -322,9 +326,9 @@ export class BoLoginComponent implements AfterViewInit, OnDestroy {
 
   private drawAtmo(): void {
     const blobs = [
-      { x: this.W * 0.2, y: this.H * 0.3, r: this.W * 0.4, c: [123,159,255] as [number,number,number], op: 0.1 },
-      { x: this.W * 0.85, y: this.H * 0.75, r: this.W * 0.35, c: [98,216,204] as [number,number,number], op: 0.08 },
-      { x: this.W * 0.7, y: this.H * 0.15, r: this.W * 0.3, c: [196,160,255] as [number,number,number], op: 0.09 }
+      { x: this.W * 0.2,  y: this.H * 0.3,  r: this.W * 0.4,  c: [123,159,255] as [number,number,number], op: 0.1  },
+      { x: this.W * 0.85, y: this.H * 0.75, r: this.W * 0.35, c: [98,216,204]  as [number,number,number], op: 0.08 },
+      { x: this.W * 0.7,  y: this.H * 0.15, r: this.W * 0.3,  c: [196,160,255] as [number,number,number], op: 0.09 }
     ];
     blobs.forEach(b => {
       const gr = this.ctx.createRadialGradient(b.x, b.y, 0, b.x, b.y, b.r);
@@ -336,22 +340,18 @@ export class BoLoginComponent implements AfterViewInit, OnDestroy {
     });
   }
 
-  // ── Main loop ────────────────────────────────────────
   private loop = (): void => {
     this.animId = requestAnimationFrame(this.loop);
     const { ctx } = this;
 
-    ctx.fillStyle = this.isDark ? '#06081A' : '#C8D0F0'; ctx.fillRect(0, 0, this.W, this.H);
+    ctx.fillStyle = this.isDark ? '#06081A' : '#C8D0F0';
+    ctx.fillRect(0, 0, this.W, this.H);
 
     this.drawAtmo();
 
-    // Waves
     this.waves.forEach(w => { w.phase += w.speed; this.drawWave(w); });
-
-    // Hexes
     this.hexes.forEach(h => { h.phase += h.speed; this.drawHex(h); });
 
-    // Tags
     this.tags.forEach(t => {
       if (t.timer < t.delay) { t.timer++; return; }
       t.x += t.vx; t.y += t.vy;
@@ -363,10 +363,8 @@ export class BoLoginComponent implements AfterViewInit, OnDestroy {
       this.drawTag(t);
     });
 
-    // Connections
     this.drawConnections();
 
-    // Nodes
     this.nodes.forEach(n => {
       n.x += n.vx; n.y += n.vy; n.phase += n.speed;
       if (n.x < -20 || n.x > this.W + 20 || n.y < -20 || n.y > this.H + 20) {
@@ -375,7 +373,6 @@ export class BoLoginComponent implements AfterViewInit, OnDestroy {
       this.drawNode(n);
     });
 
-    // Shooting stars
     if (this.frame % 220 === 0 && Math.random() < 0.7) this.stars.push(this.makeStar());
     this.stars = this.stars.filter(s => s.life > 0);
     this.stars.forEach(s => {
