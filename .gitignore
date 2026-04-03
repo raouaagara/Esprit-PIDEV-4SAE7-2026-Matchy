@@ -1,0 +1,18 @@
+# Maven
+target/
+*.jar
+*.war
+*.class
+
+# Test output
+test-output.txt
+
+# IDE
+.vscode/
+.idea/
+*.iml
+
+# Node / Angular
+node_modules/
+dist/
+.angular/cache/
