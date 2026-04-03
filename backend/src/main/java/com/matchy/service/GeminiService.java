@@ -12,7 +12,7 @@ import java.util.*;
 public class GeminiService {
 
     // ✅ Colle ta clé Groq ici
-    private static final String GROQ_API_KEY = "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";
+    private static final String GROQ_API_KEY = "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";
     private static final String GROQ_URL = "https://api.groq.com/openai/v1/chat/completions";
 
     private final RestTemplate restTemplate = new RestTemplate();
