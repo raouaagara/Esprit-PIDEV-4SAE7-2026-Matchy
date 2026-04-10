@@ -36,39 +36,28 @@ import { environment } from '../../../environments/environment';
             <div class="match-breakdown">
               <div class="breakdown-item">
                 <span class="breakdown-label">Skills</span>
-                <div class="breakdown-bar">
-                  <div class="breakdown-fill skills" [style.width.%]="(m.skillsScore / 40) * 100"></div>
-                </div>
+                <div class="breakdown-bar"><div class="breakdown-fill skills" [style.width.%]="(m.skillsScore / 40) * 100"></div></div>
                 <span class="breakdown-val">{{ m.skillsScore }}/40</span>
               </div>
               <div class="breakdown-item">
                 <span class="breakdown-label">Budget</span>
-                <div class="breakdown-bar">
-                  <div class="breakdown-fill budget" [style.width.%]="(m.budgetScore / 25) * 100"></div>
-                </div>
+                <div class="breakdown-bar"><div class="breakdown-fill budget" [style.width.%]="(m.budgetScore / 25) * 100"></div></div>
                 <span class="breakdown-val">{{ m.budgetScore }}/25</span>
               </div>
               <div class="breakdown-item">
                 <span class="breakdown-label">Experience</span>
-                <div class="breakdown-bar">
-                  <div class="breakdown-fill experience" [style.width.%]="(m.experienceScore / 20) * 100"></div>
-                </div>
+                <div class="breakdown-bar"><div class="breakdown-fill experience" [style.width.%]="(m.experienceScore / 20) * 100"></div></div>
                 <span class="breakdown-val">{{ m.experienceScore }}/20</span>
               </div>
               <div class="breakdown-item">
                 <span class="breakdown-label">Activity</span>
-                <div class="breakdown-bar">
-                  <div class="breakdown-fill activity" [style.width.%]="(m.activityScore / 15) * 100"></div>
-                </div>
+                <div class="breakdown-bar"><div class="breakdown-fill activity" [style.width.%]="(m.activityScore / 15) * 100"></div></div>
                 <span class="breakdown-val">{{ m.activityScore }}/15</span>
               </div>
             </div>
             <div class="match-footer">
-              <span class="recommendation-badge" [class]="getRecoClass(m.recommendation)">
-                {{ m.recommendation }}
-              </span>
-              <button class="btn-apply-match" (click)="openProposalModalById(m.freelancerId)"
-                [disabled]="alreadyApplied(m.freelancerId)">
+              <span class="recommendation-badge" [class]="getRecoClass(m.recommendation)">{{ m.recommendation }}</span>
+              <button class="btn-apply-match" (click)="openProposalModalById(m.freelancerId)" [disabled]="alreadyApplied(m.freelancerId)">
                 {{ alreadyApplied(m.freelancerId) ? '✅ Applied' : 'Apply Now' }}
               </button>
             </div>
@@ -90,6 +79,7 @@ import { environment } from '../../../environments/environment';
 
       <div class="project-grid" *ngIf="!isLoading">
         <div class="empty" *ngIf="filtered.length === 0">No projects found matching your criteria.</div>
+
         <div class="project-card" *ngFor="let p of filtered">
           <div class="card-top">
             <span class="category-tag">{{ p.category }}</span>
@@ -104,6 +94,62 @@ import { environment } from '../../../environments/environment';
             <span *ngIf="p.deadline">📅 Deadline: {{ p.deadline | date:'dd/MM/yyyy' }}</span>
             <span>📝 {{ p.proposalsCount || 0 }} proposals</span>
           </div>
+
+          <!-- ── PREDICT BUTTON ── -->
+          <button class="btn-predict" (click)="predictSuccess(p)" [disabled]="loadingPrediction.has(p.id!)">
+            <span class="btn-predict-icon">{{ loadingPrediction.has(p.id!) ? '⏳' : '🔮' }}</span>
+            {{ loadingPrediction.has(p.id!) ? 'Analyzing...' : 'Predict My Chances' }}
+          </button>
+
+          <!-- ── PREDICTION RESULT ── -->
+          <div class="prediction-result" *ngIf="predictions.has(p.id!)">
+
+            <!-- Header: ring + level -->
+            <div class="pred-header">
+              <div class="pred-score-wrap">
+                <svg class="pred-ring" viewBox="0 0 56 56" xmlns="http://www.w3.org/2000/svg">
+                  <circle cx="28" cy="28" r="24" fill="none" stroke="#e9ecef" stroke-width="5"/>
+                  <circle cx="28" cy="28" r="24" fill="none"
+                    [attr.stroke]="getPredictionColor(p.id!)"
+                    stroke-width="5" stroke-linecap="round"
+                    stroke-dasharray="150.8"
+                    [attr.stroke-dashoffset]="150.8 - (predictions.get(p.id!)!.finalScore / 100) * 150.8"
+                    transform="rotate(-90 28 28)"/>
+                </svg>
+                <div class="pred-score-text">
+                  <span class="pred-pct" [style.color]="getPredictionColor(p.id!)">
+                    {{ predictions.get(p.id!)!.finalScore }}%
+                  </span>
+                </div>
+              </div>
+              <div class="pred-level-wrap">
+                <span class="pred-level-badge" [ngClass]="getPredLevelClass(p.id!)">
+                  {{ getPredictionLevelEn(predictions.get(p.id!)!.predictionLevel) }}
+                </span>
+                <span class="pred-label">Success Prediction</span>
+              </div>
+            </div>
+
+            <!-- Score bars -->
+            <div class="pred-bars">
+              <div class="pred-bar-item" *ngFor="let bar of getPredBars(p.id!)">
+                <span class="pred-bar-label">{{ bar.label }}</span>
+                <div class="pred-bar-track">
+                  <div class="pred-bar-fill" [style.width]="bar.value + '%'" [style.background]="bar.color"></div>
+                </div>
+                <span class="pred-bar-val">{{ bar.value }}%</span>
+              </div>
+            </div>
+
+            <!-- Advice -->
+            <div class="pred-advice" *ngIf="predictions.get(p.id!)!.advice">
+              <span class="pred-advice-icon">💡</span>
+              <span>{{ translateAdvice(predictions.get(p.id!)!.advice) }}</span>
+            </div>
+
+          </div>
+
+          <!-- ── APPLY BUTTON ── -->
           <button class="btn-apply" (click)="openProposalModal(p)" [disabled]="alreadyApplied(p.id!)">
             {{ alreadyApplied(p.id!) ? '✅ Applied' : 'Apply Now' }}
           </button>
@@ -171,6 +217,8 @@ export class FlProjectsComponent implements OnInit {
   isGenerating = false;
   submitError = '';
   aiError = '';
+  predictions: Map<number, any> = new Map();
+  loadingPrediction: Set<number> = new Set();
   proposal = { coverLetter: '', proposedBudget: 0, deliveryTime: '' };
 
   private api = environment.apiUrl;
@@ -190,12 +238,9 @@ export class FlProjectsComponent implements OnInit {
 
     const userId = this.authService.currentUser?.id;
     if (userId) {
-      // Load applied proposals
       this.proposalService.getAll(undefined, userId).subscribe(proposals => {
         proposals.forEach(p => { if (p.projectId) this.appliedProjectIds.add(p.projectId); });
       });
-
-      // Load matching recommendations
       this.loadRecommendations(userId);
     }
   }
@@ -204,12 +249,11 @@ export class FlProjectsComponent implements OnInit {
     const headers = new HttpHeaders({ Authorization: `Bearer ${this.authService.getToken()}` });
     this.http.get<any[]>(`http://localhost:8081/api/matching/freelancer/${userId}`, { headers })
       .subscribe({
-        next: (data) => { this.recommendations = data.slice(0, 3); }, // top 3
+        next: (data) => { this.recommendations = data.slice(0, 3); },
         error: ()    => { this.recommendations = []; }
       });
   }
 
-  // Open modal for a recommendation card
   openProposalModalById(projectId: number): void {
     const project = this.projects.find(p => p.id === projectId);
     if (project) this.openProposalModal(project);
@@ -287,6 +331,7 @@ Requirements: 3-4 sentences, professional, mention relevant experience, write in
     });
   }
 
+  // ── Score / Reco helpers ──
   getScoreClass(score: number): string {
     if (score >= 75) return 'score-excellent';
     if (score >= 50) return 'score-good';
@@ -299,5 +344,80 @@ Requirements: 3-4 sentences, professional, mention relevant experience, write in
     if (reco === 'Good Match')      return 'reco-good';
     if (reco === 'Fair Match')      return 'reco-fair';
     return 'reco-low';
+  }
+
+  // ── Prediction ──
+  predictSuccess(project: Project): void {
+    const userId = this.authService.currentUser?.id;
+    if (!userId || !project.id) return;
+
+    this.loadingPrediction.add(project.id);
+    const headers = new HttpHeaders({ Authorization: `Bearer ${this.authService.getToken()}` });
+
+    this.http.post<any>(
+      `${this.api}/predictions/${userId}/${project.id}`, {},
+      { headers }
+    ).subscribe({
+      next: (data) => {
+        this.predictions.set(project.id!, data);
+        this.loadingPrediction.delete(project.id!);
+      },
+      error: () => { this.loadingPrediction.delete(project.id!); }
+    });
+  }
+
+  getPredictionColor(projectId: number): string {
+    const p = this.predictions.get(projectId);
+    if (!p) return '#667eea';
+    const lvl = (p.predictionLevel || '').toUpperCase();
+    if (lvl.includes('LEV') || lvl === 'ÉLEVÉ' || lvl === 'ELEVE') return '#22c55e';
+    if (lvl === 'MOYEN') return '#f59e0b';
+    return '#ef4444';
+  }
+
+  getPredLevelClass(projectId: number): string {
+    const p = this.predictions.get(projectId);
+    if (!p) return '';
+    const lvl = (p.predictionLevel || '').toUpperCase();
+    if (lvl.includes('LEV') || lvl === 'ÉLEVÉ' || lvl === 'ELEVE') return 'level-high';
+    if (lvl === 'MOYEN') return 'level-medium';
+    return 'level-low';
+  }
+
+  getPredictionLevelEn(level: string): string {
+    if (!level) return '';
+    const lvl = level.toUpperCase();
+    if (lvl.includes('LEV') || lvl === 'ÉLEVÉ' || lvl === 'ELEVE') return '🟢 HIGH';
+    if (lvl === 'MOYEN') return '🟡 MEDIUM';
+    return '🔴 LOW';
+  }
+
+  getPredBars(projectId: number): { label: string; value: number; color: string }[] {
+    const p = this.predictions.get(projectId);
+    if (!p) return [];
+    return [
+      { label: '🎯 Skills',       value: Math.round(p.skillsScore      ?? 0), color: '#6366f1' },
+      { label: '💼 Experience',   value: Math.round(p.experienceScore  ?? 0), color: '#f59e0b' },
+      { label: '⭐ Reputation',   value: Math.round(p.reputationScore  ?? 0), color: '#22c55e' },
+      { label: '📈 Success Rate', value: Math.round(p.successRateScore ?? 0), color: '#06b6d4' },
+    ];
+  }
+
+  translateAdvice(advice: string): string {
+    if (!advice) return '';
+    return advice
+      .replace(/Améliorez vos compétences pour correspondre aux exigences du projet\./g,
+        'Improve your skills to better match this project\'s requirements.')
+      .replace(/Complétez plus de projets pour augmenter votre expérience\./g,
+        'Complete more projects to build your experience.')
+      .replace(/Travaillez sur votre réputation en obtenant de meilleures évaluations\./g,
+        'Work on your reputation by getting better client reviews.')
+      .replace(/Excellent profil ! Vous avez de très bonnes chances de décrocher ce projet\./g,
+        'Excellent profile! You have very strong chances of landing this project.')
+      .replace(/Bon profil ! Rédigez une lettre de motivation convaincante pour augmenter vos chances\./g,
+        'Good profile! Write a compelling cover letter to boost your chances.')
+      .replace(/Continuez à améliorer votre profil avant de postuler à ce projet\./g,
+        'Keep improving your profile before applying to this project.')
+      .replace(/ \| /g, ' · ');
   }
 }
