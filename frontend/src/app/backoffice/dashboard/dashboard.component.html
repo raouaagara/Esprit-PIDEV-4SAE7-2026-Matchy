@@ -7,12 +7,6 @@
       <h1 class="page-title">Admin Dashboard</h1>
       <p class="page-sub">Global overview · real-time stats</p>
     </div>
-    <div class="h-right">
-      <div class="theme-toggle" [class.on]="!isDark" (click)="toggleTheme()">
-        <div class="tog-track"><div class="tog-knob"></div></div>
-        <span class="tog-label">{{ isDark ? 'DARK' : 'LIGHT' }}</span>
-      </div>
-    </div>
   </div>
 
   <!-- ══ SKELETON ══════════════════════════════════════════ -->
@@ -150,119 +144,6 @@
               </span>
             </div>
           </div>
-        </div>
-      </div>
-
-    </div>
-
-    <!-- ══ TABLES ROW ════════════════════════════════════ -->
-    <div class="tables-row">
-
-      <!-- Recent Users -->
-      <div class="tcard">
-        <div class="thead">
-          <div class="thead-l">
-            <span class="thead-ico">👤</span>
-            <span class="thead-title">Recent Users</span>
-            <span class="cbadge">{{ recentUsers.length }} results</span>
-          </div>
-          <div class="thead-r">
-            <div class="sinput-wrap">
-              <span class="sico">🔍</span>
-              <input class="sinput" placeholder="Search users..." [(ngModel)]="userSearch">
-            </div>
-            <button class="bexport">📄 CSV</button>
-            <button class="bexport">📊 Excel</button>
-          </div>
-        </div>
-
-        <div class="sort-strip">
-          <span class="sort-lbl">Sort by:</span>
-          <button class="sbtn"
-                  *ngFor="let btn of ['Date','Rating','Projects']"
-                  [class.active]="activeSortBtn === btn"
-                  (click)="setSort(btn)">{{ btn }}</button>
-        </div>
-
-        <div class="twrap">
-          <table>
-            <thead>
-              <tr>
-                <th>User</th><th>Email</th><th>Role</th>
-                <th>Status</th><th>Rating</th><th>Projects</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr *ngIf="recentUsers.length === 0">
-                <td colspan="6" class="empty-row">No users registered yet</td>
-              </tr>
-              <tr class="drow"
-                  *ngFor="let u of recentUsers; let i = index"
-                  [style.animation-delay]="(i*60+400)+'ms'">
-                <td class="ucell">
-                  <div class="av" [style.background]="avatarGrad(i)">{{ getInitial(u.name) }}</div>
-                  <span class="uname">{{ u.name }}</span>
-                </td>
-                <td class="uemail">{{ u.email }}</td>
-                <td><span class="badge b-role">{{ u.role }}</span></td>
-                <td>
-                  <span class="sdot" [class]="statusDotClass(u.status)"></span>
-                  {{ u.status }}
-                </td>
-                <td>{{ u.projects || 0 }}</td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
-      </div>
-
-      <!-- Top Freelancers -->
-      <div class="tcard">
-        <div class="thead">
-          <div class="thead-l">
-            <span class="thead-ico">🏆</span>
-            <span class="thead-title">Top Freelancers</span>
-            <span class="cbadge">{{ topFreelancers.length }} freelancers</span>
-          </div>
-          <div class="thead-r">
-            <div class="sinput-wrap">
-              <span class="sico">🔍</span>
-              <input class="sinput" placeholder="Search..." [(ngModel)]="freelancerSearch">
-            </div>
-            <button class="bexport">📄 CSV</button>
-            <button class="bexport">📊 Excel</button>
-          </div>
-        </div>
-
-        <div class="twrap">
-          <table>
-            <thead>
-              <tr>
-                <th>#</th><th>Freelancer</th><th>City</th>
-                <th>Projects</th><th>Badge</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr *ngIf="topFreelancers.length === 0">
-                <td colspan="6" class="empty-row">No freelancers yet</td>
-              </tr>
-              <tr class="drow"
-                  *ngFor="let f of topFreelancers; let i = index"
-                  [style.animation-delay]="(i*60+400)+'ms'">
-                <td><span class="rank">{{ rankLabel(i) }}</span></td>
-                <td class="ucell">
-                  <div class="av" [style.background]="avatarGrad(i)">{{ getInitial(f.name) }}</div>
-                  <span class="uname">{{ f.name }}</span>
-                </td>
-                <td class="uemail">{{ f.city || '—' }}</td>
-                <td>{{ f.projects || 0 }}</td>
-                <td>
-                  <span class="badge b-gold" *ngIf="f.badge">{{ f.badge }}</span>
-                  <span class="uemail" *ngIf="!f.badge">—</span>
-                </td>
-              </tr>
-            </tbody>
-          </table>
         </div>
       </div>
 
