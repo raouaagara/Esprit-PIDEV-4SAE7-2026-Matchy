@@ -879,3 +879,219 @@ app.put('/api/submissions/:id/status', async (req, res) => {
     res.status(500).json({ error: 'Failed to update submission' });
   }
 });
+
+
+// ============================================
+// ADVANCED FEATURES - AI MATCHING & PAYMENTS
+// ============================================
+
+import aiMatchingService from './ai-matching.service.js';
+import paymentService from './payment.service.js';
+import advancedSearchService from './advanced-search.service.js';
+
+// AI-Powered Freelancer Recommendations for Project
+app.get('/api/projects/:projectId/recommended-freelancers', async (req, res) => {
+  try {
+    const { projectId } = req.params;
+    const limit = parseInt(req.query.limit) || 10;
+    
+    const recommendations = await aiMatchingService.getRecommendedFreelancers(projectId, limit);
+    res.json(recommendations);
+  } catch (error) {
+    console.error('Error getting recommended freelancers:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// AI-Powered Project Recommendations for Freelancer
+app.get('/api/freelancers/:freelancerId/recommended-projects', async (req, res) => {
+  try {
+    const { freelancerId } = req.params;
+    const limit = parseInt(req.query.limit) || 10;
+    
+    const recommendations = await aiMatchingService.getRecommendedProjects(freelancerId, limit);
+    res.json(recommendations);
+  } catch (error) {
+    console.error('Error getting recommended projects:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// Create Payment (when work is approved)
+app.post('/api/payments', async (req, res) => {
+  try {
+    const { submission_id, company_id, amount, currency, payment_method, transaction_id } = req.body;
+    
+    const paymentId = await paymentService.createPayment(submission_id, {
+      company_id,
+      amount,
+      currency,
+      payment_method,
+      transaction_id
+    });
+    
+    res.json({ 
+      success: true, 
+      payment_id: paymentId,
+      message: 'Payment created successfully' 
+    });
+  } catch (error) {
+    console.error('Error creating payment:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// Process Payment
+app.post('/api/payments/:paymentId/process', async (req, res) => {
+  try {
+    const { paymentId } = req.params;
+    const result = await paymentService.processPayment(paymentId);
+    res.json(result);
+  } catch (error) {
+    console.error('Error processing payment:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// Get Freelancer Payment History
+app.get('/api/freelancers/:freelancerId/payments', async (req, res) => {
+  try {
+    const { freelancerId } = req.params;
+    const payments = await paymentService.getFreelancerPayments(freelancerId);
+    res.json(payments);
+  } catch (error) {
+    console.error('Error getting freelancer payments:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// Get Company Payment History
+app.get('/api/companies/:companyId/payments', async (req, res) => {
+  try {
+    const { companyId } = req.params;
+    const payments = await paymentService.getCompanyPayments(companyId);
+    res.json(payments);
+  } catch (error) {
+    console.error('Error getting company payments:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// Advanced Project Search
+app.post('/api/search/projects', async (req, res) => {
+  try {
+    const filters = req.body;
+    const results = await advancedSearchService.searchProjects(filters);
+    res.json(results);
+  } catch (error) {
+    console.error('Error searching projects:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// Advanced Freelancer Search
+app.post('/api/search/freelancers', async (req, res) => {
+  try {
+    const filters = req.body;
+    const results = await advancedSearchService.searchFreelancers(filters);
+    res.json(results);
+  } catch (error) {
+    console.error('Error searching freelancers:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// Save Search
+app.post('/api/saved-searches', async (req, res) => {
+  try {
+    const { user_id, user_type, name, query, filters, notify_on_match } = req.body;
+    
+    const searchId = await advancedSearchService.saveSearch(user_id, user_type, {
+      name,
+      query,
+      filters,
+      notifyOnMatch: notify_on_match
+    });
+    
+    res.json({ 
+      success: true, 
+      search_id: searchId,
+      message: 'Search saved successfully' 
+    });
+  } catch (error) {
+    console.error('Error saving search:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// Get Saved Searches
+app.get('/api/saved-searches/:userType/:userId', async (req, res) => {
+  try {
+    const { userId, userType } = req.params;
+    const searches = await advancedSearchService.getSavedSearches(userId, userType);
+    res.json(searches);
+  } catch (error) {
+    console.error('Error getting saved searches:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// Get Freelancer Profile
+app.get('/api/freelancer-profiles/:freelancerId', async (req, res) => {
+  try {
+    const [profiles] = await pool.query(
+      'SELECT * FROM freelancer_profiles WHERE freelancer_id = ?',
+      [req.params.freelancerId]
+    );
+    
+    if (profiles.length === 0) {
+      return res.status(404).json({ error: 'Freelancer profile not found' });
+    }
+    
+    res.json(profiles[0]);
+  } catch (error) {
+    console.error('Error getting freelancer profile:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// Create/Update Freelancer Profile
+app.post('/api/freelancer-profiles', async (req, res) => {
+  try {
+    const {
+      freelancer_id, freelancer_name, freelancer_email, skills,
+      experience_years, hourly_rate, availability, location, bio, portfolio_url
+    } = req.body;
+    
+    const [result] = await pool.query(`
+      INSERT INTO freelancer_profiles 
+      (freelancer_id, freelancer_name, freelancer_email, skills, experience_years, 
+       hourly_rate, availability, location, bio, portfolio_url)
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+      ON DUPLICATE KEY UPDATE
+        freelancer_name = VALUES(freelancer_name),
+        freelancer_email = VALUES(freelancer_email),
+        skills = VALUES(skills),
+        experience_years = VALUES(experience_years),
+        hourly_rate = VALUES(hourly_rate),
+        availability = VALUES(availability),
+        location = VALUES(location),
+        bio = VALUES(bio),
+        portfolio_url = VALUES(portfolio_url),
+        updated_at = NOW()
+    `, [
+      freelancer_id, freelancer_name, freelancer_email, JSON.stringify(skills),
+      experience_years, hourly_rate, availability, location, bio, portfolio_url
+    ]);
+    
+    res.json({ 
+      success: true, 
+      message: 'Freelancer profile saved successfully' 
+    });
+  } catch (error) {
+    console.error('Error saving freelancer profile:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+console.log('✅ Advanced features loaded: AI Matching, Payments, Advanced Search');
