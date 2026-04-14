@@ -202,7 +202,7 @@
         </div>
 
         <div class="app-actions" *ngIf="app.cvUrl">
-          <a [href]="app.cvUrl" target="_blank" class="btn-cv">📄 View CV/Portfolio</a>
+          <button (click)="viewCV(app.cvUrl)" class="btn-cv">📥 Download CV/Portfolio</button>
         </div>
 
         <div class="interview-section" *ngIf="app.interview">

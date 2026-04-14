@@ -26,6 +26,7 @@ import { MySubscriptionComponent } from './my-subscription/my-subscription.compo
 import { AvailableProjectsComponent } from './available-projects/available-projects.component';
 import { ProjectDetailsComponent } from './project-details/project-details.component';
 import { MyApplicationsComponent } from './my-applications/my-applications.component';
+import { AiRecommendationsComponent } from './ai-recommendations/ai-recommendations.component';
 
 @NgModule({
   declarations: [
@@ -46,7 +47,8 @@ import { MyApplicationsComponent } from './my-applications/my-applications.compo
     MySubscriptionComponent,
     AvailableProjectsComponent,
     ProjectDetailsComponent,
-    MyApplicationsComponent
+    MyApplicationsComponent,
+    AiRecommendationsComponent
   ],
   imports: [
     CommonModule,

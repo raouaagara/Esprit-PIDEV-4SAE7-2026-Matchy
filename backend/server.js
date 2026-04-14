@@ -9,7 +9,10 @@ const PORT = process.env.PORT || 9090;
 
 // CORS is handled by API Gateway, so we don't need it here
 // app.use(cors({ origin: true }));
-app.use(express.json());
+
+// Increase body size limit for file uploads (10MB)
+app.use(express.json({ limit: '10mb' }));
+app.use(express.urlencoded({ limit: '10mb', extended: true }));
 
 // MySQL Connection Pool
 const pool = mysql.createPool({

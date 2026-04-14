@@ -220,4 +220,73 @@ export class BoProjectsMilestonesComponent implements OnInit {
   getCompletedCount(): number {
     return this.projectsWithMilestones.filter(pw => pw.project.status === 'closed').length;
   }
+
+  viewCV(cvUrl: string): void {
+    console.log('Opening CV, URL length:', cvUrl.length);
+    console.log('URL starts with:', cvUrl.substring(0, 50));
+    
+    if (cvUrl.startsWith('data:')) {
+      // Base64 data - convert to blob and download
+      try {
+        // Extract mime type and base64 data
+        const matches = cvUrl.match(/^data:([^;]+);base64,(.+)$/);
+        if (!matches) {
+          console.error('Invalid data URL format');
+          alert('Invalid CV format. Please contact support.');
+          return;
+        }
+        
+        const mimeType = matches[1];
+        const base64Data = matches[2];
+        
+        console.log('MIME type:', mimeType);
+        console.log('Base64 data length:', base64Data.length);
+        
+        // Convert base64 to binary
+        const byteCharacters = atob(base64Data);
+        const byteNumbers = new Array(byteCharacters.length);
+        for (let i = 0; i < byteCharacters.length; i++) {
+          byteNumbers[i] = byteCharacters.charCodeAt(i);
+        }
+        const byteArray = new Uint8Array(byteNumbers);
+        
+        console.log('Byte array length:', byteArray.length);
+        
+        // Create blob
+        const blob = new Blob([byteArray], { type: mimeType });
+        console.log('Blob created, size:', blob.size, 'type:', blob.type);
+        
+        // Create download link
+        const blobUrl = URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = blobUrl;
+        
+        // Determine file extension
+        let extension = 'pdf';
+        if (mimeType.includes('pdf')) {
+          extension = 'pdf';
+        } else if (mimeType.includes('msword') || mimeType.includes('doc')) {
+          extension = 'doc';
+        } else if (mimeType.includes('wordprocessingml')) {
+          extension = 'docx';
+        }
+        
+        link.download = `CV_${Date.now()}.${extension}`;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        
+        // Clean up
+        setTimeout(() => URL.revokeObjectURL(blobUrl), 100);
+        
+        console.log('Download initiated');
+      } catch (error) {
+        console.error('Error downloading CV:', error);
+        alert('Unable to download CV. Error: ' + (error as Error).message);
+      }
+    } else {
+      // Regular URL - open directly
+      window.open(cvUrl, '_blank');
+    }
+  }
 }

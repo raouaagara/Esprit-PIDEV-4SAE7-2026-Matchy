@@ -13,6 +13,7 @@ import { MySubscriptionComponent } from './my-subscription/my-subscription.compo
 import { AvailableProjectsComponent } from './available-projects/available-projects.component';
 import { ProjectDetailsComponent } from './project-details/project-details.component';
 import { MyApplicationsComponent } from './my-applications/my-applications.component';
+import { AiRecommendationsComponent } from './ai-recommendations/ai-recommendations.component';
 
 const routes: Routes = [
   {
@@ -26,6 +27,7 @@ const routes: Routes = [
       { path: 'projects', component: AvailableProjectsComponent },
       { path: 'projects/:id', component: ProjectDetailsComponent },
       { path: 'my-applications', component: MyApplicationsComponent },
+      { path: 'ai-recommendations', component: AiRecommendationsComponent },
       { path: 'profile-settings', component: ProfileSettingsComponent },
       { path: 'projects-milestones', component: ProjectsMilestonesComponent },
       { path: 'subscription-management', component: SubscriptionManagementComponent },

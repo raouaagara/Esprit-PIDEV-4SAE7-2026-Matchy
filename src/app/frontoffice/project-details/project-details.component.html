@@ -160,12 +160,30 @@
       </div>
 
       <div class="form-group">
-        <label>CV/Portfolio URL</label>
-        <input 
-          type="url" 
-          [(ngModel)]="applicationForm.cvUrl" 
-          placeholder="https://your-portfolio.com or link to CV">
-        <small>Optional: Link to your CV, portfolio, or LinkedIn profile</small>
+        <label>Upload CV/Resume</label>
+        <div class="file-upload-wrapper">
+          <input 
+            type="file" 
+            id="cvFile"
+            accept=".pdf,.doc,.docx"
+            (change)="onCvFileSelected($event)"
+            #cvFileInput>
+          <label for="cvFile" class="file-upload-label">
+            <i class="fas fa-cloud-upload-alt"></i>
+            <span *ngIf="!selectedCvFile">Choose CV file (PDF, DOC, DOCX)</span>
+            <span *ngIf="selectedCvFile" class="file-selected">
+              <i class="fas fa-file-pdf"></i> {{ selectedCvFile.name }}
+            </span>
+          </label>
+          <button 
+            *ngIf="selectedCvFile" 
+            class="btn-remove-file" 
+            (click)="removeCvFile()"
+            type="button">
+            <i class="fas fa-times"></i>
+          </button>
+        </div>
+        <small>Optional: Upload your CV or resume (Max 5MB)</small>
       </div>
 
       <div class="form-group">
@@ -190,7 +208,12 @@
 
     <div class="modal-footer">
       <button class="btn-cancel" (click)="closeApplicationModal()">Cancel</button>
-      <button class="btn-submit" (click)="submitApplication()">Submit Application</button>
+      <button class="btn-submit" (click)="submitApplication()" [disabled]="isUploading">
+        <span *ngIf="!isUploading">Submit Application</span>
+        <span *ngIf="isUploading">
+          <i class="fas fa-spinner fa-spin"></i> Uploading...
+        </span>
+      </button>
     </div>
   </div>
 </div>
