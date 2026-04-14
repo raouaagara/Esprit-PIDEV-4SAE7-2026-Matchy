@@ -32,7 +32,7 @@ public class ChatService {
         // Fetch all events from DB to give the AI context
         List<Evenement> events = evenementRepository.findAll();
         String eventsContext = buildEventsContext(events);
-
+ 
         String systemPrompt = """
                 You are a helpful assistant for the Matchy platform — a freelance and event management platform.
                 You help users discover events, register for them, and answer questions about freelancing.
