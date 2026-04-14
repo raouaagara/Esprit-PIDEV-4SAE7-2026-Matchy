@@ -19,6 +19,7 @@ import { ProfileSettingsComponent } from './profile-settings/profile-settings.co
 import { ProjectsMilestonesComponent } from './projects-milestones/projects-milestones.component';
 import { SubscriptionManagementComponent } from './subscription-management/subscription-management.component';
 import { RegistrationModalComponent } from './events/registration-modal/registration-modal.component';
+import { ChatAssistantComponent } from './chat-assistant/chat-assistant.component';
 
 @NgModule({
   declarations: [
@@ -31,7 +32,8 @@ import { RegistrationModalComponent } from './events/registration-modal/registra
     ProfileSettingsComponent,
     ProjectsMilestonesComponent,
     SubscriptionManagementComponent,
-    RegistrationModalComponent
+    RegistrationModalComponent,
+    ChatAssistantComponent
   ],
   imports: [
     CommonModule,

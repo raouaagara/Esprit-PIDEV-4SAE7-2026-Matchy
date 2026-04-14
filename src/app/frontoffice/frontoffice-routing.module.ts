@@ -4,6 +4,7 @@ import { FoLayoutComponent } from './layout/fo-layout.component';
 import { HomeComponent } from './home/home.component';
 import { CoursesResourcesComponent } from './courses-resources/courses-resources.component';
 import { EventsComponent } from './events/events.component';
+import { ChatAssistantComponent } from './chat-assistant/chat-assistant.component';
 import { ProfileSettingsComponent } from './profile-settings/profile-settings.component';
 import { ProjectsMilestonesComponent } from './projects-milestones/projects-milestones.component';
 import { SubscriptionManagementComponent } from './subscription-management/subscription-management.component';
@@ -16,6 +17,7 @@ const routes: Routes = [
       { path: '', component: HomeComponent },
       { path: 'courses-resources', component: CoursesResourcesComponent },
       { path: 'events', component: EventsComponent },
+      { path: 'chat-assistant', component: ChatAssistantComponent },
       { path: 'profile-settings', component: ProfileSettingsComponent },
       { path: 'projects-milestones', component: ProjectsMilestonesComponent },
       { path: 'subscription-management', component: SubscriptionManagementComponent },

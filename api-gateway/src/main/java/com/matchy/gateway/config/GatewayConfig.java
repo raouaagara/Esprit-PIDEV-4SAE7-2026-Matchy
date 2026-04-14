@@ -45,6 +45,15 @@ public class GatewayConfig {
                                 .stripPrefix(0)
                                 .addRequestHeader("X-Gateway", "API-Gateway"))
                         .uri("lb://MATCHY-BACKEND"))
+
+                // Route for Chat AI
+                .route("chat-service", r -> r
+                        .path("/api/chat/**")
+                        .filters(f -> f
+                                .stripPrefix(0)
+                                .addRequestHeader("X-Gateway", "API-Gateway")
+                                .addResponseHeader("X-Powered-By", "Matchy-Gateway"))
+                        .uri("lb://MATCHY-BACKEND"))
                 
                 // Route for Actuator endpoints
                 .route("actuator", r -> r
