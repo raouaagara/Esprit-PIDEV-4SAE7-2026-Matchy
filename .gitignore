@@ -106,6 +106,8 @@ hs_err_pid*
 .env.development.local
 .env.test.local
 .env.production.local
+backend/.env
+**/application-local.properties
 
 # Application properties (keep templates, ignore local overrides)
 # backend/src/main/resources/application-local.properties
