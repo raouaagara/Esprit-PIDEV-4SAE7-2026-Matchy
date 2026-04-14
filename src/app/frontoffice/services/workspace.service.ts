@@ -2,6 +2,7 @@ import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable, interval } from 'rxjs';
 import { switchMap, startWith } from 'rxjs/operators';
+import { environment } from '../../../environments/environment';
 
 export interface TeamMember {
   freelancer_id: number;
@@ -41,7 +42,7 @@ export interface WorkSubmission {
   providedIn: 'root'
 })
 export class WorkspaceService {
-  private apiUrl = 'http://localhost:4000/api';
+  private apiUrl = environment.paymentsAdminBaseUrl;
 
   constructor(private http: HttpClient) {}
 

@@ -2,12 +2,13 @@ import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable, map } from 'rxjs';
 import { ProjectMilestone, MilestoneApplication, InterviewSchedule } from '../models/milestone.model';
+import { environment } from '../../../environments/environment';
 
 @Injectable({
   providedIn: 'root'
 })
 export class MilestonesService {
-  private apiUrl = 'http://localhost:4000/api';
+  private apiUrl = environment.paymentsAdminBaseUrl;
 
   constructor(private http: HttpClient) {}
 

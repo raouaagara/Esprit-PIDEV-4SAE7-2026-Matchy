@@ -2,11 +2,13 @@ import express from 'express';
 import cors from 'cors';
 import mysql from 'mysql2/promise';
 import { sendPaymentApprovalEmail, sendPaymentRejectedEmail } from './email.service.js';
+import eurekaClient from './eureka-client.js';
 
 const app = express();
-const PORT = process.env.PORT || 4000;
+const PORT = process.env.PORT || 9090;
 
-app.use(cors({ origin: true }));
+// CORS is handled by API Gateway, so we don't need it here
+// app.use(cors({ origin: true }));
 app.use(express.json());
 
 // MySQL Connection Pool
@@ -468,9 +470,10 @@ app.get('/api/health', (_req, res) => {
 // ============================================
 
 app.listen(PORT, () => {
-  console.log(`🚀 Matchy API Server running on http://localhost:${PORT}`);
+  console.log(`🚀 Matchy Backend Service running on http://localhost:${PORT}`);
   console.log(`📊 Database: matchy_db`);
   console.log(`✅ Ready to accept requests`);
+  console.log(`🔗 Registering with Eureka at http://localhost:8761`);
 });
 
 // ============================================
