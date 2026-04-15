@@ -10,7 +10,7 @@ export class ProposalService {
 
   constructor(private http: HttpClient) {}
 
-  getAll(projectId?: number, freelancerId?: number): Observable<Proposal[]> {
+  getAll(projectId?: string | number, freelancerId?: string | number): Observable<Proposal[]> {
     let params: any = {};
     if (projectId) params['projectId'] = projectId;
     if (freelancerId) params['freelancerId'] = freelancerId;
