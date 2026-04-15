@@ -10,7 +10,7 @@ export class ProjectService {
 
   constructor(private http: HttpClient) {}
 
-  getAll(status?: string, clientId?: number): Observable<Project[]> {
+  getAll(status?: string, clientId?: string | number): Observable<Project[]> {
     let params: any = {};
     if (status)   params['status']   = status;
     if (clientId) params['clientId'] = clientId;
