@@ -123,3 +123,33 @@
 @media (max-width: 768px) {
   .ps-grid { grid-template-columns: 1fr; }
 }
+
+.ps-error {
+  background: rgba(239,68,68,0.1);
+  border: 1px solid rgba(239,68,68,0.3);
+  border-radius: 8px;
+  padding: 12px 20px;
+  color: #dc2626;
+  font-size: 14px;
+  font-weight: 600;
+  width: fit-content;
+}
+
+.ps-form-row-2 {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+.ps-textarea {
+  min-height: 80px;
+  resize: vertical;
+  line-height: 1.5;
+}
+
+.req { color: var(--primary); }
+
+button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}

@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+﻿import { Component } from '@angular/core';
 
 @Component({
   selector: 'app-cl-layout',
@@ -8,6 +8,7 @@ import { Component } from '@angular/core';
       <main class="cl-content">
         <router-outlet></router-outlet>
       </main>
+      <app-client-chatbot></app-client-chatbot>
     </div>
   `,
   styles: [`
@@ -20,8 +21,9 @@ import { Component } from '@angular/core';
     }
     .cl-content {
       flex: 1;
-      padding: 28px 32px;
+      padding: 24px 32px;
       overflow-y: auto;
+      overflow-x: hidden;
     }
   `]
 })

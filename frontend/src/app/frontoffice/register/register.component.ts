@@ -20,6 +20,8 @@ export class RegisterComponent implements AfterViewInit, OnDestroy {
   isDark = true;
   error = '';
   showPassword = false;
+  captchaToken = '';
+  captchaWidgetId: number | null = null;
   form: FormGroup;
 
   // ── Canvas internals ─────────────────────────────────
@@ -62,6 +64,7 @@ export class RegisterComponent implements AfterViewInit, OnDestroy {
 
   ngAfterViewInit(): void {
     this.initCanvas();
+    this.initRecaptcha();
   }
 
   ngOnDestroy(): void {
@@ -73,11 +76,15 @@ export class RegisterComponent implements AfterViewInit, OnDestroy {
   selectRole(role: 'CLIENT' | 'FREELANCER'): void {
     this.selectedRole = role;
     this.step = 'form';
+    // The captcha container exists only in step "form".
+    // Render it after Angular updates the view.
+    setTimeout(() => this.renderRecaptcha(), 0);
   }
 
   goBackToRole(): void {
     this.step = 'role';
     this.error = '';
+    this.resetCaptcha();
   }
 
   togglePassword(): void {
@@ -89,13 +96,18 @@ export class RegisterComponent implements AfterViewInit, OnDestroy {
       this.form.markAllAsTouched();
       return;
     }
+    if (!this.captchaToken) {
+      this.error = 'Please complete captcha verification.';
+      return;
+    }
     this.isLoading = true;
     this.error = '';
 
     const payload = {
       ...this.form.value,
       role: this.selectedRole,
-      status: 'ACTIVE'
+      status: 'ACTIVE',
+      captchaToken: this.captchaToken
     };
 
     this.http.post<any>(`${environment.apiUrl}/auth/register`, payload).subscribe({
@@ -111,9 +123,65 @@ export class RegisterComponent implements AfterViewInit, OnDestroy {
       },
       error: (err: any) => {
         this.error = err?.error?.error || 'Registration failed. Email may already be in use.';
+        this.resetCaptcha();
         this.isLoading = false;
       }
     });
+  }
+
+  private initRecaptcha(): void {
+    this.loadRecaptchaScript().then(() => this.renderRecaptcha());
+  }
+
+  private loadRecaptchaScript(): Promise<void> {
+    return new Promise((resolve) => {
+      const w = window as any;
+      if (w.grecaptcha) {
+        resolve();
+        return;
+      }
+      const existing = document.querySelector('script[src*="google.com/recaptcha/api.js"]');
+      if (existing) {
+        existing.addEventListener('load', () => resolve(), { once: true });
+        return;
+      }
+
+      const script = document.createElement('script');
+      script.src = 'https://www.google.com/recaptcha/api.js?render=explicit';
+      script.async = true;
+      script.defer = true;
+      script.onload = () => resolve();
+      document.body.appendChild(script);
+    });
+  }
+
+  private renderRecaptcha(): void {
+    const w = window as any;
+    const el = document.getElementById('register-recaptcha');
+    if (!w.grecaptcha || !el || this.captchaWidgetId !== null) return;
+
+    this.captchaWidgetId = w.grecaptcha.render('register-recaptcha', {
+      sitekey: environment.recaptchaSiteKey,
+      callback: (token: string) => {
+        this.captchaToken = token;
+        this.error = '';
+      },
+      'expired-callback': () => {
+        this.captchaToken = '';
+      },
+      'error-callback': () => {
+        this.captchaToken = '';
+        this.error = 'Captcha could not be loaded. Please retry.';
+      }
+    });
+  }
+
+  private resetCaptcha(): void {
+    const w = window as any;
+    if (w.grecaptcha && this.captchaWidgetId !== null) {
+      w.grecaptcha.reset(this.captchaWidgetId);
+    }
+    this.captchaToken = '';
   }
 
   private redirectByRole(): void {

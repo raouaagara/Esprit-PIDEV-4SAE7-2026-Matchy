@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+﻿import { Component, OnInit } from '@angular/core';
 import { AuthService } from './core/services/auth.service';
 
 @Component({
@@ -8,9 +8,7 @@ import { AuthService } from './core/services/auth.service';
 })
 export class AppComponent implements OnInit {
   title = 'matchy-angular';
-
   constructor(private authService: AuthService) {}
-
   ngOnInit(): void {
     this.authService.checkAuth();
   }

@@ -1,7 +1,9 @@
 <div class="bo-page">
   <div class="bo-page-header">
     <div><h1>Profile Settings</h1><p>Manage admin account and platform settings</p></div>
-    <button class="btn-primary" (click)="save()">Save Changes</button>
+    <button class="btn-primary" (click)="save()" [disabled]="isSaving">
+      {{ isSaving ? 'Saving...' : 'Save Changes' }}
+    </button>
   </div>
 
   <div class="ps-grid">
@@ -9,21 +11,31 @@
     <div class="ps-card">
       <h3>Admin Profile</h3>
       <form [formGroup]="form">
-        <div class="ps-form-group">
-          <label>Full Name</label>
-          <input type="text" formControlName="name" class="ps-input" placeholder="Full Name">
+        <div class="ps-form-row-2">
+          <div class="ps-form-group">
+            <label>First Name <span class="req">*</span></label>
+            <input type="text" formControlName="firstName" class="ps-input" placeholder="First Name">
+          </div>
+          <div class="ps-form-group">
+            <label>Last Name <span class="req">*</span></label>
+            <input type="text" formControlName="lastName" class="ps-input" placeholder="Last Name">
+          </div>
         </div>
         <div class="ps-form-group">
-          <label>Email</label>
+          <label>Email <span class="req">*</span></label>
           <input type="email" formControlName="email" class="ps-input" placeholder="Email">
         </div>
         <div class="ps-form-group">
-          <label>Phone</label>
-          <input type="text" formControlName="phone" class="ps-input" placeholder="Phone">
+          <label>Location</label>
+          <input type="text" formControlName="location" class="ps-input" placeholder="e.g. Tunis, Tunisia">
         </div>
         <div class="ps-form-group">
-          <label>Role</label>
-          <input type="text" formControlName="role" class="ps-input" [attr.readonly]="true">
+          <label>Skills</label>
+          <input type="text" formControlName="skills" class="ps-input" placeholder="e.g. Management, Strategy">
+        </div>
+        <div class="ps-form-group">
+          <label>Bio</label>
+          <textarea formControlName="bio" class="ps-input ps-textarea" placeholder="Short bio..."></textarea>
         </div>
       </form>
     </div>
@@ -74,5 +86,6 @@
     </div>
   </div>
 
-  <div class="ps-success" *ngIf="saved">✅ Settings saved successfully!</div>
+  <div class="ps-success" *ngIf="saved">✅ Profile saved successfully!</div>
+  <div class="ps-error"   *ngIf="saveError">⚠️ {{ saveError }}</div>
 </div>
