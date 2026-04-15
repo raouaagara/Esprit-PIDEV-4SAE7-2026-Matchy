@@ -10,12 +10,16 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
@@ -45,14 +49,31 @@ public class SecurityConfig {
             .sessionManagement(s -> s.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
             .authorizeHttpRequests(auth -> auth
                 .requestMatchers("/api/auth/**").permitAll()
-                .requestMatchers("/api/users/**").permitAll()
-                .requestMatchers("/api/projects/**").permitAll()
-                .requestMatchers("/api/proposals/**").permitAll()
-                .requestMatchers("/api/notifications/**").permitAll()
-                .requestMatchers("/api/categories/**").permitAll()
                 .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
                 .requestMatchers("/h2-console/**").permitAll()
-                .anyRequest().permitAll()
+                // Public read endpoints to avoid breaking front pages
+                .requestMatchers(HttpMethod.GET, "/api/projects/**").permitAll()
+                .requestMatchers(HttpMethod.GET, "/api/categories/**").permitAll()
+                .requestMatchers(HttpMethod.GET, "/api/proposals/**").permitAll()
+                .requestMatchers(HttpMethod.GET, "/api/freelancers/**", "/api/availability/**", "/api/market/**", "/api/stats/**").permitAll()
+                .requestMatchers(HttpMethod.GET, "/api/notifications/**").authenticated()
+                .requestMatchers("/api/users/stats/dashboard", "/api/users/role/**").hasAuthority("ADMIN")
+                .requestMatchers(HttpMethod.DELETE, "/api/users/**").hasAuthority("ADMIN")
+                .requestMatchers("/api/users/**").authenticated()
+                .requestMatchers(HttpMethod.POST, "/api/categories/**").hasAuthority("ADMIN")
+                .requestMatchers(HttpMethod.PUT, "/api/categories/**").hasAuthority("ADMIN")
+                .requestMatchers(HttpMethod.PATCH, "/api/categories/**").hasAuthority("ADMIN")
+                .requestMatchers(HttpMethod.DELETE, "/api/categories/**").hasAuthority("ADMIN")
+                .requestMatchers(HttpMethod.POST, "/api/projects/**").hasAnyAuthority("CLIENT", "ADMIN")
+                .requestMatchers(HttpMethod.PUT, "/api/projects/**").hasAnyAuthority("CLIENT", "ADMIN")
+                .requestMatchers(HttpMethod.PATCH, "/api/projects/**").hasAnyAuthority("CLIENT", "ADMIN")
+                .requestMatchers(HttpMethod.DELETE, "/api/projects/**").hasAuthority("ADMIN")
+                .requestMatchers(HttpMethod.POST, "/api/proposals/**").hasAnyAuthority("FREELANCER", "ADMIN")
+                .requestMatchers(HttpMethod.PATCH, "/api/proposals/**").hasAnyAuthority("CLIENT", "ADMIN")
+                .requestMatchers(HttpMethod.DELETE, "/api/proposals/**").hasAnyAuthority("ADMIN", "FREELANCER")
+                .requestMatchers("/api/notifications/**").authenticated()
+                .requestMatchers("/api/matching/**", "/api/predictions/**", "/api/ai/**", "/api/chat/**", "/api/wallet/**", "/api/badges/**").authenticated()
+                .anyRequest().authenticated()
             )
             .headers(h -> h.frameOptions(f -> f.disable()))
             .addFilterBefore(jwtFilter(), UsernamePasswordAuthenticationFilter.class);
@@ -81,6 +102,16 @@ public class SecurityConfig {
 
                     if (jwtUtil.isValid(token)) {
                         Claims claims = jwtUtil.parseToken(token);
+                        String role = claims.get("role", String.class);
+
+                        UsernamePasswordAuthenticationToken authentication =
+                            new UsernamePasswordAuthenticationToken(
+                                claims.getSubject(),
+                                null,
+                                List.of(new SimpleGrantedAuthority(role))
+                            );
+                        authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(req));
+                        SecurityContextHolder.getContext().setAuthentication(authentication);
 
                         req.setAttribute("userId",    claims.getSubject());
                         req.setAttribute("userRole",  claims.get("role",      String.class));
@@ -88,6 +119,9 @@ public class SecurityConfig {
                         // ✅ Added firstName & lastName
                         req.setAttribute("firstName", claims.get("firstName", String.class));
                         req.setAttribute("lastName",  claims.get("lastName",  String.class));
+                    } else {
+                        res.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+                        return;
                     }
                 }
 
