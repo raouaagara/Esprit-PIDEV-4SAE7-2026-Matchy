@@ -14,7 +14,7 @@ export interface CategoryModel {
 
 @Injectable({ providedIn: 'root' })
 export class CategoryService {
-  private api = 'http://localhost:8081/api/categories';
+  private api = 'http://localhost:8080/api/categories';
 
   constructor(private http: HttpClient) {}
 
