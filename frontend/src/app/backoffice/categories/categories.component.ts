@@ -18,7 +18,7 @@ export interface Category {
 })
 export class CategoriesComponent implements OnInit {
 
-  private apiUrl = 'http://localhost:8081/api/categories';
+  private apiUrl = 'http://localhost:8080/api/categories';
 
   // ── Data
   categories: Category[] = [];
