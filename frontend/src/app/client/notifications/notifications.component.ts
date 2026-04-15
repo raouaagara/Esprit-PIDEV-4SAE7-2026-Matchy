@@ -1,77 +1,144 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, OnDestroy } from '@angular/core';
 import { AuthService } from '../../core/services/auth.service';
 import { NotificationService } from '../../core/services/notification.service';
+import { WebSocketService } from '../../core/services/websocket.service';
 import { Notification } from '../../core/models/models';
+import { Subscription } from 'rxjs';
 
 @Component({
   selector: 'app-notifications-page',
-  template: `
-    <div class="page">
-      <div class="page-header">
-        <div><h1 class="page-title">Notifications</h1><p class="page-sub">{{ unread }} unread messages</p></div>
-        <button class="btn-outline" (click)="markAllRead()" *ngIf="unread > 0">Mark all as read</button>
-      </div>
-
-      <div class="loading-state" *ngIf="isLoading"><div class="spinner"></div><span>Loading...</span></div>
-
-      <div class="notif-list" *ngIf="!isLoading">
-        <div class="empty" *ngIf="notifications.length === 0">🎉 No notifications</div>
-        <div class="notif-card" *ngFor="let n of notifications" [class.unread]="!n.read" (click)="markRead(n)">
-          <div class="notif-left">
-            <div class="notif-dot" [class.read]="n.read"></div>
-            <div class="notif-icon">{{ getIcon(n.type) }}</div>
-          </div>
-          <div class="notif-body">
-            <span class="notif-title">{{ n.title }}</span>
-            <span class="notif-msg">{{ n.message }}</span>
-            <span class="notif-time">{{ n.createdAt | date:'dd/MM/yyyy HH:mm' }}</span>
-          </div>
-          <div class="notif-actions">
-            <button class="btn-delete" (click)="deleteNotif($event, n.id!)">🗑</button>
-          </div>
-        </div>
-      </div>
-    </div>
-  `,
+  templateUrl: './notifications.component.html',
   styleUrls: ['./notifications.component.scss']
 })
-export class NotificationsPageComponent implements OnInit {
+export class NotificationsPageComponent implements OnInit, OnDestroy {
   notifications: Notification[] = [];
+  filtered: Notification[] = [];
   isLoading = true;
-  get unread() { return this.notifications.filter(n => !n.read).length; }
+  activeFilter: 'all' | 'unread' | 'read' = 'all';
+  private wsSub?: Subscription;
 
-  constructor(public authService: AuthService, private notifService: NotificationService) {}
+  get unreadCount() { return this.notifications.filter(n => !n.read).length; }
 
-  ngOnInit(): void { this.load(); }
+  constructor(
+    public authService: AuthService,
+    private notifService: NotificationService,
+    private wsService: WebSocketService
+  ) {}
+
+  ngOnInit(): void {
+    this.authService.checkAuth();
+    this.load();
+    const userId = String(this.authService.currentUser?.id || '');
+    if (userId) {
+      this.wsService.connect(userId);
+      this.wsSub = this.wsService.onNotification().subscribe(notif => {
+        this.notifications.unshift(notif);
+        this.applyFilter();
+      });
+    }
+  }
+
+  ngOnDestroy(): void { this.wsSub?.unsubscribe(); }
 
   load(): void {
     const userId = this.authService.currentUser?.id;
-    if (!userId) return;
+    if (!userId) { this.isLoading = false; return; }
     this.notifService.getForUser(userId).subscribe({
-      next: n => { this.notifications = n.sort((a, b) => (b.createdAt || '') > (a.createdAt || '') ? 1 : -1); this.isLoading = false; },
+      next: n => {
+        this.notifications = n.sort((a, b) =>
+          (b.createdAt || '') > (a.createdAt || '') ? 1 : -1);
+        this.applyFilter();
+        this.isLoading = false;
+      },
       error: () => { this.isLoading = false; }
     });
   }
 
+  setFilter(f: 'all' | 'unread' | 'read'): void {
+    this.activeFilter = f;
+    this.applyFilter();
+  }
+
+  private applyFilter(): void {
+    if (this.activeFilter === 'unread') this.filtered = this.notifications.filter(n => !n.read);
+    else if (this.activeFilter === 'read') this.filtered = this.notifications.filter(n => n.read);
+    else this.filtered = [...this.notifications];
+  }
+
   markRead(n: Notification): void {
     if (!n.read && n.id) {
-      this.notifService.markAsRead(n.id).subscribe(() => n.read = true);
+      this.notifService.markAsRead(n.id).subscribe(() => {
+        n.read = true;
+        this.applyFilter();
+      });
     }
   }
 
   markAllRead(): void {
     const userId = this.authService.currentUser?.id;
     if (!userId) return;
-    this.notifService.markAllAsRead(userId).subscribe(() => this.notifications.forEach(n => n.read = true));
+    this.notifService.markAllAsRead(userId).subscribe(() => {
+      this.notifications.forEach(n => n.read = true);
+      this.applyFilter();
+    });
   }
 
   deleteNotif(e: Event, id: number): void {
     e.stopPropagation();
-    this.notifService.delete(id).subscribe(() => this.notifications = this.notifications.filter(n => n.id !== id));
+    this.notifService.delete(id).subscribe(() => {
+      this.notifications = this.notifications.filter(n => n.id !== id);
+      this.applyFilter();
+    });
   }
 
   getIcon(type: string): string {
-    const icons: any = { PROPOSAL: '📝', PROJECT: '📁', MESSAGE: '💬', SYSTEM: '⚙️', PAYMENT: '💰', REVIEW: '⭐' };
-    return icons[type] || '🔔';
+    const m: Record<string, string> = {
+      PROJECT_CREATED:   '🚀',
+      PROPOSAL_RECEIVED: '📝',
+      PROPOSAL_ACCEPTED: '🎉',
+      PROPOSAL_REJECTED: '❌',
+      DEADLINE_REMINDER: '⏰',
+      NEW_MESSAGE:       '💬',
+      SYSTEM:            '⚙️',
+    };
+    return m[type] || '🔔';
+  }
+
+  getTypeClass(type: string): string {
+    const m: Record<string, string> = {
+      PROJECT_CREATED:   'type-info',
+      PROPOSAL_RECEIVED: 'type-info',
+      PROPOSAL_ACCEPTED: 'type-success',
+      PROPOSAL_REJECTED: 'type-error',
+      DEADLINE_REMINDER: 'type-warning',
+      NEW_MESSAGE:       'type-info',
+      SYSTEM:            'type-warning',
+    };
+    return m[type] || 'type-info';
+  }
+
+  getTypeLabel(type: string): string {
+    const m: Record<string, string> = {
+      PROJECT_CREATED:   'New Project',
+      PROPOSAL_RECEIVED: 'New Proposal',
+      PROPOSAL_ACCEPTED: 'Accepted',
+      PROPOSAL_REJECTED: 'Rejected',
+      DEADLINE_REMINDER: 'Deadline',
+      NEW_MESSAGE:       'Message',
+      SYSTEM:            'System',
+    };
+    return m[type] || 'Notification';
+  }
+
+  timeAgo(dateStr: string | undefined): string {
+    if (!dateStr) return '';
+    const diff = Date.now() - new Date(dateStr).getTime();
+    const m = Math.floor(diff / 60000);
+    if (m < 1) return 'Just now';
+    if (m < 60) return `${m}m ago`;
+    const h = Math.floor(m / 60);
+    if (h < 24) return `${h}h ago`;
+    const d = Math.floor(h / 24);
+    return `${d}d ago`;
   }
 }
