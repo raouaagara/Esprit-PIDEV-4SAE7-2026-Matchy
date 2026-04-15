@@ -1,5 +1,5 @@
 import { Component, OnInit, ViewChild } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Router } from '@angular/router';
 import { AuthService } from '../../core/services/auth.service';
 import { ProjectService } from '../../core/services/project.service';
@@ -41,6 +41,32 @@ import { environment } from '../../../environments/environment';
           <div class="ai-error" *ngIf="aiError">⚠️ {{ aiError }}</div>
         </div>
         <input class="form-input" placeholder="Required skills (comma separated)" [(ngModel)]="skillsInput">
+        <div class="prediction-trigger" *ngIf="newProject.category">
+          <button class="btn-predict" (click)="loadPrediction()" [disabled]="isPredicting">
+            {{ isPredicting ? 'Calculating...' : 'Suggest Budget and Deadline' }}
+          </button>
+        </div>
+        <div class="ai-error" *ngIf="predictionError">⚠️ {{ predictionError }}</div>
+        <div class="prediction-card" *ngIf="prediction && prediction.budget && prediction.deadline && !isPredicting">
+          <div class="prediction-section">
+            <b>Budget</b> {{ prediction.budget.confidence }}
+            <div class="prediction-stats">
+              <span>Min: {{ prediction.budget.min }} TND</span>
+              <span>Recommended: {{ prediction.budget.recommended }} TND</span>
+              <span>Max: {{ prediction.budget.max }} TND</span>
+            </div>
+            <button class="btn-apply" (click)="applyBudget()">Apply Budget</button>
+          </div>
+          <div class="prediction-section">
+            <b>Deadline</b> {{ prediction.deadline.confidence }}
+            <div class="prediction-stats">
+              <span>Min: {{ prediction.deadline.minDays }}d</span>
+              <span>Recommended: {{ prediction.deadline.recommendedDays }}d</span>
+              <span>Max: {{ prediction.deadline.maxDays }}d</span>
+            </div>
+            <button class="btn-apply" (click)="applyDeadline()">Apply Deadline</button>
+          </div>
+        </div>
         <div class="form-actions">
           <button class="btn-primary" (click)="createProject()" [disabled]="isCreating">
             {{ isCreating ? 'Creating...' : 'Post Project' }}
@@ -113,6 +139,7 @@ import { environment } from '../../../environments/environment';
 
           <div class="card-actions">
             <button class="btn-sm" (click)="viewProposals(p.id!)">View Proposals</button>
+            <button class="btn-sm" (click)="openEditModal(p)" *ngIf="p.status === 'OPEN' || p.status === 'DRAFT'">Edit</button>
 
             <!-- 🔒 Escrow Payment — visible for IN_PROGRESS or DELIVERED -->
             <button class="btn-sm btn-pay-escrow"
@@ -214,6 +241,27 @@ import { environment } from '../../../environments/environment';
       (done)="onPaymentDone()"
       #paymentModal
     ></app-payment-modal>
+
+    <div class="modal-backdrop" *ngIf="showEditModal" (click)="closeEditModal()">
+      <div class="modal-box" (click)="$event.stopPropagation()">
+        <div class="modal-header">
+          <div class="modal-title"><span class="modal-icon">✏️</span><div><h3>Edit Project</h3><p>{{ editingProject?.title }}</p></div></div>
+          <button class="modal-close" (click)="closeEditModal()">✕</button>
+        </div>
+        <div class="modal-body">
+          <input class="form-input" placeholder="Project title *" [(ngModel)]="editProject.title">
+          <input class="form-input" type="number" placeholder="Budget (TND)" [(ngModel)]="editProject.budget">
+          <input class="form-input" type="date" [(ngModel)]="editProject.deadline">
+          <textarea class="form-input form-textarea" placeholder="Description" [(ngModel)]="editProject.description"></textarea>
+        </div>
+        <div class="modal-footer">
+          <button class="btn-cancel-revision" (click)="closeEditModal()">Cancel</button>
+          <button class="btn-confirm-modal" (click)="saveProjectEdit()" [disabled]="isSavingEdit">
+            {{ isSavingEdit ? 'Saving...' : 'Save Changes' }}
+          </button>
+        </div>
+      </div>
+    </div>
   `,
   styleUrls: ['./projects.component.scss']
 })
@@ -244,6 +292,10 @@ export class ClProjectsComponent implements OnInit {
   selectedProject:   any = null;
   showRevisionInput  = false;
   revisionMessage    = '';
+  showEditModal      = false;
+  isSavingEdit       = false;
+  editingProject: Project | null = null;
+  editProject: Partial<Project> = {};
 
   @ViewChild('paymentModal') paymentModalRef: any;
 
@@ -288,8 +340,18 @@ export class ClProjectsComponent implements OnInit {
     this.http.post<{ description: string }>(`${this.api}/ai/generate-description`, {
       title: this.newProject.title, category: this.newProject.category || ''
     }).subscribe({
-      next: (res) => { this.newProject.description = res.description; this.isGenerating = false; },
-      error: (err: any) => { this.aiError = err?.error?.error || 'Failed to generate.'; this.isGenerating = false; }
+      next: (res) => {
+        const text = String(res?.description ?? '');
+        const aiFailed = /erreur|unexpected|inattendue/i.test(text) || !text.trim();
+        this.newProject.description = aiFailed ? '' : text;
+        this.aiError = aiFailed ? 'Groq could not generate a description right now. Please retry.' : '';
+        this.isGenerating = false;
+      },
+      error: (_err: any) => {
+        this.newProject.description = '';
+        this.aiError = 'Groq service unavailable. Please retry.';
+        this.isGenerating = false;
+      }
     });
   }
 
@@ -299,6 +361,107 @@ export class ClProjectsComponent implements OnInit {
     this.filtered = this.activeFilter === 'ALL'
       ? this.projects
       : this.projects.filter(p => p.status === this.activeFilter);
+  }
+
+  prediction: any = null;
+  isPredicting = false;
+  predictionError = '';
+
+  private buildLocalPrediction(category: string, skills: string[]): any {
+    const byCategory: Record<string, { budget: number; days: number }> = {
+      'web development': { budget: 900, days: 18 },
+      'mobile development': { budget: 1200, days: 24 },
+      'design': { budget: 500, days: 10 },
+      'marketing': { budget: 450, days: 12 },
+      'writing': { budget: 280, days: 7 },
+      'data': { budget: 800, days: 16 },
+      'ai': { budget: 1400, days: 26 }
+    };
+    const key = String(category || '').toLowerCase().trim();
+    const base = byCategory[key] ?? { budget: 700, days: 14 };
+    const skillFactor = Math.max(0, Math.min(6, skills.length)) * 0.08;
+    const knownCategory = !!byCategory[key];
+    const confidence: 'HIGH' | 'MEDIUM' | 'LOW' =
+      knownCategory && skills.length >= 3 ? 'HIGH' :
+      (knownCategory || skills.length >= 1) ? 'MEDIUM' : 'LOW';
+
+    const factors = confidence === 'HIGH'
+      ? { budgetMin: 0.9, budgetMax: 1.12, daysMin: 0.88, daysMax: 1.18 }
+      : confidence === 'LOW'
+      ? { budgetMin: 0.75, budgetMax: 1.35, daysMin: 0.7, daysMax: 1.45 }
+      : { budgetMin: 0.85, budgetMax: 1.2, daysMin: 0.8, daysMax: 1.3 };
+
+    const recBudget = Math.round(base.budget * (1 + skillFactor));
+    const minBudget = Math.max(100, Math.round(recBudget * factors.budgetMin));
+    const maxBudget = Math.round(recBudget * factors.budgetMax);
+    const recDays = Math.max(3, Math.round(base.days * (1 + skillFactor * 0.7)));
+    const minDays = Math.max(2, Math.round(recDays * factors.daysMin));
+    const maxDays = Math.round(recDays * factors.daysMax);
+
+    return {
+      budget: {
+        min: minBudget,
+        max: maxBudget,
+        average: recBudget,
+        median: recBudget,
+        recommended: recBudget,
+        confidence,
+        basedOn: 0,
+        message: 'Estimated from category and required skills.'
+      },
+      deadline: {
+        minDays,
+        maxDays,
+        medianDays: recDays,
+        recommendedDays: recDays,
+        onTimeRate: 0.8,
+        confidence,
+        basedOn: 0,
+        message: 'Estimated from category and required skills.'
+      }
+    };
+  }
+
+  loadPrediction() {
+    this.isPredicting = true;
+    this.prediction = null;
+    this.predictionError = '';
+    const skills = this.skillsInput ? this.skillsInput.split(",").map((s: string) => s.trim()) : [];
+    const headers = new HttpHeaders({ Authorization: `Bearer ${this.authService.getToken()}` });
+    this.http.get<any>(
+      `${this.api}/predictions/all?category=${encodeURIComponent(String(this.newProject.category ?? ''))}&skills=${encodeURIComponent(skills.join(","))}`,
+      { headers }
+    ).subscribe({
+      next: (data) => {
+        if (!data?.budget || !data?.deadline) {
+          this.prediction = this.buildLocalPrediction(String(this.newProject.category ?? ''), skills);
+          this.predictionError = 'Prediction service unavailable. Showing smart local estimate.';
+        } else {
+          this.prediction = data;
+          // Auto-fill recommended values so budget/deadline are saved in DB.
+          this.applyBudget();
+          this.applyDeadline();
+        }
+        this.isPredicting = false;
+      },
+      error: () => {
+        this.prediction = this.buildLocalPrediction(String(this.newProject.category ?? ''), skills);
+        this.predictionError = 'Prediction service unavailable. Showing smart local estimate.';
+        this.isPredicting = false;
+      }
+    });
+  }
+
+  applyBudget() {
+    if (this.prediction) this.newProject.budget = this.prediction.budget.recommended;
+  }
+
+  applyDeadline() {
+    if (this.prediction) {
+      const d = new Date();
+      d.setDate(d.getDate() + this.prediction.deadline.recommendedDays);
+      this.newProject.deadline = d.toISOString().split("T")[0];
+    }
   }
 
   createProject(): void {
@@ -410,5 +573,42 @@ export class ClProjectsComponent implements OnInit {
       DRAFT:       'status-draft'
     };
     return m[s] || '';
+  }
+
+  openEditModal(project: Project): void {
+    this.editingProject = project;
+    this.editProject = {
+      title: project.title,
+      description: project.description,
+      budget: project.budget,
+      deadline: project.deadline,
+      category: project.category,
+      budgetType: project.budgetType,
+      requiredSkills: project.requiredSkills,
+      duration: project.duration,
+      experienceLevel: project.experienceLevel
+    };
+    this.showEditModal = true;
+  }
+
+  closeEditModal(): void {
+    this.showEditModal = false;
+    this.editingProject = null;
+    this.editProject = {};
+  }
+
+  saveProjectEdit(): void {
+    if (!this.editingProject?.id) return;
+    this.isSavingEdit = true;
+    this.projectService.update(this.editingProject.id, this.editProject).subscribe({
+      next: () => {
+        this.isSavingEdit = false;
+        this.closeEditModal();
+        this.load();
+      },
+      error: () => {
+        this.isSavingEdit = false;
+      }
+    });
   }
 }
