@@ -22,16 +22,43 @@ export class AuthService {
     const token = localStorage.getItem(this.TOKEN_KEY);
     const user  = localStorage.getItem(this.USER_KEY);
     if (token && user) {
-      this.currentUser = JSON.parse(user);
+      const parsed = JSON.parse(user);
+      // Toujours extraire l'ID depuis le JWT pour éviter l'overflow JavaScript
+      const jwtId = this.extractIdFromJwt(token);
+      if (jwtId) {
+        parsed.id = jwtId;
+        // Réécrire dans localStorage avec l'ID corrigé
+        localStorage.setItem(this.USER_KEY, JSON.stringify(parsed));
+      }
+      this.currentUser = parsed;
       this.isAuthenticated = true;
     }
+  }
+
+  // Extrait le "sub" du JWT sans JSON.parse (qui corrompt les Long Java)
+  private extractIdFromJwt(token: string): string | null {
+    try {
+      const parts = token.split('.');
+      if (parts.length !== 3) return null;
+      // Décoder le payload en string brute SANS JSON.parse
+      const raw = atob(parts[1].replace(/-/g, '+').replace(/_/g, '/'));
+      // Extraire "sub":"..." avec une regex pour éviter JSON.parse
+      const match = raw.match(/"sub"\s*:\s*"?(\d+)"?/);
+      return match ? match[1] : null;
+    } catch { return null; }
   }
 
   login(email: string, password: string): Observable<boolean> {
     return this.http.post<AuthResponse>(`${environment.apiUrl}/auth/login`, { email, password }).pipe(
       map(res => {
         localStorage.setItem(this.TOKEN_KEY, res.token);
-        const user = { ...res.user, name: `${res.user.firstName} ${res.user.lastName}` };
+        // Extraire l'ID depuis le JWT pour éviter l'overflow JavaScript
+        const jwtId = this.extractIdFromJwt(res.token);
+        const user = {
+          ...res.user,
+          id:   jwtId || String(res.user.id),
+          name: `${res.user.firstName} ${res.user.lastName}`
+        };
         localStorage.setItem(this.USER_KEY, JSON.stringify(user));
         this.currentUser = user;
         this.isAuthenticated = true;
@@ -55,6 +82,12 @@ export class AuthService {
   isAdmin():      boolean { return this.currentUser?.role === 'ADMIN'; }
   isClient():     boolean { return this.currentUser?.role === 'CLIENT'; }
   isFreelancer(): boolean { return this.currentUser?.role === 'FREELANCER'; }
+
+  getCurrentUserId(): string | null {
+    const user = localStorage.getItem(this.USER_KEY);
+    if (!user) return null;
+    return JSON.parse(user)?.id || null;
+  }
 
   forgotPassword(email: string): Observable<any> {
     return this.http.post(`${environment.apiUrl}/auth/forgot-password`, { email });
