@@ -11,7 +11,7 @@
 <!-- ══════════════════════════════════════
      CHAT WINDOW
 ══════════════════════════════════════ -->
-<div class="chat-window" [class.visible]="isOpen" role="dialog" aria-label="Matchy AI Support">
+<div class="chat-window visible" *ngIf="isOpen" role="dialog" aria-label="Matchy AI Support">
 
   <!-- HEADER -->
   <div class="cw-header">
