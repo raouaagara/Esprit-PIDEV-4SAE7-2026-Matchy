@@ -1,5 +1,5 @@
 export interface User {
-  id?: number;
+  id?: string | number;  // string | number pour compatibilité avec les Long Java
   firstName?: string;
   lastName?: string;
   name: string; // computed: firstName + lastName
@@ -53,20 +53,52 @@ export interface Proposal {
   projectTitle?: string;
   clientId?: number;
   clientEmail?: string;
-  freelancerId?: number;
+  freelancerId?: string | number;
   freelancerName?: string;
   freelancerEmail?: string;
   coverLetter?: string;
   proposedBudget?: number;
   deliveryTime?: string;
-  status: 'PENDING' | 'ACCEPTED' | 'REJECTED' | 'WITHDRAWN';
+  status: 'PENDING' | 'ACCEPTED' | 'REJECTED' | 'WITHDRAWN' | 'COMPLETED';
   clientFeedback?: string;
   createdAt?: string;
 }
 
+export interface ProposalCategoryAnalytics {
+  category: string;
+  total: number;
+  accepted: number;
+  acceptanceRate: number;
+}
+
+export interface ProposalPerformanceAnalytics {
+  totalProposals: number;
+  acceptedProposals: number;
+  globalAcceptanceRate: number;
+  acceptanceByCategory: ProposalCategoryAnalytics[];
+  averageClientResponseHours: number;
+  bestSubmitWindow: {
+    day: string;
+    hour: number;
+    sampleSize: number;
+    basedOnAcceptedOnly: boolean;
+  };
+}
+
+export interface ProposalOptimizerResult {
+  totalScore: number;
+  breakdown: {
+    clarity: number;
+    personalization: number;
+    budgetCoherence: number;
+    cta: number;
+  };
+  suggestions: string[];
+}
+
 export interface Notification {
   id?: number;
-  recipientId: number;
+  recipientId: string | number;
   recipientEmail?: string;
   title: string;
   message: string;
@@ -113,4 +145,34 @@ export interface Transaction {
   statut: 'PENDING' | 'COMPLETED' | 'FAILED' | 'REFUNDED';
   description: string;
   createdAt: string;
+}
+export interface CompletenessResult {
+  score: number;
+  missing: string[];
+}
+
+export interface ReactivityResult {
+  score: number;
+  label: string;
+  totalProposals: number;
+  acceptedProposals: number;
+}
+
+export interface OverloadResult {
+  activeProjects: number;
+  threshold: number;
+  overloaded: boolean;
+}
+
+export interface MarketStat {
+  category: string;
+  projectCount: number;
+  candidateCount: number;
+}
+
+export interface AvailabilityResult {
+  status: 'AVAILABLE' | 'PARTIAL' | 'BUSY';
+  occupiedSlots: number;
+  maxSlots: number;
+  availableFrom: string;
 }
