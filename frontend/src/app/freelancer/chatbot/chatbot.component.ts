@@ -107,6 +107,7 @@ export class ChatbotComponent implements OnInit, OnDestroy, AfterViewChecked {
 
     this.userInput = '';
     this.charCount = 0;
+
     this.isLoading = true;
 
     this.chatbotService.sendMessage(this.history).subscribe({
