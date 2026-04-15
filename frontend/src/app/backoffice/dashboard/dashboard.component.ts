@@ -183,7 +183,11 @@ export class DashboardComponent implements OnInit {
   }
 
   private restoreTheme(): void {
-    this.isDark = localStorage.getItem('adm-theme') !== 'light';
+    // Sync avec le header (bo-theme) ET le dashboard (adm-theme)
+    const boTheme  = localStorage.getItem('bo-theme');
+    const admTheme = localStorage.getItem('adm-theme');
+    // Priorité au bo-theme (header)
+    this.isDark = boTheme ? boTheme === 'dark' : admTheme !== 'light';
     document.documentElement.setAttribute('data-theme', this.isDark ? 'dark' : 'light');
   }
 }
