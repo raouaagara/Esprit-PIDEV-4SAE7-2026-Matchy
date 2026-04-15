@@ -6,6 +6,7 @@ import { HttpClientModule } from '@angular/common/http';
 import { FreelancerRoutingModule } from './freelancer-routing.module';
 import { FlLayoutComponent } from './layout/fl-layout.component';
 import { FlNavbarComponent } from './layout/fl-sidebar/fl-sidebar.component';
+import { FlHeaderComponent } from './layout/fl-header/fl-header.component';
 import { FlDashboardComponent } from './dashboard/dashboard.component';
 import { FlProjectsComponent } from './projects/projects.component';
 import { FlProposalsComponent } from './proposals/proposals.component';
@@ -18,6 +19,7 @@ import { GamificationComponent } from './gamification/gamification.component';
   declarations: [
     FlLayoutComponent,
     FlNavbarComponent,
+    FlHeaderComponent,
     FlDashboardComponent,
     FlProjectsComponent,
     FlProposalsComponent,
