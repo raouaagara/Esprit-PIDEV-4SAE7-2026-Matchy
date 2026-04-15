@@ -38,11 +38,22 @@ const BADGE_STYLES: Record<string, { color:string; bg:string; border:string; glo
   template: `
 <div class="fp-page">
 
-  <!-- ── HEADER ── -->
+  <!-- ?? HEADER ?? -->
   <div class="fp-header">
-    <div class="fp-avatar-wrap">
-      <div class="fp-avatar">{{ getInitials(user?.firstName + ' ' + user?.lastName) }}</div>
+    <div class="fp-avatar-wrap" (click)="triggerFileInput()" title="Change profile photo">
+      <div class="fp-avatar">
+        <img *ngIf="avatarPreview" [src]="avatarPreview" class="fp-avatar-img" alt="Profile photo" />
+        <span *ngIf="!avatarPreview">{{ getInitials(user?.firstName + ' ' + user?.lastName) }}</span>
+      </div>
       <div class="fp-avatar-ring"></div>
+      <div class="fp-avatar-overlay">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/>
+          <circle cx="12" cy="13" r="4"/>
+        </svg>
+      </div>
+      <button class="fp-avatar-delete" *ngIf="avatarPreview" (click)="$event.stopPropagation(); removePhoto()" title="Supprimer">?</button>
+      <input #fileInput type="file" accept="image/*" style="display:none" (change)="onFileSelected($event)" />
     </div>
     <div class="fp-header-info">
       <h1 class="fp-name">{{ user?.firstName }} {{ user?.lastName }}</h1>
@@ -51,17 +62,26 @@ const BADGE_STYLES: Record<string, { color:string; bg:string; border:string; glo
         <span class="fp-badges-count-dot"></span>
         {{ badges.length }} badge{{ badges.length > 1 ? 's' : '' }} earned
       </div>
+      <div class="fp-progress-wrap">
+        <div class="fp-progress-header">
+          <span class="fp-progress-label">Profile completion</span>
+          <span class="fp-progress-pct">{{ profileCompletion }}%</span>
+        </div>
+        <div class="fp-progress-bar">
+          <div class="fp-progress-fill" [style.width]="profileCompletion + '%'"></div>
+        </div>
+      </div>
     </div>
     <button class="fp-save-btn" (click)="save()" [disabled]="isSaving">
       <span *ngIf="!isSaving && !saved">Save changes</span>
       <span *ngIf="isSaving" class="fp-spinner"></span>
-      <span *ngIf="saved" class="fp-saved-ok">✓ Saved!</span>
+      <span *ngIf="saved" class="fp-saved-ok">? Saved!</span>
     </button>
   </div>
 
   <div class="fp-body">
 
-    <!-- ── LEFT COL ── -->
+    <!-- ?? LEFT COL ?? -->
     <div class="fp-col fp-col--left">
 
       <!-- Personal info -->
@@ -90,7 +110,7 @@ const BADGE_STYLES: Record<string, { color:string; bg:string; border:string; glo
         </div>
         <div class="fp-field">
           <label class="fp-label">Bio</label>
-          <textarea class="fp-input fp-textarea" [(ngModel)]="user!.bio" placeholder="Tell clients about yourself…" rows="4"></textarea>
+          <textarea class="fp-input fp-textarea" [(ngModel)]="user!.bio" placeholder="Tell clients about yourself?" rows="4"></textarea>
         </div>
         <div class="fp-grid2">
           <div class="fp-field">
@@ -112,7 +132,6 @@ const BADGE_STYLES: Record<string, { color:string; bg:string; border:string; glo
           <span class="fp-skill-count">{{ skillTags.length }}/20</span>
         </div>
 
-        <!-- Tag input -->
         <div class="fp-skill-box" [class.fp-skill-box--focused]="inputFocused" (click)="focusInput()">
           <div class="fp-tag-list">
             <span
@@ -124,7 +143,7 @@ const BADGE_STYLES: Record<string, { color:string; bg:string; border:string; glo
               [style.border-color]="getTagBorder(tag)"
             >
               {{ tag }}
-              <button class="fp-tag-x" (click)="$event.stopPropagation(); removeSkill(i)">×</button>
+              <button class="fp-tag-x" (click)="$event.stopPropagation(); removeSkill(i)">�</button>
             </span>
             <input
               #skillInput
@@ -134,12 +153,11 @@ const BADGE_STYLES: Record<string, { color:string; bg:string; border:string; glo
               (blur)="onInputBlur()"
               (input)="onSkillInput()"
               (keydown)="onSkillKeydown($event)"
-              placeholder="{{ skillTags.length === 0 ? 'Type a skill and press Enter…' : '' }}"
+              placeholder="{{ skillTags.length === 0 ? 'Type a skill and press Enter?' : '' }}"
               [style.width]="skillInputValue.length * 9 + 90 + 'px'"
             />
           </div>
 
-          <!-- Autocomplete dropdown -->
           <div class="fp-dropdown" *ngIf="showDropdown && (filteredSuggestions.length > 0 || canAddCustom)">
             <div
               *ngFor="let s of filteredSuggestions"
@@ -161,7 +179,6 @@ const BADGE_STYLES: Record<string, { color:string; bg:string; border:string; glo
           </div>
         </div>
 
-        <!-- Category browser -->
         <div class="fp-cat-tabs">
           <button
             *ngFor="let cat of categories"
@@ -182,14 +199,14 @@ const BADGE_STYLES: Record<string, { color:string; bg:string; border:string; glo
             [style.border-color]="activeCategoryColor + '55'"
             (click)="!skillTags.includes(skill) && addSuggestion(skill)"
           >
-            <span *ngIf="skillTags.includes(skill)">✓ </span>{{ skill }}
+            <span *ngIf="skillTags.includes(skill)">? </span>{{ skill }}
           </span>
         </div>
       </div>
 
     </div>
 
-    <!-- ── RIGHT COL ── -->
+    <!-- ?? RIGHT COL ?? -->
     <div class="fp-col fp-col--right">
 
       <!-- Badges -->
@@ -200,19 +217,16 @@ const BADGE_STYLES: Record<string, { color:string; bg:string; border:string; glo
           <span class="fp-badge-count-pill" *ngIf="badges.length > 0">{{ badges.length }}</span>
         </div>
 
-        <!-- Loading -->
         <div class="fp-badge-loading" *ngIf="badgesLoading">
           <div class="fp-badge-skeleton" *ngFor="let i of [1,2,3]"></div>
         </div>
 
-        <!-- Empty -->
         <div class="fp-badge-empty" *ngIf="!badgesLoading && badges.length === 0">
-          <div class="fp-badge-empty-icon">🏅</div>
+          <div class="fp-badge-empty-icon">??</div>
           <p class="fp-badge-empty-title">No badges yet</p>
           <p class="fp-badge-empty-sub">Complete projects and get reviews to earn your first badge.</p>
         </div>
 
-        <!-- Badge grid -->
         <div class="fp-badge-grid" *ngIf="!badgesLoading && badges.length > 0">
           <div
             *ngFor="let badge of badges"
@@ -263,9 +277,6 @@ const BADGE_STYLES: Record<string, { color:string; bg:string; border:string; glo
 </div>
   `,
   styles: [`
-    /* ════════════════════════════════════
-       VARIABLES
-    ════════════════════════════════════ */
     :host {
       --p:    #3D8EFF;
       --pl:   #6AACFF;
@@ -281,9 +292,6 @@ const BADGE_STYLES: Record<string, { color:string; bg:string; border:string; glo
       --font: 'Plus Jakarta Sans','Outfit',sans-serif;
     }
 
-    /* ════════════════════════════════════
-       PAGE
-    ════════════════════════════════════ */
     .fp-page {
       min-height: 100vh;
       background: var(--bg);
@@ -292,9 +300,6 @@ const BADGE_STYLES: Record<string, { color:string; bg:string; border:string; glo
       color: var(--txt);
     }
 
-    /* ════════════════════════════════════
-       HEADER
-    ════════════════════════════════════ */
     .fp-header {
       display: flex;
       align-items: center;
@@ -308,9 +313,11 @@ const BADGE_STYLES: Record<string, { color:string; bg:string; border:string; glo
       box-shadow: 0 8px 40px rgba(0,0,0,0.4), 0 1px 0 rgba(255,255,255,0.06) inset;
     }
 
+    /* ?? AVATAR UPLOAD ?? */
     .fp-avatar-wrap {
       position: relative;
       flex-shrink: 0;
+      cursor: pointer;
     }
 
     .fp-avatar {
@@ -321,7 +328,37 @@ const BADGE_STYLES: Record<string, { color:string; bg:string; border:string; glo
       font-size: 24px; font-weight: 800; color: white;
       position: relative; z-index: 1;
       box-shadow: 0 8px 24px rgba(61,142,255,0.4);
+      overflow: hidden;
     }
+
+    .fp-avatar-img {
+      width: 100%; height: 100%;
+      object-fit: cover;
+      border-radius: 50%;
+    }
+
+    .fp-avatar-overlay {
+      position: absolute;
+      inset: 0;
+      border-radius: 50%;
+      background: rgba(0,0,0,0.55);
+      display: flex; align-items: center; justify-content: center;
+      z-index: 2;
+      opacity: 0;
+      transition: opacity 0.2s;
+    }
+
+    .fp-avatar-wrap:hover .fp-avatar-overlay { opacity: 1; }
+    .fp-avatar-delete {
+      position: absolute; top: -4px; right: -4px;
+      width: 20px; height: 20px; border-radius: 50%;
+      background: #ef4444; border: 2px solid #07091C;
+      color: white; font-size: 13px; line-height: 1;
+      display: flex; align-items: center; justify-content: center;
+      cursor: pointer; z-index: 3; padding: 0;
+      transition: background 0.2s;
+    }
+    .fp-avatar-delete:hover { background: #dc2626; }
 
     .fp-avatar-ring {
       position: absolute;
@@ -335,6 +372,12 @@ const BADGE_STYLES: Record<string, { color:string; bg:string; border:string; glo
     }
 
     .fp-header-info { flex: 1; min-width: 0; }
+    .fp-progress-wrap { margin-top: 10px; }
+    .fp-progress-header { display: flex; justify-content: space-between; margin-bottom: 5px; }
+    .fp-progress-label { font-size: 11px; color: var(--muted); font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; }
+    .fp-progress-pct { font-size: 11px; font-weight: 700; color: var(--pl); }
+    .fp-progress-bar { height: 6px; background: rgba(255,255,255,0.07); border-radius: 100px; overflow: hidden; width: 220px; }
+    .fp-progress-fill { height: 100%; border-radius: 100px; background: linear-gradient(90deg, var(--p), #8B5CF6); transition: width 0.5s ease; }
 
     .fp-name {
       font-size: 22px; font-weight: 800;
@@ -404,9 +447,6 @@ const BADGE_STYLES: Record<string, { color:string; bg:string; border:string; glo
       animation: spin 0.7s linear infinite;
     }
 
-    /* ════════════════════════════════════
-       BODY LAYOUT
-    ════════════════════════════════════ */
     .fp-body {
       display: grid;
       grid-template-columns: 1fr 420px;
@@ -416,9 +456,6 @@ const BADGE_STYLES: Record<string, { color:string; bg:string; border:string; glo
 
     .fp-col { display: flex; flex-direction: column; gap: 24px; }
 
-    /* ════════════════════════════════════
-       CARD
-    ════════════════════════════════════ */
     .fp-card {
       background: var(--card);
       border: 1px solid var(--bdr);
@@ -439,9 +476,6 @@ const BADGE_STYLES: Record<string, { color:string; bg:string; border:string; glo
 
     .fp-card-title svg { color: var(--pl); }
 
-    /* ════════════════════════════════════
-       FORM
-    ════════════════════════════════════ */
     .fp-grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
     .fp-field { display: flex; flex-direction: column; gap: 6px; margin-bottom: 14px; }
     .fp-field:last-child { margin-bottom: 0; }
@@ -467,23 +501,10 @@ const BADGE_STYLES: Record<string, { color:string; bg:string; border:string; glo
     }
 
     .fp-input::placeholder { color: rgba(255,255,255,0.2); }
-
-    .fp-input:hover {
-      background: rgba(255,255,255,0.06);
-      border-color: rgba(255,255,255,0.13);
-    }
-
-    .fp-input:focus {
-      background: rgba(61,142,255,0.07);
-      border-color: var(--p);
-      box-shadow: 0 0 0 4px rgba(61,142,255,0.12);
-    }
-
+    .fp-input:hover { background: rgba(255,255,255,0.06); border-color: rgba(255,255,255,0.13); }
+    .fp-input:focus { background: rgba(61,142,255,0.07); border-color: var(--p); box-shadow: 0 0 0 4px rgba(61,142,255,0.12); }
     .fp-textarea { resize: vertical; min-height: 90px; }
 
-    /* ════════════════════════════════════
-       SKILLS
-    ════════════════════════════════════ */
     .fp-skill-count {
       margin-left: auto;
       font-size: 11px; font-weight: 600;
@@ -506,16 +527,9 @@ const BADGE_STYLES: Record<string, { color:string; bg:string; border:string; glo
       margin-bottom: 16px;
     }
 
-    .fp-skill-box--focused {
-      border-color: var(--p);
-      box-shadow: 0 0 0 4px rgba(61,142,255,0.12);
-      background: rgba(61,142,255,0.04);
-    }
+    .fp-skill-box--focused { border-color: var(--p); box-shadow: 0 0 0 4px rgba(61,142,255,0.12); background: rgba(61,142,255,0.04); }
 
-    .fp-tag-list {
-      display: flex; flex-wrap: wrap; gap: 6px;
-      align-items: center;
-    }
+    .fp-tag-list { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
 
     .fp-tag {
       display: inline-flex; align-items: center; gap: 5px;
@@ -526,9 +540,7 @@ const BADGE_STYLES: Record<string, { color:string; bg:string; border:string; glo
       transition: all 0.18s;
     }
 
-    .fp-tag--removing {
-      opacity: 0; transform: scale(0.8);
-    }
+    .fp-tag--removing { opacity: 0; transform: scale(0.8); }
 
     .fp-tag-x {
       background: none; border: none;
@@ -550,7 +562,6 @@ const BADGE_STYLES: Record<string, { color:string; bg:string; border:string; glo
 
     .fp-skill-input::placeholder { color: rgba(255,255,255,0.22); }
 
-    /* Dropdown */
     .fp-dropdown {
       position: absolute;
       top: calc(100% + 8px); left: 0; right: 0;
@@ -572,36 +583,13 @@ const BADGE_STYLES: Record<string, { color:string; bg:string; border:string; glo
     }
 
     .fp-dropdown-item:hover { background: rgba(61,142,255,0.08); }
-
-    .fp-dropdown-dot {
-      width: 7px; height: 7px;
-      border-radius: 50%; flex-shrink: 0;
-    }
-
+    .fp-dropdown-dot { width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; }
     .fp-dropdown-skill { flex: 1; font-weight: 500; color: var(--txt); }
+    .fp-dropdown-cat { font-size: 10.5px; font-weight: 700; padding: 2px 7px; border-radius: 100px; letter-spacing: 0.3px; }
+    .fp-dropdown-item--custom { border-top: 1px solid var(--bdr); color: var(--pl); font-weight: 600; }
+    .fp-dropdown-plus { font-size: 16px; font-weight: 700; color: var(--pl); width: 20px; text-align: center; }
 
-    .fp-dropdown-cat {
-      font-size: 10.5px; font-weight: 700;
-      padding: 2px 7px; border-radius: 100px;
-      letter-spacing: 0.3px;
-    }
-
-    .fp-dropdown-item--custom {
-      border-top: 1px solid var(--bdr);
-      color: var(--pl); font-weight: 600;
-    }
-
-    .fp-dropdown-plus {
-      font-size: 16px; font-weight: 700;
-      color: var(--pl); width: 20px;
-      text-align: center;
-    }
-
-    /* Category tabs */
-    .fp-cat-tabs {
-      display: flex; flex-wrap: wrap; gap: 6px;
-      margin-bottom: 14px;
-    }
+    .fp-cat-tabs { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 14px; }
 
     .fp-cat-tab {
       padding: 5px 12px;
@@ -615,15 +603,9 @@ const BADGE_STYLES: Record<string, { color:string; bg:string; border:string; glo
       transition: all 0.2s;
     }
 
-    .fp-cat-tab--active {
-      background: rgba(var(--cat-color, 168,85,247), 0.12);
-      border-color: var(--cat-color, #a855f7);
-      color: var(--cat-color, #a855f7);
-    }
+    .fp-cat-tab--active { background: rgba(var(--cat-color, 168,85,247), 0.12); border-color: var(--cat-color, #a855f7); color: var(--cat-color, #a855f7); }
 
-    .fp-cat-skills {
-      display: flex; flex-wrap: wrap; gap: 7px;
-    }
+    .fp-cat-skills { display: flex; flex-wrap: wrap; gap: 7px; }
 
     .fp-cat-skill {
       padding: 5px 12px;
@@ -638,9 +620,6 @@ const BADGE_STYLES: Record<string, { color:string; bg:string; border:string; glo
     .fp-cat-skill:hover:not(.fp-cat-skill--added) { opacity: 1; transform: translateY(-1px); }
     .fp-cat-skill--added { opacity: 1; cursor: default; }
 
-    /* ════════════════════════════════════
-       BADGES
-    ════════════════════════════════════ */
     .fp-badge-count-pill {
       margin-left: auto;
       background: linear-gradient(135deg, var(--p), #8B5CF6);
@@ -652,55 +631,25 @@ const BADGE_STYLES: Record<string, { color:string; bg:string; border:string; glo
       text-align: center;
     }
 
-    /* Loading skeletons */
     .fp-badge-loading { display: flex; flex-direction: column; gap: 12px; }
 
     .fp-badge-skeleton {
       height: 72px;
       border-radius: 12px;
-      background: linear-gradient(90deg,
-        rgba(255,255,255,0.04) 25%,
-        rgba(255,255,255,0.08) 50%,
-        rgba(255,255,255,0.04) 75%);
+      background: linear-gradient(90deg, rgba(255,255,255,0.04) 25%, rgba(255,255,255,0.08) 50%, rgba(255,255,255,0.04) 75%);
       background-size: 200% 100%;
       animation: shimmer 1.4s infinite;
     }
 
-    /* Empty */
-    .fp-badge-empty {
-      text-align: center;
-      padding: 36px 16px;
-    }
+    .fp-badge-empty { text-align: center; padding: 36px 16px; }
+    .fp-badge-empty-icon { font-size: 44px; margin-bottom: 12px; opacity: 0.5; filter: grayscale(1); }
+    .fp-badge-empty-title { font-size: 15px; font-weight: 700; color: var(--txt); margin-bottom: 6px; }
+    .fp-badge-empty-sub { font-size: 13px; color: var(--muted); line-height: 1.6; max-width: 260px; margin: 0 auto; }
 
-    .fp-badge-empty-icon {
-      font-size: 44px;
-      margin-bottom: 12px;
-      opacity: 0.5;
-      filter: grayscale(1);
-    }
-
-    .fp-badge-empty-title {
-      font-size: 15px; font-weight: 700;
-      color: var(--txt); margin-bottom: 6px;
-    }
-
-    .fp-badge-empty-sub {
-      font-size: 13px; color: var(--muted);
-      line-height: 1.6; max-width: 260px;
-      margin: 0 auto;
-    }
-
-    /* Badge grid */
-    .fp-badge-grid {
-      display: flex;
-      flex-direction: column;
-      gap: 10px;
-    }
+    .fp-badge-grid { display: flex; flex-direction: column; gap: 10px; }
 
     .fp-badge-card {
-      display: flex;
-      align-items: flex-start;
-      gap: 14px;
+      display: flex; align-items: flex-start; gap: 14px;
       padding: 14px 16px;
       background: var(--bb);
       border: 1px solid var(--bbd);
@@ -709,24 +658,15 @@ const BADGE_STYLES: Record<string, { color:string; bg:string; border:string; glo
       animation: badgeIn 0.4s both;
     }
 
-    .fp-badge-card:hover {
-      transform: translateX(3px);
-      box-shadow: 0 4px 20px var(--bg);
-      border-color: var(--bc);
-    }
+    .fp-badge-card:hover { transform: translateX(3px); box-shadow: 0 4px 20px var(--bg); border-color: var(--bc); }
 
     .fp-badge-icon-wrap {
-      position: relative;
-      flex-shrink: 0;
+      position: relative; flex-shrink: 0;
       width: 44px; height: 44px;
       display: flex; align-items: center; justify-content: center;
     }
 
-    .fp-badge-icon {
-      font-size: 24px;
-      position: relative; z-index: 1;
-      filter: drop-shadow(0 2px 8px var(--bg));
-    }
+    .fp-badge-icon { font-size: 24px; position: relative; z-index: 1; filter: drop-shadow(0 2px 8px var(--bg)); }
 
     .fp-badge-icon-ring {
       position: absolute; inset: 0;
@@ -737,27 +677,10 @@ const BADGE_STYLES: Record<string, { color:string; bg:string; border:string; glo
     }
 
     .fp-badge-info { flex: 1; min-width: 0; }
+    .fp-badge-title { font-size: 13.5px; font-weight: 700; color: var(--bc); margin-bottom: 3px; }
+    .fp-badge-desc { font-size: 12px; color: var(--soft); line-height: 1.5; margin-bottom: 6px; }
+    .fp-badge-date { display: flex; align-items: center; gap: 5px; font-size: 11px; color: var(--muted); font-weight: 500; }
 
-    .fp-badge-title {
-      font-size: 13.5px; font-weight: 700;
-      color: var(--bc);
-      margin-bottom: 3px;
-    }
-
-    .fp-badge-desc {
-      font-size: 12px; color: var(--soft);
-      line-height: 1.5; margin-bottom: 6px;
-    }
-
-    .fp-badge-date {
-      display: flex; align-items: center; gap: 5px;
-      font-size: 11px; color: var(--muted);
-      font-weight: 500;
-    }
-
-    /* ════════════════════════════════════
-       KEYFRAMES
-    ════════════════════════════════════ */
     @keyframes spin       { to { transform: rotate(360deg); } }
     @keyframes ringRotate { to { transform: rotate(360deg); } }
     @keyframes dotPulse   { 0%,100%{box-shadow:0 0 6px #00E5FF} 50%{box-shadow:0 0 14px #00E5FF,0 0 28px rgba(0,229,255,0.3)} }
@@ -769,12 +692,27 @@ const BADGE_STYLES: Record<string, { color:string; bg:string; border:string; glo
       .fp-body { grid-template-columns: 1fr; }
       .fp-page { padding: 20px; }
     }
+
+    .fp-page.fp-light {
+      --bg:   #f0f2fa; --bg2: #ffffff;
+      --card: rgba(255,255,255,0.95);
+      --bdr:  rgba(0,0,0,0.08);
+      --txt:  #111827;
+      --muted:rgba(0,0,0,0.45);
+      --soft: rgba(0,0,0,0.65);
+    }
+    .fp-page.fp-light .fp-input { background: rgba(0,0,0,0.03); color: #111827; }
+    .fp-page.fp-light .fp-input::placeholder { color: rgba(0,0,0,0.3); }
+    .fp-page.fp-light .fp-skill-input { color: #111827; }
+    .fp-page.fp-light .fp-skill-input::placeholder { color: rgba(0,0,0,0.3); }
+    .fp-page.fp-light .fp-dropdown { background: #ffffff; border-color: rgba(0,0,0,0.1); }
+    .fp-page.fp-light .fp-dropdown-skill { color: #111827; }
   `]
 })
 export class FlProfileComponent implements OnInit {
   @ViewChild('skillInput') skillInputRef!: ElementRef<HTMLInputElement>;
+  @ViewChild('fileInput') fileInputRef!: ElementRef<HTMLInputElement>;
 
-  // Cast étendu pour les champs optionnels du freelancer
   user: (User & {
     name: string;
     phone?: string;
@@ -785,9 +723,13 @@ export class FlProfileComponent implements OnInit {
     linkedinUrl?: string;
     githubUrl?: string;
     skills?: any;
+    avatar?: string;
   }) | null = null;
+
   isSaving = false;
   saved = false;
+  avatarPreview: string | null = null;
+  selectedPhotoFile: File | null = null;
 
   badges: Badge[] = [];
   badgesLoading = false;
@@ -816,6 +758,18 @@ export class FlProfileComponent implements OnInit {
     return res.slice(0, 8);
   }
 
+  get profileCompletion(): number {
+    if (!this.user) return 0;
+    const fields = [
+      this.user.firstName, this.user.lastName, this.user.email,
+      this.user.phone, this.user.bio, this.user.avatar,
+      this.user.hourlyRate, this.user.experienceYears,
+      this.user.portfolioUrl, this.skillTags.length > 0 ? "ok" : ""
+    ];
+    const filled = fields.filter(f => f !== null && f !== undefined && f !== "" && f !== 0).length;
+    return Math.round((filled / fields.length) * 100);
+  }
+
   get canAddCustom() {
     const q = this.skillInputValue.trim();
     return q.length > 0
@@ -826,21 +780,140 @@ export class FlProfileComponent implements OnInit {
   constructor(public authService: AuthService, private userService: UserService, private http: HttpClient) {}
 
   ngOnInit() {
+    this.authService.checkAuth();
     this.user = this.authService.currentUser ? { ...this.authService.currentUser } as any : null;
-    if (this.user?.skills) {
-      const raw = Array.isArray(this.user.skills)
-        ? this.user.skills
-        : (this.user.skills as string).split(',');
-      this.skillTags = raw.map((s: string) => s.trim()).filter((s: string) => s.length > 0);
+    if (this.user?.id) {
+      this.userService.getById(this.user.id).subscribe({
+        next: (fullUser: any) => {
+          this.user = { ...(this.user as any), ...fullUser };
+          const raw = Array.isArray(this.user?.skills)
+            ? this.user?.skills
+            : (this.user?.skills ? String(this.user.skills).split(',') : []);
+          this.skillTags = raw.map((s: string) => s.trim()).filter((s: string) => s.length > 0);
+          this.avatarPreview = this.user?.avatar ?? null;
+        },
+        error: () => {
+          if (this.user?.skills) {
+            const raw = Array.isArray(this.user.skills)
+              ? this.user.skills
+              : (this.user.skills as string).split(',');
+            this.skillTags = raw.map((s: string) => s.trim()).filter((s: string) => s.length > 0);
+          }
+          if (this.user?.avatar) {
+            this.avatarPreview = this.user.avatar;
+          }
+        }
+      });
+      this.loadBadges(this.user.id);
     }
-    if (this.user?.id) this.loadBadges(this.user.id);
+    this.applyTheme();
   }
 
-  loadBadges(userId: number) {
+  private applyTheme(): void {
+    const isDark = localStorage.getItem('theme') === 'dark' || document.body.classList.contains('dark');
+    const page = document.querySelector('.fp-page');
+    if (page) page.classList.toggle('fp-light', !isDark);
+  }
+
+  removePhoto(): void {
+    this.avatarPreview = null;
+    this.selectedPhotoFile = null;
+    if (this.user) this.user.avatar = undefined;
+  }
+
+  triggerFileInput(): void {
+    this.fileInputRef?.nativeElement.click();
+  }
+
+  onFileSelected(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    if (!input.files?.length) return;
+    const file = input.files[0];
+    if (!file.type.startsWith('image/')) return;
+    this.selectedPhotoFile = file;
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      this.avatarPreview = e.target?.result as string;
+    };
+    reader.readAsDataURL(file);
+  }
+
+  loadBadges(userId: string | number) {
     this.badgesLoading = true;
     const headers = new HttpHeaders({ Authorization: `Bearer ${this.authService.getToken()}` });
-    this.http.get<Badge[]>(`${environment.apiUrl}/badges/user/${userId}`, { headers }).subscribe({
-      next:  b => { this.badges = b ?? []; this.badgesLoading = false; },
+    const badgeUrls = [
+      `${environment.apiUrl}/badges/user/${userId}`,
+      `http://localhost:8082/api/badges/user/${userId}`,
+      `http://localhost:8081/api/badges/user/${userId}`
+    ];
+
+    const tryLoad = (index: number): void => {
+      if (index >= badgeUrls.length) {
+        this.loadFallbackFreelancerBadges(userId);
+        return;
+      }
+
+      this.http.get<any>(badgeUrls[index], { headers }).subscribe({
+        next: (res) => {
+          const rawBadges = this.extractBadgesArray(res);
+          const normalized = rawBadges.map(raw => this.normalizeBadge(raw));
+          if (normalized.length > 0) {
+            this.badges = normalized;
+            this.badgesLoading = false;
+            return;
+          }
+          tryLoad(index + 1);
+        },
+        error: () => tryLoad(index + 1)
+      });
+    };
+
+    tryLoad(0);
+  }
+
+  private extractBadgesArray(payload: any): any[] {
+    if (Array.isArray(payload)) return payload;
+    if (Array.isArray(payload?.data)) return payload.data;
+    if (Array.isArray(payload?.content)) return payload.content;
+    return [];
+  }
+
+  private normalizeBadge(raw: any): Badge {
+    const type = String(raw?.type ?? raw?.badgeType ?? raw?.name ?? 'FIRST_PROPOSAL');
+    const icon = raw?.icon || this.defaultIcon(type);
+    return {
+      id: Number(raw?.id ?? 0),
+      type,
+      title: raw?.title ?? type.replace(/_/g, ' '),
+      description: raw?.description ?? 'Achievement unlocked',
+      icon,
+      earnedAt: raw?.earnedAt ?? raw?.createdAt ?? new Date().toISOString()
+    };
+  }
+
+  private defaultIcon(type: string): string {
+    const map: Record<string, string> = {
+      FIRST_PROPOSAL: '??', PROLIFIC: '??', FAST_STARTER: '?',
+      RISING_TALENT: '??', EXPERIENCED: '??', EXPERT: '??',
+      ELITE: '??', HIGH_ACCEPTANCE: '??', TOP_RATED: '?', VERIFIED_PRO: '?'
+    };
+    return map[type] ?? '??';
+  }
+
+  private loadFallbackFreelancerBadges(userId: string | number): void {
+    const headers = new HttpHeaders({ Authorization: `Bearer ${this.authService.getToken()}` });
+    this.http.get<any[]>(`${environment.apiUrl}/proposals?freelancerId=${userId}`, { headers }).subscribe({
+      next: proposals => {
+        const total = proposals?.length ?? 0;
+        const accepted = (proposals ?? []).filter((p: any) => String(p?.status ?? '').toUpperCase() === 'ACCEPTED').length;
+        const fallback: Badge[] = [];
+        if (total >= 1) fallback.push({ id: 1, type: 'FIRST_PROPOSAL', title: 'First Step', description: 'Submitted your first proposal', icon: '??', earnedAt: new Date().toISOString() });
+        if (total >= 20) fallback.push({ id: 2, type: 'PROLIFIC', title: 'Prolific', description: 'Submitted 20+ proposals', icon: '??', earnedAt: new Date().toISOString() });
+        if (accepted >= 1) fallback.push({ id: 3, type: 'RISING_TALENT', title: 'Rising Talent', description: 'Got your first proposal accepted', icon: '??', earnedAt: new Date().toISOString() });
+        if (accepted >= 5) fallback.push({ id: 4, type: 'EXPERIENCED', title: 'Experienced', description: 'Got 5 proposals accepted', icon: '??', earnedAt: new Date().toISOString() });
+        this.badges = fallback;
+        this.badgesLoading = false;
+      },
       error: () => { this.badges = []; this.badgesLoading = false; }
     });
   }
@@ -916,7 +989,26 @@ export class FlProfileComponent implements OnInit {
     this.syncSkills();
     this.isSaving = true;
     this.user.name = `${this.user.firstName} ${this.user.lastName}`;
-    this.userService.update(this.user.id, this.user).subscribe({
+
+    if (this.selectedPhotoFile) {
+      const formData = new FormData();
+      formData.append('photo', this.selectedPhotoFile);
+      const headers = new HttpHeaders({ Authorization: `Bearer ${this.authService.getToken()}` });
+      this.http.post<{ photoUrl: string }>(`${environment.apiUrl}/users/${this.user.id}/photo`, formData, { headers }).subscribe({
+        next: (res) => {
+          if (this.user) this.user.avatar = res.photoUrl;
+          this.selectedPhotoFile = null;
+          this.saveProfile();
+        },
+        error: () => this.saveProfile()
+      });
+    } else {
+      this.saveProfile();
+    }
+  }
+
+  private saveProfile() {
+    this.userService.update(this.user!.id!, this.user!).subscribe({
       next:  () => { this.isSaving = false; this.saved = true; setTimeout(() => this.saved = false, 3000); },
       error: () => { this.isSaving = false; }
     });
@@ -926,3 +1018,13 @@ export class FlProfileComponent implements OnInit {
     return name?.split(' ').map(n => n[0]).join('').substring(0,2).toUpperCase() || '??';
   }
 }
+
+
+
+
+
+
+
+
+
+
