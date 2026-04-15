@@ -1,4 +1,4 @@
-import { NgModule } from '@angular/core';
+﻿import { NgModule } from '@angular/core';
 import { RouterModule, Routes } from '@angular/router';
 import { FlLayoutComponent } from './layout/fl-layout.component';
 import { FlDashboardComponent } from './dashboard/dashboard.component';
@@ -8,6 +8,7 @@ import { FlNotificationsComponent } from './notifications/notifications.componen
 import { FlProfileComponent } from './profile/profile.component';
 import { FreelancerGuard } from '../core/guards/auth.guard';
 import { GamificationComponent } from './gamification/gamification.component';
+
 const routes: Routes = [
   {
     path: '',
