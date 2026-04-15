@@ -24,7 +24,9 @@ public class User implements Serializable {
     @Column(unique = true)
     private String email;
 
-    @Column(name = "role", length = 20)  // ← Ajoutez cette annotation
+    private String password;
+
+    @Column(name = "role", length = 20)
     @Enumerated(EnumType.STRING)
     private Role role;
 

@@ -27,6 +27,10 @@ public class Content implements Serializable {
     @Enumerated(EnumType.STRING)
     private ContentType type;
 
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private ContentLevel level;
+
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 
@@ -44,14 +48,24 @@ public class Content implements Serializable {
         if (updatedAt == null) {
             updatedAt = LocalDateTime.now();
         }
+        if (level == null) {
+            level = ContentLevel.DEBUTANT;
+        }
     }
 
     @PreUpdate
     protected void onUpdate() {
         updatedAt = LocalDateTime.now();
+        if (level == null) {
+            level = ContentLevel.DEBUTANT;
+        }
     }
 
     public enum ContentType {
         COURS, ARTICLE, VIDEO
+    }
+
+    public enum ContentLevel {
+        DEBUTANT, INTERMEDIAIRE, AVANCE
     }
 }
