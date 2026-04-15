@@ -256,6 +256,25 @@
   background:var(--surface); border:1.5px solid var(--border); border-radius:20px; padding:24px;
   box-shadow:var(--shadow-sm); transition:box-shadow .28s; &:hover { box-shadow:var(--shadow-md); }
 }
+.panel-analytics { margin-bottom: 20px; }
+.analytics-top { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-bottom: 14px; }
+.analytics-chip {
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 10px 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  .chip-label { font-size: 11px; color: var(--text-muted); text-transform: uppercase; letter-spacing: .05em; }
+  strong { font-size: 14px; color: var(--text); }
+}
+.analytics-cats { display: grid; gap: 8px; }
+.analytics-cat { display: grid; grid-template-columns: 120px 1fr 56px; gap: 10px; align-items: center; }
+.cat-name { font-size: 12px; color: var(--text-muted); text-transform: capitalize; }
+.cat-bar { height: 8px; border-radius: 6px; background: var(--border); overflow: hidden; }
+.cat-bar-fill { height: 100%; background: linear-gradient(135deg, var(--accent), var(--purple)); }
+.cat-rate { text-align: right; font-size: 12px; font-weight: 700; color: var(--accent); }
 .notif-panel { animation: fadeUp .55s .35s both; }
 .panel-head { display:flex; align-items:center; justify-content:space-between; margin-bottom:20px; }
 .panel-title { display:flex; align-items:center; gap:10px; h3 { font-size:15px; font-weight:800; margin:0; letter-spacing:-.2px; } }
@@ -349,6 +368,8 @@
   .content-wrap  { padding: 18px 16px 72px; }
   .inprogress-item { flex-wrap: wrap; gap: 10px; }
   .btn-deliver, .delivered-badge { width: 100%; text-align: center; justify-content: center; }
+  .analytics-top { grid-template-columns: 1fr; }
+  .analytics-cat { grid-template-columns: 90px 1fr 52px; }
 }
 
 // ─────────────────────────────────────────────
@@ -495,4 +516,185 @@
     &:nth-child(2) { animation-delay: .18s; }
     &:nth-child(3) { animation-delay: .36s; }
   }
+  // ── Détecteur de profil incomplet ──────────────────────────────
+.profile-completeness {
+  margin-top: 1rem;
+ 
+  .completeness-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 12px;
+    margin-bottom: 6px;
+    opacity: .85;
+ 
+    .completeness-label { font-weight: 500; }
+    .completeness-tip   { opacity: .7; font-size: 11px; }
+  }
+ 
+  .completeness-bar {
+    height: 6px;
+    background: rgba(255, 255, 255, .2);
+    border-radius: 3px;
+    overflow: hidden;
+  }
+ 
+  .completeness-fill {
+    height: 100%;
+    border-radius: 3px;
+    transition: width .6s ease;
+ 
+    &.fill-low  { background: #E24B4A; }
+    &.fill-mid  { background: #EF9F27; }
+    &.fill-high { background: #63a522; }
+  }
 }
+ 
+// ── Alerte surcharge ────────────────────────────────────────────
+.overload-alert {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  background: rgba(226, 75, 74, .08);
+  border: 1px solid rgba(226, 75, 74, .3);
+  border-radius: 12px;
+  padding: 14px 16px;
+  margin-bottom: 1.25rem;
+ 
+  .overload-icon { font-size: 20px; flex-shrink: 0; margin-top: 1px; }
+ 
+  strong {
+    display: block;
+    font-size: 14px;
+    font-weight: 500;
+    margin-bottom: 2px;
+    color: #A32D2D;
+  }
+ 
+  span { font-size: 13px; opacity: .8; line-height: 1.4; }
+}
+ 
+// ── Grid disponibilité + marché ─────────────────────────────────
+.advanced-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1.25rem;
+  margin-bottom: 1.25rem;
+ 
+  @media (max-width: 768px) {
+    grid-template-columns: 1fr;
+  }
+}
+ 
+// ── Disponibilité ───────────────────────────────────────────────
+.panel-availability {
+  .availability-body { padding-top: 4px; }
+ 
+  .avail-slots {
+    display: flex;
+    gap: 8px;
+    margin: 12px 0 8px;
+ 
+    .slot {
+      flex: 1;
+      height: 10px;
+      border-radius: 5px;
+      background: rgba(128, 128, 128, .2);
+      transition: background .4s ease;
+ 
+      &.slot-used { background: #E24B4A; }
+    }
+  }
+ 
+  .avail-label {
+    font-size: 13px;
+    opacity: .7;
+    margin: 0 0 4px;
+  }
+ 
+  .avail-from {
+    font-size: 14px;
+    margin: 0;
+ 
+    strong { color: #3B6D11; }
+  }
+}
+ 
+// ── Thermomètre de marché ───────────────────────────────────────
+.panel-market {
+  .market-list { padding-top: 6px; }
+ 
+  .market-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 7px 0;
+    font-size: 13px;
+    border-bottom: 1px solid rgba(128, 128, 128, .08);
+ 
+    &:last-child { border-bottom: none; }
+ 
+    .market-cat {
+      width: 110px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      opacity: .85;
+      flex-shrink: 0;
+    }
+ 
+    .market-bar-wrap {
+      flex: 1;
+      height: 6px;
+      background: rgba(128, 128, 128, .15);
+      border-radius: 3px;
+      overflow: hidden;
+    }
+ 
+    .market-bar-fill {
+      height: 100%;
+      border-radius: 3px;
+      background: #378ADD;
+      transition: width .7s ease;
+      min-width: 4px;
+    }
+ 
+    .market-count {
+      font-size: 12px;
+      opacity: .6;
+      white-space: nowrap;
+      min-width: 20px;
+      text-align: right;
+    }
+  }
+}
+}
+// -- Availability redesign
+.avail-big { display:flex; align-items:center; gap:14px; margin-top:4px; }
+.avail-circle { width:54px; height:54px; border-radius:50%; border:3px solid var(--blue); display:flex; align-items:center; justify-content:center; flex-direction:column; flex-shrink:0; }
+.avail-num { font-size:20px; font-weight:900; color:var(--blue); line-height:1; }
+.avail-of { font-size:10px; color:var(--text-muted); }
+.avail-desc { flex:1; }
+.avail-label { font-size:12px; color:var(--text-muted); margin-bottom:6px; }
+.avail-slots { display:flex; gap:6px; margin-bottom:8px; }
+.slot { flex:1; height:8px; border-radius:4px; background:var(--border); }
+.slot.slot-used { background:var(--blue); }
+.avail-from { font-size:13px; color:var(--text-muted); margin:0; strong { color:#3B6D11; font-weight:700; } }
+
+
+
+// ── Market redesign
+.panel-market {
+  .market-list { padding-top: 4px; }
+  .market-item {
+    display: flex; align-items: center; gap: 10px;
+    padding: 9px 0; border-bottom: 1px solid var(--border);
+    &:last-child { border-bottom: none; }
+  }
+  .market-dot { width: 9px; height: 9px; border-radius: 50%; flex-shrink: 0; }
+  .market-cat { width: 100px; font-size: 13px; font-weight: 600; color: var(--text); text-transform: capitalize; flex-shrink: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .market-bar-wrap { flex: 1; height: 7px; background: var(--border); border-radius: 4px; overflow: hidden; }
+  .market-bar-fill { height: 100%; border-radius: 4px; min-width: 4px; }
+  .market-count { font-size: 12px; font-weight: 700; color: var(--text-muted); min-width: 20px; text-align: right; }
+}
+
