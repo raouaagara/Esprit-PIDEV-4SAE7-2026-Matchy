@@ -1,7 +1,9 @@
-import { Component, OnInit } from '@angular/core';
+﻿import { Component, OnInit, OnDestroy } from '@angular/core';
 import { Router } from '@angular/router';
 import { AuthService } from '../../../core/services/auth.service';
 import { NotificationService } from '../../../core/services/notification.service';
+import { WebSocketService } from '../../../core/services/websocket.service';
+import { Subscription } from 'rxjs';
 
 @Component({
   selector: 'app-fl-navbar',
@@ -45,7 +47,7 @@ import { NotificationService } from '../../../core/services/notification.service
   styles: [`
     .fl-navbar {
       width: 100%; height: 64px; background: var(--bo-bg-sidebar);
-      display: flex; align-items: center; padding: 0 24px; gap: 32px;
+      display: flex; align-items: center; padding: 0 24px;
       box-shadow: 0 2px 16px rgba(0,0,0,0.18); position: sticky; top: 0; z-index: 100;
       flex-shrink: 0;
     }
@@ -62,7 +64,8 @@ import { NotificationService } from '../../../core/services/notification.service
     }
 
     .navbar-links {
-      display: flex; align-items: center; gap: 4px; flex: 1;
+      display: flex; align-items: center; gap: 4px;
+      position: absolute; left: 50%; transform: translateX(-50%);
     }
 
     .nav-link {
@@ -121,12 +124,13 @@ import { NotificationService } from '../../../core/services/notification.service
     @media (max-width: 768px) {
       .nav-link .nav-label { display: none; }
       .user-chip .user-info { display: none; }
-      .fl-navbar { padding: 0 16px; gap: 16px; }
+      .fl-navbar { padding: 0 16px; }
     }
   `]
 })
-export class FlNavbarComponent implements OnInit {
+export class FlNavbarComponent implements OnInit, OnDestroy {
   unreadCount = 0;
+  private wsSub?: Subscription;
 
   navItems = [
     { label: 'Dashboard',       icon: '📊', route: '/freelancer/dashboard',  badge: false },
@@ -139,7 +143,8 @@ export class FlNavbarComponent implements OnInit {
   constructor(
     public authService: AuthService,
     private router: Router,
-    private notifService: NotificationService
+    private notifService: NotificationService,
+    private wsService: WebSocketService
   ) {}
 
   ngOnInit(): void {
@@ -149,8 +154,14 @@ export class FlNavbarComponent implements OnInit {
         next: r => this.unreadCount = r.count,
         error: () => this.unreadCount = 0
       });
+      this.wsService.connect(String(userId));
+      this.wsSub = this.wsService.onNotification().subscribe(() => {
+        this.unreadCount++;
+      });
     }
   }
+
+  ngOnDestroy(): void { this.wsSub?.unsubscribe(); }
 
   logout(): void { this.authService.logout(); this.router.navigate(['/']); }
 
