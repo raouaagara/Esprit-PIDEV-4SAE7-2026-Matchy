@@ -17,6 +17,13 @@ import { AuthService } from '../../../core/services/auth.service';
 
       <!-- RIGHT : Actions -->
       <div class="header-right">
+
+        <!-- Dark/Light toggle -->
+        <button class="btn-theme" (click)="toggleTheme()" [title]="isDark ? 'Switch to Light' : 'Switch to Dark'">
+          <span>{{ isDark ? '☀️' : '🌙' }}</span>
+          <span class="theme-lbl">{{ isDark ? 'Light' : 'Dark' }}</span>
+        </button>
+
         <button class="btn-home" (click)="goHome()">
           <svg width="14" height="14" viewBox="0 0 16 16" fill="none">
             <path d="M10 12L6 8l4-4" stroke="currentColor" stroke-width="2"
@@ -40,14 +47,12 @@ import { AuthService } from '../../../core/services/auth.service';
     </header>
   `,
   styles: [`
-    /* ── Tokens ─────────────────────────────────────── */
     :host {
       --accent:  #6366f1;
       --purple:  #a855f7;
       --a-light: rgba(99,102,241,0.1);
     }
 
-    /* ── Shell ──────────────────────────────────────── */
     .fl-header {
       display: flex;
       align-items: center;
@@ -63,7 +68,6 @@ import { AuthService } from '../../../core/services/auth.service';
       gap: 16px;
     }
 
-    /* ── Brand ──────────────────────────────────────── */
     .header-brand {
       display: flex;
       align-items: center;
@@ -107,11 +111,31 @@ import { AuthService } from '../../../core/services/auth.service';
       letter-spacing: 0.03em;
     }
 
-    /* ── Right ──────────────────────────────────────── */
     .header-right {
       display: flex;
       align-items: center;
       gap: 14px;
+    }
+
+    .btn-theme {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 6px 14px;
+      border-radius: 50px;
+      font-size: 12px;
+      font-weight: 600;
+      border: 1.5px solid rgba(124,106,247,0.3);
+      background: rgba(124,106,247,0.08);
+      color: #9d8ff9;
+      cursor: pointer;
+      font-family: inherit;
+      transition: all 0.2s;
+    }
+    .btn-theme .theme-lbl { letter-spacing: 0.02em; }
+    .btn-theme:hover {
+      background: rgba(124,106,247,0.16);
+      border-color: rgba(124,106,247,0.5);
     }
 
     .btn-home {
@@ -142,7 +166,6 @@ import { AuthService } from '../../../core/services/auth.service';
       flex-shrink: 0;
     }
 
-    /* ── User Pill ──────────────────────────────────── */
     .user-pill {
       display: flex;
       align-items: center;
@@ -184,6 +207,34 @@ import { AuthService } from '../../../core/services/auth.service';
   `]
 })
 export class FlHeaderComponent {
-  constructor(public authService: AuthService, private router: Router) {}
+  isDark = false;
+
+  constructor(public authService: AuthService, private router: Router) {
+    this.authService.checkAuth();
+    this.isDark = localStorage.getItem('theme') === 'dark'
+               || document.body.classList.contains('dark');
+    this.applyTheme();
+  }
+
+  toggleTheme(): void {
+    this.isDark = !this.isDark;
+    localStorage.setItem('theme', this.isDark ? 'dark' : 'light');
+    this.applyTheme();
+  }
+
+  private applyTheme(): void {
+    document.body.classList.toggle('dark', this.isDark);
+    const html = document.documentElement;
+    if (this.isDark) {
+      html.classList.add('bo-dark');
+      html.classList.remove('bo-light');
+      html.setAttribute('data-theme', 'dark');
+    } else {
+      html.classList.add('bo-light');
+      html.classList.remove('bo-dark');
+      html.setAttribute('data-theme', 'light');
+    }
+  }
+
   goHome(): void { this.router.navigate(['/']); }
 }
