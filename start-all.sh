@@ -1,67 +1,31 @@
 #!/bin/bash
-# =============================================
-#  MATCHY - Démarrage complet de l'application
-# =============================================
-
 BASE_DIR="$(cd "$(dirname "$0")" && pwd)"
 
-echo ""
-echo "╔══════════════════════════════════════╗"
-echo "║   MATCHY - Démarrage des services    ║"
-echo "╠══════════════════════════════════════╣"
-echo "║  1. Eureka Server    → port 8761     ║"
-echo "║  2. API Gateway      → port 8080     ║"
-echo "║  3. Backend (mono)   → port 8081     ║"
-echo "║  4. Frontend Angular → port 4200     ║"
-echo "╚══════════════════════════════════════╝"
-echo ""
+echo "================================================"
+echo "  MATCHY - Demarrage microservices (3 services)"
+echo "================================================"
 
-# 1. Eureka Server
-echo ">>> [1/4] Démarrage Eureka Server (port 8761)..."
-cd "$BASE_DIR/eureka-server"
+# 1. user-service
+echo ">>> [1/3] user-service (port 8081)..."
+cd "$BASE_DIR/user-service"
 mvn spring-boot:run -q &
-EUREKA_PID=$!
-echo "    Eureka PID=$EUREKA_PID - Attente 20s..."
-sleep 20
-echo "    ✅ Eureka démarré !"
+sleep 10
 
-# 2. API Gateway
-echo ""
-echo ">>> [2/4] Démarrage API Gateway (port 8080)..."
+# 2. profile_project_service
+echo ">>> [2/3] profile_project_service (port 8082)..."
+cd "$BASE_DIR/profile_project_service"
+mvn spring-boot:run -q &
+sleep 10
+
+# 3. api-gateway
+echo ">>> [3/3] api-gateway (port 8080)..."
 cd "$BASE_DIR/api-gateway"
 mvn spring-boot:run -q &
-GW_PID=$!
-echo "    Gateway PID=$GW_PID - Attente 15s..."
-sleep 15
-echo "    ✅ API Gateway démarrée !"
-
-# 3. Backend
-echo ""
-echo ">>> [3/4] Démarrage Backend (port 8081)..."
-cd "$BASE_DIR/backend"
-mvn spring-boot:run -q &
-BACKEND_PID=$!
-echo "    Backend PID=$BACKEND_PID - Attente 15s..."
-sleep 15
-echo "    ✅ Backend démarré !"
 
 echo ""
-echo "╔══════════════════════════════════════════════════╗"
-echo "║          ✅ TOUS LES SERVICES DÉMARRÉS !         ║"
-echo "╠══════════════════════════════════════════════════╣"
-echo "║  Eureka Dashboard : http://localhost:8761         ║"
-echo "║                     (admin / admin123)            ║"
-echo "║  API Gateway      : http://localhost:8080/api     ║"
-echo "║  Backend direct   : http://localhost:8081         ║"
-echo "║  H2 Console       : http://localhost:8081/h2-con  ║"
-echo "╠══════════════════════════════════════════════════╣"
-echo "║  Frontend : cd frontend && npm install && ng serve║"
-echo "╠══════════════════════════════════════════════════╣"
-echo "║  Comptes demo:                                    ║"
-echo "║  Admin      : admin@matchy.tn / admin123          ║"
-echo "║  Client     : sara@matchy.tn / client123          ║"
-echo "║  Freelancer : karim@matchy.tn / freelancer123     ║"
-echo "╚══════════════════════════════════════════════════╝"
-echo ""
+echo "Tous les services sont démarrés !"
+echo "API Gateway:          http://localhost:8080"
+echo "user-service:         http://localhost:8081"
+echo "profile_project_service: http://localhost:8082"
 
 wait
