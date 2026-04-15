@@ -18,7 +18,7 @@ export class UserService {
     return this.http.get<any[]>(this.api).pipe(map(list => list.map(u => this.toUser(u))));
   }
 
-  getById(id: number): Observable<User> {
+  getById(id: string | number): Observable<User> {
     return this.http.get<any>(`${this.api}/${id}`).pipe(map(u => this.toUser(u)));
   }
 
@@ -30,15 +30,15 @@ export class UserService {
     return this.http.post<any>(this.api, user).pipe(map(u => this.toUser(u)));
   }
 
-  update(id: number, user: Partial<User>): Observable<User> {
+  update(id: string | number, user: Partial<User>): Observable<User> {
     return this.http.put<any>(`${this.api}/${id}`, user).pipe(map(u => this.toUser(u)));
   }
 
-  delete(id: number): Observable<any> {
+  delete(id: string | number): Observable<any> {
     return this.http.delete(`${this.api}/${id}`);
   }
 
-  updateStatus(id: number, status: string): Observable<User> {
+  updateStatus(id: string | number, status: string): Observable<User> {
     return this.http.patch<any>(`${this.api}/${id}/status`, { status }).pipe(map(u => this.toUser(u)));
   }
 
