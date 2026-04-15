@@ -1,4 +1,4 @@
-<div class="dashboard">
+﻿<div class="dashboard">
   <div class="page-header animate-slide-down">
     <div class="header-left">
       <span class="welcome-eyebrow">Client Portal</span>
@@ -10,13 +10,13 @@
       <p class="page-sub">Here's what's happening with your projects today</p>
     </div>
     <a routerLink="/client/projects" class="btn-primary">
-      <span>＋</span> Post a Project
+      <span>+</span> Post a Project
     </a>
   </div>
 
   <div class="loading-state" *ngIf="isLoading">
     <div class="loader-ring"></div>
-    <span>Loading your dashboard…</span>
+    <span>Loading your dashboard...</span>
   </div>
 
   <ng-container *ngIf="!isLoading">
@@ -24,7 +24,7 @@
     <div class="stats-grid">
       <div class="stat-card stat-purple animate-fade-up" style="animation-delay:0.05s">
         <div class="stat-glow"></div>
-        <div class="stat-icon">📁</div>
+        <div class="stat-icon">📋</div>
         <div class="stat-info">
           <span class="stat-value">{{ stats.total }}</span>
           <span class="stat-label">Total Projects</span>
@@ -65,6 +65,29 @@
       </div>
     </div>
 
+    <!-- BADGES SECTION -->
+<div class="badges-section animate-fade-up" style="animation-delay:0.28s">
+  <div class="badges-header">
+    <h3><span>🏅</span> My Achievements</h3>
+    <span class="badges-count">{{ earnedCount }} / {{ allBadges.length }} unlocked</span>
+  </div>
+  <div class="badges-grid">
+    <div class="badge-item" *ngFor="let b of mergedBadges"
+      [class.badge-unlocked]="!b.locked"
+      [class.badge-locked]="b.locked"
+    >
+      <div class="badge-icon-wrap">
+        <span class="badge-icon">{{ b.locked ? "🔒" : b.icon }}</span>
+      </div>
+      <div class="badge-info">
+        <span class="badge-title">{{ b.name }}</span>
+        <span class="badge-desc">{{ b.desc }}</span>
+      </div>
+      <div class="badge-earned-pill" *ngIf="!b.locked">✔ Earned</div>
+    </div>
+  </div>
+</div>
+
     <!-- DELIVERED BANNER -->
     <div class="delivered-banner animate-fade-up" *ngIf="deliveredProjects.length > 0" style="animation-delay:0.28s">
       <div class="delivered-banner-header">
@@ -73,7 +96,7 @@
           <span>📦 Deliveries waiting for your review</span>
           <span class="delivered-count">{{ deliveredProjects.length }}</span>
         </div>
-        <p class="delivered-banner-sub">A freelancer submitted work — confirm or request a revision.</p>
+        <p class="delivered-banner-sub">A freelancer submitted work – confirm or request a revision.</p>
       </div>
       <div class="delivered-list">
         <div class="delivered-item" *ngFor="let p of deliveredProjects" (click)="openDelivery(p)">
@@ -104,7 +127,7 @@
           <a routerLink="/client/projects" class="link-more">View all →</a>
         </div>
         <div class="empty-state" *ngIf="projects.length === 0">
-          <span class="empty-icon">📭</span>
+          <span class="empty-icon">🔭</span>
           <p>No projects yet. <a routerLink="/client/projects">Create one!</a></p>
         </div>
         <div class="project-list" *ngIf="projects.length > 0">
@@ -172,7 +195,7 @@
         <div class="delivery-message">{{ selectedDelivery.deliveryMessage }}</div>
       </div>
       <div class="delivery-empty" *ngIf="!selectedDelivery?.deliveryLink && !selectedDelivery?.deliveryMessage">
-        <span>📎</span>
+        <span>🔎</span>
         <p>No delivery link or message provided.</p>
       </div>
       <div class="revision-section" *ngIf="showRevisionInput">
@@ -184,7 +207,7 @@
 
     <div class="modal-footer">
       <button class="btn-revision-toggle" (click)="showRevisionInput = !showRevisionInput" *ngIf="!showRevisionInput">
-        🔁 Request Revision
+        📝 Request Revision
       </button>
       <button class="btn-send-revision" (click)="requestRevision()" *ngIf="showRevisionInput" [disabled]="!revisionMessage.trim()">
         Send Revision Request
@@ -253,7 +276,7 @@
           Les fonds sont libérés au freelancer uniquement après votre confirmation.</p>
       </div>
 
-      <!-- AMOUNT BOX — 100% dynamique -->
+      <!-- AMOUNT BOX – 100% dynamique -->
       <div class="pay-amount-box">
         <div class="pay-amount-top">
           <div>
@@ -366,7 +389,7 @@
       </button>
 
       <div class="pay-secure-note">
-        <span>🔐</span> Les fonds sont libérés au freelancer après confirmation
+        <span>🔍</span> Les fonds sont libérés au freelancer après confirmation
       </div>
 
     </ng-container>
@@ -378,7 +401,7 @@
           <div class="pay-spinner-ring"></div>
           <div class="pay-spinner-inner">💳</div>
         </div>
-        <div class="pay-processing-title">Traitement en cours…</div>
+        <div class="pay-processing-title">Traitement en cours...</div>
         <div class="pay-processing-sub">Sécurisation des fonds en escrow</div>
         <div class="pay-processing-dots">
           <span></span><span></span><span></span>
@@ -421,10 +444,11 @@
           </div>
         </div>
 
-        <div class="pay-success-badge">✓ Projet marqué comme Terminé</div>
+        <div class="pay-success-badge">✔ Projet marqué comme Terminé</div>
         <button class="pay-btn-done" (click)="finishPayment()">Fermer 🎉</button>
       </div>
     </ng-container>
 
   </div>
 </div>
+
