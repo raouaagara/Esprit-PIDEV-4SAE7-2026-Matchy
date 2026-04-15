@@ -10,15 +10,15 @@ export class NotificationService {
 
   constructor(private http: HttpClient) {}
 
-  getForUser(userId: number): Observable<Notification[]> {
+  getForUser(userId: string | number): Observable<Notification[]> {
     return this.http.get<Notification[]>(`${this.api}/user/${userId}`);
   }
 
-  getUnread(userId: number): Observable<Notification[]> {
+  getUnread(userId: string | number): Observable<Notification[]> {
     return this.http.get<Notification[]>(`${this.api}/user/${userId}/unread`);
   }
 
-  countUnread(userId: number): Observable<{ count: number }> {
+  countUnread(userId: string | number): Observable<{ count: number }> {
     return this.http.get<{ count: number }>(`${this.api}/user/${userId}/count`);
   }
 
@@ -26,7 +26,7 @@ export class NotificationService {
     return this.http.patch(`${this.api}/${id}/read`, {});
   }
 
-  markAllAsRead(userId: number): Observable<any> {
+  markAllAsRead(userId: string | number): Observable<any> {
     return this.http.patch(`${this.api}/user/${userId}/read-all`, {});
   }
 
