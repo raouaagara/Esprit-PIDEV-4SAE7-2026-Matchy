@@ -117,68 +117,80 @@ Matchy is an intelligent freelance marketplace and event management platform des
 
 ## 🏗️ Architecture
 
-### Microservices Architecture
+## 🌿 Repository Branches
 
-```
 ┌─────────────────────────────────────────────────────────────┐
 │                  Angular Frontend (4200)                    │
-│  • Event Management  • Registration  • Dark Mode            │
+│  • Event Management  • Registration  • Dark Mode           │
+│  • Branches:                                               │
+│    - Event-Management-System                               │
+│    - user-and-project-management     
+      -subscription                                          │
+│    - milestone-workspace-feature                           │
+│    - content-and-certification-management    │
 └────────────────────────────┬────────────────────────────────┘
                              │
                              ▼
 ┌─────────────────────────────────────────────────────────────┐
 │                   API Gateway (9090)                        │
 │  • Request Routing  • Load Balancing  • CORS               │
+│  • Branch: main                                            │
 └────────────────────────────┬────────────────────────────────┘
                              │
                              ▼
 ┌─────────────────────────────────────────────────────────────┐
 │                  Eureka Server (8761)                       │
 │  • Service Discovery  • Health Monitoring                   │
+│  • Branch: main                                            │
 └────────────────────────────┬────────────────────────────────┘
                              │
                              ▼
 ┌─────────────────────────────────────────────────────────────┐
 │                 Matchy Backend (8081)                       │
 │  • Event Service  • User Service  • Registration Service    │
+│  • Branches:                                               │
+│    - user-service 
+     -profile & project management│
+│    - subscription                                          │
+│    - milestone-workspace-feature                           │
+│    - content-and-certification-management                  │
+│    - content-certification-management                      │
 └────────────────────────────┬────────────────────────────────┘
                              │
                              ▼
 ┌─────────────────────────────────────────────────────────────┐
 │                    MySQL Database (3307)                    │
-│  • Events  • Users  • Registrations                         │
+│  • Events  • Users  • Registrations - subscription-projects
+  -milestones -subscription│
+│                             
 └─────────────────────────────────────────────────────────────┘
-```
 
 ---
 
-## 📁 Project Structure
-
-```
 matchy-angular/
 ├── src/app/
 │   ├── frontoffice/                  # Public-facing module
-│   │   ├── home/                     # Landing page
-│   │   ├── events/                   # Event browsing & registration
-│   │   ├── layout/                   # Navbar + Footer
+│   │   ├── home/
+│   │   ├── events/
+│   │   ├── layout/
 │   │   └── frontoffice.module.ts
 │   │
 │   ├── backoffice/                   # Admin module
-│   │   ├── dashboard/                # Admin dashboard
-│   │   ├── events/                   # Event management (CRUD)
-│   │   ├── registrations/            # Registration management
-│   │   ├── users/                    # User management
-│   │   ├── layout/                   # Sidebar + Header
+│   │   ├── dashboard/
+│   │   ├── events/
+│   │   ├── registrations/
+│   │   ├── users/
+│   │   ├── layout/
 │   │   └── backoffice.module.ts
 │   │
 │   ├── shared/                       # Shared components
 │   │   ├── components/
-│   │   │   ├── notification-bell/    # Real-time notifications
-│   │   │   ├── location-icon/        # Event location viewer
-│   │   │   ├── location-map/         # Map modal
-│   │   │   ├── event-statistics-panel/ # Statistics panel
-│   │   │   ├── confirmation-dialog/  # Animated dialogs
-│   │   │   └── theme-toggle/         # Dark mode toggle
+│   │   │   ├── notification-bell/
+│   │   │   ├── location-icon/
+│   │   │   ├── location-map/
+│   │   │   ├── event-statistics-panel/
+│   │   │   ├── confirmation-dialog/
+│   │   │   └── theme-toggle/
 │   │   ├── services/
 │   │   └── pipes/
 │   │
@@ -191,15 +203,72 @@ matchy-angular/
 │       │   └── export.service.ts
 │       └── models/
 │
-├── backend/                          # Spring Boot backend
-│   ├── src/main/java/com/matchy/
-│   │   ├── controller/               # REST controllers
-│   │   ├── service/                  # Business logic
-│   │   ├── repository/               # Data access
-│   │   ├── entity/                   # JPA entities
-│   │   ├── dto/                      # Data transfer objects
-│   │   └── config/                   # Configuration
-│   └── pom.xml
+├── backend/                          # Microservices architecture
+│   │
+│   ├── event-service/                # Event microservice
+│   │   ├── controller/
+│   │   ├── service/
+│   │   ├── repository/
+│   │   ├── entity/
+│   │   ├── dto/
+│   │   └── config/
+│   │
+│   ├── registration-service/         # Registration microservice
+│   │   ├── controller/
+│   │   ├── service/
+│   │   ├── repository/
+│   │   ├── entity/
+│   │   └── dto/
+│   │
+│   ├── user-service/                 # User microservice
+│   │   ├── controller/
+│   │   ├── service/
+│   │   ├── repository/
+│   │   ├── entity/
+│   │   └── dto/
+│   │
+│   ├── profile-project-management-service/   # ✅ Combined service
+│   │   ├── src/main/java/com/matchy/management/
+│   │   │   ├── controller/
+│   │   │   │   ├── ProfileController.java
+│   │   │   │   └── ProjectController.java
+│   │   │   │
+│   │   │   ├── service/
+│   │   │   │   ├── ProfileService.java
+│   │   │   │   └── ProjectService.java
+│   │   │   │
+│   │   │   ├── repository/
+│   │   │   │   ├── ProfileRepository.java
+│   │   │   │   └── ProjectRepository.java
+│   │   │   │
+│   │   │   ├── entity/
+│   │   │   │   ├── Profile.java
+│   │   │   │   ├── Project.java
+│   │   │   │   └── Task.java
+│   │   │   │
+│   │   │   └── config/
+│   │   │       ├── SecurityConfig.java
+│   │   │       └── WebConfig.java
+│   │   │
+│   │   ├── src/main/resources/
+│   │   │   └── application.yml
+│   │   │
+│   │   └── pom.xml
+│   │
+│   ├── subscription-service/
+│   │   ├── controller/
+│   │   ├── service/
+│   │   └── config/
+│   │
+│   ├── content-certification-service/
+│   │   ├── controller/
+│   │   ├── service/
+│   │   └── dto/
+│   │
+│   └── milestone-workspace-service/
+│       ├── controller/
+│       ├── service/
+│       └── entity/
 │
 ├── eureka-server/                    # Service discovery
 │   ├── src/main/java/com/matchy/eureka/
@@ -207,19 +276,16 @@ matchy-angular/
 │
 ├── api-gateway/                      # API Gateway
 │   ├── src/main/java/com/matchy/gateway/
-│   │   ├── config/                   # Gateway routes & CORS
-│   │   └── filter/                   # Request/response logging
+│   │   ├── config/
+│   │   └── filter/
 │   └── pom.xml
 │
-└── Documentation/                    # Comprehensive guides
+└── Documentation/
     ├── API_GATEWAY_GUIDE.md
     ├── EUREKA_SETUP_GUIDE.md
     ├── REGISTRATION_FEATURE_GUIDE.md
     ├── DARK_MODE_GUIDE.md
     └── LOCATION_MAP_GUIDE.md
-```
-
----
 
 ## 🚀 Getting Started
 
@@ -320,12 +386,12 @@ Comprehensive guides are available in the project:
 
 | Name | GitHub | Role |
 |------|--------|------|
-| Raouaa GARA | [@raouaagara](https://github.com/raouaagara) | Team Lead |
-| Amine Abdellah | [@amine52a](https://github.com/amine52a) | Backend Developer |
-| Soumaya Mchita | [@soumaya-afk](https://github.com/soumaya-afk) | Frontend Developer |
-| Asma Ibrahim | [@asmaibr](https://github.com/asmaibr) | Full Stack Developer |
-| Sourour Alaimi | [@alaimi-sourour](https://github.com/alaimi-sourour) | UI/UX Designer |
-| Salma Haouari | [@salmahaouarii](https://github.com/salmahaouarii) | QA Engineer |
+| Raouaa GARA | [@raouaagara](https://github.com/raouaagara) 
+| Amine Abdellah | [@amine52a](https://github.com/amine52a) 
+| Soumaya Mchita | [@soumaya-afk](https://github.com/soumaya-afk) 
+| Asma Ibrahim | [@asmaibr](https://github.com/asmaibr) 
+| Sourour Alaimi | [@alaimi-sourour](https://github.com/alaimi-sourour)
+
 
 ---
 
