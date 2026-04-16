@@ -119,173 +119,77 @@ Matchy is an intelligent freelance marketplace and event management platform des
 
 ## 🌿 Repository Branches
 
-┌─────────────────────────────────────────────────────────────┐
-│                  Angular Frontend (4200)                    │
-│  • Event Management  • Registration  • Dark Mode           │
-│  • Branches:                                               │
-│    - Event-Management-System                               │
-│    - user-and-project-management     
-      -subscription                                          │
-│    - milestone-workspace-feature                           │
-│    - content-and-certification-management    │
-└────────────────────────────┬────────────────────────────────┘
-                             │
-                             ▼
-┌─────────────────────────────────────────────────────────────┐
-│                   API Gateway (9090)                        │
-│  • Request Routing  • Load Balancing  • CORS               │
-│  • Branch: main                                            │
-└────────────────────────────┬────────────────────────────────┘
-                             │
-                             ▼
-┌─────────────────────────────────────────────────────────────┐
-│                  Eureka Server (8761)                       │
-│  • Service Discovery  • Health Monitoring                   │
-│  • Branch: main                                            │
-└────────────────────────────┬────────────────────────────────┘
-                             │
-                             ▼
-┌─────────────────────────────────────────────────────────────┐
-│                 Matchy Backend (8081)                       │
-│  • Event Service  • User Service  • Registration Service    │
-│  • Branches:                                               │
-│    - user-service 
-     -profile & project management│
-│    - subscription                                          │
-│    - milestone-workspace-feature                           │
-│    - content-and-certification-management                  │
-│    - content-certification-management                      │
-└────────────────────────────┬────────────────────────────────┘
-                             │
-                             ▼
-┌─────────────────────────────────────────────────────────────┐
-│                    MySQL Database (3307)                    │
-│  • Events  • Users  • Registrations - subscription-projects
-  -milestones -subscription│
-│                             
-└─────────────────────────────────────────────────────────────┘
+┌─────────────────────────────────────────────┐
+│        Angular Frontend (4200)              │
+│  • Event • Registration • Dashboard         │
+│  • Branches:                                │
+│    - Event-Management-System                │
+│    - user-and-project-management            │
+│    - subscription                           │
+│    - milestone-workspace-feature            │
+│    - content-and-certification-management   │
+└───────────────┬─────────────────────────────┘
+                │
+                ▼
+┌─────────────────────────────────────────────┐
+│          API Gateway (9090)                 │
+│  • Routing • CORS • Load Balancing          │
+│  • Branch: main                            │
+└───────────────┬─────────────────────────────┘
+                │
+                ▼
+┌─────────────────────────────────────────────┐
+│         Eureka Server (8761)                │
+│  • Service Discovery                        │
+│  • Branch: main                            │
+└───────────────┬─────────────────────────────┘
+                │
+                ▼
+┌─────────────────────────────────────────────┐
+│        Backend Microservices (8081)         │
+│  • event-service                           │
+│  • registration-service                    │
+│  • user-service                            │
+│  • profile-project-management-service      │
+│  • subscription-service                    │
+│  • milestone-workspace-service             │
+│  • content-certification-service           │
+│  • Branches:                               │
+│    - user-service                          │
+│    - user-and-project-management           │
+│    - subscription                          │
+│    - milestone-workspace-feature           │
+│    - content-and-certification-management  │
+└───────────────┬─────────────────────────────┘
+                │
+                ▼
+┌─────────────────────────────────────────────┐
+│           MySQL Database (3307)             │
+│  • Users • Events • Registrations           │
+│  • Projects • Subscriptions • Milestones    │
+└─────────────────────────────────────────────┘
 
----
+## Project Structure
 
 matchy-angular/
 ├── src/app/
-│   ├── frontoffice/                  # Public-facing module
-│   │   ├── home/
-│   │   ├── events/
-│   │   ├── layout/
-│   │   └── frontoffice.module.ts
-│   │
-│   ├── backoffice/                   # Admin module
-│   │   ├── dashboard/
-│   │   ├── events/
-│   │   ├── registrations/
-│   │   ├── users/
-│   │   ├── layout/
-│   │   └── backoffice.module.ts
-│   │
-│   ├── shared/                       # Shared components
-│   │   ├── components/
-│   │   │   ├── notification-bell/
-│   │   │   ├── location-icon/
-│   │   │   ├── location-map/
-│   │   │   ├── event-statistics-panel/
-│   │   │   ├── confirmation-dialog/
-│   │   │   └── theme-toggle/
-│   │   ├── services/
-│   │   └── pipes/
-│   │
-│   └── core/                         # Core services & models
-│       ├── services/
-│       │   ├── evenement.service.ts
-│       │   ├── registration.service.ts
-│       │   ├── event-refresh.service.ts
-│       │   ├── theme.service.ts
-│       │   └── export.service.ts
-│       └── models/
+│   ├── frontoffice/
+│   ├── backoffice/
+│   ├── shared/
+│   └── core/
 │
-├── backend/                          # Microservices architecture
-│   │
-│   ├── event-service/                # Event microservice
-│   │   ├── controller/
-│   │   ├── service/
-│   │   ├── repository/
-│   │   ├── entity/
-│   │   ├── dto/
-│   │   └── config/
-│   │
-│   ├── registration-service/         # Registration microservice
-│   │   ├── controller/
-│   │   ├── service/
-│   │   ├── repository/
-│   │   ├── entity/
-│   │   └── dto/
-│   │
-│   ├── user-service/                 # User microservice
-│   │   ├── controller/
-│   │   ├── service/
-│   │   ├── repository/
-│   │   ├── entity/
-│   │   └── dto/
-│   │
-│   ├── profile-project-management-service/   # ✅ Combined service
-│   │   ├── src/main/java/com/matchy/management/
-│   │   │   ├── controller/
-│   │   │   │   ├── ProfileController.java
-│   │   │   │   └── ProjectController.java
-│   │   │   │
-│   │   │   ├── service/
-│   │   │   │   ├── ProfileService.java
-│   │   │   │   └── ProjectService.java
-│   │   │   │
-│   │   │   ├── repository/
-│   │   │   │   ├── ProfileRepository.java
-│   │   │   │   └── ProjectRepository.java
-│   │   │   │
-│   │   │   ├── entity/
-│   │   │   │   ├── Profile.java
-│   │   │   │   ├── Project.java
-│   │   │   │   └── Task.java
-│   │   │   │
-│   │   │   └── config/
-│   │   │       ├── SecurityConfig.java
-│   │   │       └── WebConfig.java
-│   │   │
-│   │   ├── src/main/resources/
-│   │   │   └── application.yml
-│   │   │
-│   │   └── pom.xml
-│   │
+├── backend/
+│   ├── event-service/
+│   ├── registration-service/
+│   ├── user-service/
+│   ├── profile-project-management-service/
 │   ├── subscription-service/
-│   │   ├── controller/
-│   │   ├── service/
-│   │   └── config/
-│   │
 │   ├── content-certification-service/
-│   │   ├── controller/
-│   │   ├── service/
-│   │   └── dto/
-│   │
 │   └── milestone-workspace-service/
-│       ├── controller/
-│       ├── service/
-│       └── entity/
 │
-├── eureka-server/                    # Service discovery
-│   ├── src/main/java/com/matchy/eureka/
-│   └── pom.xml
-│
-├── api-gateway/                      # API Gateway
-│   ├── src/main/java/com/matchy/gateway/
-│   │   ├── config/
-│   │   └── filter/
-│   └── pom.xml
-│
+├── eureka-server/
+├── api-gateway/
 └── Documentation/
-    ├── API_GATEWAY_GUIDE.md
-    ├── EUREKA_SETUP_GUIDE.md
-    ├── REGISTRATION_FEATURE_GUIDE.md
-    ├── DARK_MODE_GUIDE.md
-    └── LOCATION_MAP_GUIDE.md
 
 ## 🚀 Getting Started
 
