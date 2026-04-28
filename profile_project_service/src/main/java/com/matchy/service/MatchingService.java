@@ -3,7 +3,7 @@ package com.matchy.service;
 import com.matchy.entity.Project;
 import com.matchy.entity.Proposal;
 import com.matchy.entity.User;
-import com.matchy.entity.MatchResult;  // ← au lieu de com.matchy.model
+import com.matchy.entity.MatchResult;  
 import com.matchy.repository.ProjectRepository;
 import com.matchy.repository.ProposalRepository;
 import com.matchy.repository.UserRepository;

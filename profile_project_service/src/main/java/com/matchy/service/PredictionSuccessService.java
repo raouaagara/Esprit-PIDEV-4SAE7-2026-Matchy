@@ -70,9 +70,7 @@ public class PredictionSuccessService {
         return predictionRepository.save(prediction);
     }
 
-    // ============================================
-    // CALCUL DES SCORES
-    // ============================================
+    
 
     private double calculateSkillsScore(User freelancer, Project project) {
         if (freelancer.getSkills() == null || freelancer.getSkills().isEmpty()) return 0;
