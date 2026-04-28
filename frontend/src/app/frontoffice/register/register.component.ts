@@ -76,9 +76,14 @@ export class RegisterComponent implements AfterViewInit, OnDestroy {
   selectRole(role: 'CLIENT' | 'FREELANCER'): void {
     this.selectedRole = role;
     this.step = 'form';
-    // The captcha container exists only in step "form".
-    // Render it after Angular updates the view.
-    setTimeout(() => this.renderRecaptcha(), 0);
+    // Captcha is required for freelancer signup only.
+    if (role === 'FREELANCER') {
+      // The captcha container exists only in step "form".
+      // Render it after Angular updates the view.
+      setTimeout(() => this.renderRecaptcha(), 0);
+    } else {
+      this.resetCaptcha();
+    }
   }
 
   goBackToRole(): void {
@@ -96,7 +101,7 @@ export class RegisterComponent implements AfterViewInit, OnDestroy {
       this.form.markAllAsTouched();
       return;
     }
-    if (!this.captchaToken) {
+    if (this.selectedRole === 'FREELANCER' && !this.captchaToken) {
       this.error = 'Please complete captcha verification.';
       return;
     }

@@ -218,8 +218,8 @@
                     placeholder="Tell us a bit about yourself..."></textarea>
         </div>
 
-        <!-- Captcha -->
-        <div class="captcha-box">
+        <!-- Captcha (freelancer signup) -->
+        <div class="captcha-box" *ngIf="selectedRole === 'FREELANCER'">
           <div id="register-recaptcha"></div>
         </div>
 
