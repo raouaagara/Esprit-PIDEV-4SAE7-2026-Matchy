@@ -1,0 +1,166 @@
+<div class="org-layout">
+  <!-- Sidebar -->
+  <aside class="sidebar">
+    <div class="sidebar-brand">
+      <div class="logo-icon">M</div>
+      <span class="logo-text">Marketplace</span>
+    </div>
+    <nav class="sidebar-nav">
+      <a routerLink="/organizer/dashboard" routerLinkActive="active" class="nav-item">
+        <span class="nav-icon">📊</span> Dashboard
+      </a>
+      <a routerLink="/organizer/projects" routerLinkActive="active" class="nav-item">
+        <span class="nav-icon">📦</span> Mes Projets
+      </a>
+      <a routerLink="/organizer/chat" routerLinkActive="active" class="nav-item">
+        <span class="nav-icon">💬</span> Messages
+      </a>
+    </nav>
+    <div class="sidebar-footer">
+      <div class="user-info">
+        <div class="user-avatar">{{ getInitials(authService.currentUser?.name || '') }}</div>
+        <div>
+          <p class="user-name">{{ authService.currentUser?.name }}</p>
+          <p class="user-role">Organisateur</p>
+        </div>
+      </div>
+      <button class="btn btn-secondary btn-sm w-full" (click)="logout()">Déconnexion</button>
+    </div>
+  </aside>
+
+  <!-- Main -->
+  <main class="main">
+    <div class="page-header">
+      <div>
+        <h1 class="page-title">Mes Projets 📦</h1>
+        <p class="page-sub">{{ projects.length }} projet(s) publiés</p>
+      </div>
+      <button class="btn btn-primary btn-lg" (click)="openCreate()">
+        <span>+</span> Nouveau Projet
+      </button>
+    </div>
+
+    <!-- Success / Error messages -->
+    <div class="alert alert-success fade-in" *ngIf="successMsg">✅ {{ successMsg }}</div>
+
+    <!-- Loading -->
+    <div class="projects-grid" *ngIf="loading">
+      <div class="skeleton-card" *ngFor="let i of [1,2,3,4,5,6]"></div>
+    </div>
+
+    <!-- Empty -->
+    <div class="empty-state" *ngIf="!loading && projects.length === 0">
+      <div class="empty-icon">📭</div>
+      <h3>Aucun projet pour l'instant</h3>
+      <p>Créez votre premier projet et commencez à vendre !</p>
+      <button class="btn btn-primary mt-3" (click)="openCreate()">Créer un projet</button>
+    </div>
+
+    <!-- Projects grid -->
+    <div class="projects-grid" *ngIf="!loading && projects.length > 0">
+      <div class="project-card fade-in" *ngFor="let project of projects">
+        <div class="project-img">
+          <img *ngIf="project.imageUrl" [src]="project.imageUrl" [alt]="project.title" onerror="this.style.display='none'">
+          <div class="project-img-placeholder" *ngIf="!project.imageUrl">
+            {{ project.title.charAt(0) }}
+          </div>
+          <span class="badge project-status"
+                [class.badge-success]="project.status === 'AVAILABLE'"
+                [class.badge-danger]="project.status === 'SOLD_OUT'">
+            {{ project.status === 'AVAILABLE' ? 'Disponible' : 'Épuisé' }}
+          </span>
+        </div>
+
+        <div class="project-body">
+          <div class="project-top">
+            <span class="badge badge-primary">{{ project.category }}</span>
+            <span class="sold-badge">{{ project.soldCount }} vendus</span>
+          </div>
+          <h3 class="project-title">{{ project.title }}</h3>
+          <p class="project-desc">{{ project.description }}</p>
+        </div>
+
+        <div class="project-footer">
+          <div class="project-price">{{ project.price | currency:'EUR':'symbol':'1.0-0' }}</div>
+          <div class="project-actions">
+            <button class="btn btn-chat btn-sm" (click)="openChat(project)">
+              💬
+              <span class="unread-badge" *ngIf="project.unreadCount && project.unreadCount > 0">
+                {{ project.unreadCount > 9 ? '9+' : project.unreadCount }}
+              </span>
+            </button>
+            <button class="btn btn-secondary btn-sm" (click)="openEdit(project)">✏️ Modifier</button>
+            <button class="btn btn-danger btn-sm" (click)="deleteProject(project.id)"
+                    [disabled]="deleting === project.id">
+              <span *ngIf="deleting !== project.id">🗑️ Supprimer</span>
+              <span *ngIf="deleting === project.id" class="spinner-sm"></span>
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <!-- Toast notifications -->
+  <app-notification-toast></app-notification-toast>
+
+  <!-- Chat panel -->
+  <app-chat-panel
+    *ngIf="activeChatProject"
+    [project]="activeChatProject"
+    (close)="closeChat()">
+  </app-chat-panel>
+</div>
+
+<!-- Modal Create/Edit -->
+<div class="modal-overlay" *ngIf="showModal" (click)="closeModal()"></div>
+<div class="modal" *ngIf="showModal">
+  <div class="modal-header">
+    <h2>{{ editingProject ? '✏️ Modifier le projet' : '🚀 Nouveau Projet' }}</h2>
+    <button class="close-btn" (click)="closeModal()">✕</button>
+  </div>
+
+  <div class="modal-body">
+    <div class="alert alert-danger" *ngIf="errorMsg">⚠️ {{ errorMsg }}</div>
+
+    <div class="form-group">
+      <label>Titre du projet *</label>
+      <input class="form-control" type="text" [(ngModel)]="form.title" placeholder="Ex: Application e-commerce">
+    </div>
+
+    <div class="form-group">
+      <label>Description *</label>
+      <textarea class="form-control" [(ngModel)]="form.description" rows="4"
+                placeholder="Décrivez votre projet en détail..."></textarea>
+    </div>
+
+    <div class="grid-2">
+      <div class="form-group">
+        <label>Prix (€) *</label>
+        <input class="form-control" type="number" [(ngModel)]="form.price" placeholder="0" min="0">
+      </div>
+      <div class="form-group">
+        <label>Catégorie</label>
+        <select class="form-control" [(ngModel)]="form.category">
+          <option *ngFor="let cat of categories" [value]="cat">{{ cat }}</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label>URL de l'image (optionnel)</label>
+      <input class="form-control" type="url" [(ngModel)]="form.imageUrl" placeholder="https://...">
+      <div class="img-preview" *ngIf="form.imageUrl">
+        <img [src]="form.imageUrl" alt="Preview" onerror="this.style.display='none'">
+      </div>
+    </div>
+  </div>
+
+  <div class="modal-footer">
+    <button class="btn btn-secondary" (click)="closeModal()">Annuler</button>
+    <button class="btn btn-primary" (click)="saveProject()" [disabled]="saving || !form.title || !form.price">
+      <span *ngIf="!saving">{{ editingProject ? 'Mettre à jour' : 'Publier le projet' }}</span>
+      <span *ngIf="saving" class="spinner"></span>
+    </button>
+  </div>
+</div>

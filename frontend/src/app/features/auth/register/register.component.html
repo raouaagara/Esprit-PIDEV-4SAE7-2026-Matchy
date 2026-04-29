@@ -1,0 +1,161 @@
+<div class="auth-page">
+  <div class="auth-bg">
+    <div class="blob blob1"></div>
+    <div class="blob blob2"></div>
+    <div class="blob blob3"></div>
+    <div class="blob blob4"></div>
+    <div class="gradient-orb"></div>
+    <div class="particles" id="particles"></div>
+  </div>
+
+  <div class="auth-card fade-in">
+    <div class="auth-logo">
+      <div class="logo-icon">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+          <path d="M12 2L2 7L12 12L22 7L12 2Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          <path d="M2 17L12 22L22 17" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          <path d="M2 12L12 17L22 12" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </div>
+      <span class="logo-text">Matchy</span>
+    </div>
+
+    <h1 class="auth-title slide-up">
+      Créer un compte 
+      <span class="wave-emoji">✨</span>
+    </h1>
+    <p class="auth-subtitle slide-up delay-1">Rejoignez notre marketplace innovante</p>
+
+    <div class="alert alert-danger slide-up delay-2" *ngIf="error">
+      <div class="alert-icon">⚠️</div>
+      <span>{{ error }}</span>
+      <button class="alert-close" (click)="error = ''">×</button>
+    </div>
+
+    <form (ngSubmit)="onSubmit()" class="auth-form">
+      <div class="form-group slide-up delay-2">
+        <label class="form-label">
+          <span class="label-icon">👤</span>
+          <span>Nom complet</span>
+        </label>
+        <div class="input-wrapper">
+          <input 
+            class="form-control" 
+            type="text" 
+            [(ngModel)]="name" 
+            name="name"
+            placeholder="Votre nom" 
+            required
+            [class.filled]="name"
+          >
+          <div class="input-focus-effect"></div>
+        </div>
+      </div>
+
+      <div class="form-group slide-up delay-3">
+        <label class="form-label">
+          <span class="label-icon">📧</span>
+          <span>Email</span>
+        </label>
+        <div class="input-wrapper">
+          <input 
+            class="form-control" 
+            type="email" 
+            [(ngModel)]="email" 
+            name="email"
+            placeholder="vous@exemple.com" 
+            required
+            [class.filled]="email"
+          >
+          <div class="input-focus-effect"></div>
+        </div>
+      </div>
+
+      <div class="form-group slide-up delay-4">
+        <label class="form-label">
+          <span class="label-icon">🔒</span>
+          <span>Mot de passe</span>
+        </label>
+        <div class="input-wrapper">
+          <input
+            class="form-control"
+            [type]="showPassword ? 'text' : 'password'"
+            [(ngModel)]="password"
+            (ngModelChange)="onPasswordChange()"
+            name="password"
+            placeholder="••••••••"
+            required
+            [class.filled]="password"
+          >
+          <button type="button" class="password-toggle" (click)="showPassword = !showPassword">
+            {{ showPassword ? '👁️' : '👁️‍🗨️' }}
+          </button>
+          <div class="input-focus-effect"></div>
+        </div>
+        <div class="password-strength" *ngIf="password">
+          <div class="strength-bar">
+            <div class="strength-level" [style.width.%]="passwordStrength.percentage" 
+                 [class.weak]="passwordStrength.level === 'weak'"
+                 [class.medium]="passwordStrength.level === 'medium'"
+                 [class.strong]="passwordStrength.level === 'strong'">
+            </div>
+          </div>
+          <span class="strength-text">{{ passwordStrength.message }}</span>
+        </div>
+      </div>
+
+      <div class="form-group slide-up delay-5">
+        <label class="form-label">
+          <span class="label-icon">🎯</span>
+          <span>Je suis</span>
+        </label>
+        <div class="role-selector">
+          <div class="role-option" [class.active]="role === 'CLIENT'" (click)="role = 'CLIENT'">
+            <div class="role-icon">🛍️</div>
+            <div class="role-label">Client</div>
+            <div class="role-desc">J'achète des projets</div>
+            <div class="role-check" *ngIf="role === 'CLIENT'">✓</div>
+          </div>
+          <div class="role-option" [class.active]="role === 'ORGANIZER'" (click)="role = 'ORGANIZER'">
+            <div class="role-icon">🚀</div>
+            <div class="role-label">Organisateur</div>
+            <div class="role-desc">Je vends des projets</div>
+            <div class="role-check" *ngIf="role === 'ORGANIZER'">✓</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="form-options slide-up delay-6">
+        <label class="checkbox">
+          <input type="checkbox" [(ngModel)]="agreeTerms" name="terms">
+          <span class="checkmark"></span>
+          <span class="checkbox-text">
+            J'accepte les <a href="#" (click)="$event.preventDefault()">conditions d'utilisation</a>
+          </span>
+        </label>
+      </div>
+
+      <button class="btn btn-primary w-full btn-lg slide-up delay-7" type="submit" [disabled]="loading">
+        <span class="btn-content">
+          <span *ngIf="!loading">Créer mon compte</span>
+          <span *ngIf="loading" class="spinner"></span>
+        </span>
+        <span class="btn-glow"></span>
+      </button>
+    </form>
+
+    <!-- TODO: Social login buttons disabled — add real Google Client ID from Google Cloud Console
+    <div class="auth-divider slide-up delay-8">
+      <span>Ou s'inscrire avec</span>
+    </div>
+    <div class="social-buttons slide-up delay-9">
+      ... Google / GitHub buttons ...
+    </div>
+    -->
+
+    <p class="auth-link slide-up delay-10">
+      Déjà un compte ?
+      <a routerLink="/auth/login">Se connecter <span>→</span></a>
+    </p>
+  </div>
+</div>

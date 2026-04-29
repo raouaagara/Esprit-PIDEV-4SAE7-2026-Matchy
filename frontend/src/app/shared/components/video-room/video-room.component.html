@@ -1,0 +1,164 @@
+<div class="video-overlay">
+
+  <!-- ── Language lobby ── -->
+  <div class="lang-lobby" *ngIf="showLangLobby">
+    <div class="lang-lobby-card">
+      <div class="lang-lobby-icon">🌐</div>
+      <h2 class="lang-lobby-title">{{ subject }}</h2>
+      <p class="lang-lobby-subtitle">Choisissez votre langue de sous-titrage</p>
+      <p class="lang-lobby-hint">Les sous-titres seront traduits dans la langue sélectionnée.</p>
+      <div class="lang-lobby-grid">
+        <button
+          *ngFor="let lang of languages"
+          class="lang-btn"
+          [class.selected]="lobbyLang === lang.code"
+          (click)="lobbyLang = lang.code">
+          {{ lang.label }}
+        </button>
+      </div>
+      <button class="btn-join-meeting" (click)="joinWithLanguage()">
+        Rejoindre la réunion →
+      </button>
+    </div>
+  </div>
+
+  <!-- ── Header ── -->
+  <div class="video-header">
+    <div class="header-left">
+      <div class="meeting-live-dot" [class.live]="isTranscribing"></div>
+      <span class="video-subject">{{ subject }}</span>
+    </div>
+    <div class="header-controls">
+      <button
+        class="btn-transcription"
+        [class.active]="isTranscribing"
+        (click)="toggleTranscription()"
+        [disabled]="isFinalizing">
+        <span *ngIf="isTranscribing" class="ia-pulse"></span>
+        <span class="btn-icon">{{ isTranscribing ? '🎙️' : '🤖' }}</span>
+        <span class="btn-label">{{ isTranscribing ? 'IA Active' : 'Activer IA' }}</span>
+      </button>
+      <button
+        *ngIf="isTranscribing"
+        class="btn-subtitle-toggle"
+        [class.active]="showOriginalSubtitles"
+        (click)="showOriginalSubtitles = !showOriginalSubtitles"
+        title="{{ showOriginalSubtitles ? 'Voir traduction' : 'Voir original' }}">
+        {{ showOriginalSubtitles ? '🌐' : '📝' }}
+      </button>
+      <button class="btn-leave" (click)="onLeave()" [disabled]="isFinalizing">
+        Quitter
+      </button>
+    </div>
+  </div>
+
+  <!-- ── Conteneur ZegoCloud — UN SEUL, toujours dans le DOM ── -->
+  <div
+    class="video-container"
+    id="zego-container"
+    #videoContainer
+    [style.visibility]="showLangLobby ? 'hidden' : 'visible'"
+    [style.position]="showLangLobby ? 'absolute' : 'relative'"
+    [style.pointer-events]="showLangLobby ? 'none' : 'auto'">
+  </div>
+
+  <!-- ── Barre de statut transcription ── -->
+  <div class="transcription-bar" *ngIf="isTranscribing">
+    <span class="transcription-dot"></span>
+    <span class="transcription-label">Transcription en cours…</span>
+  </div>
+
+  <!-- ── Sous-titres overlay ── -->
+  <div class="subtitle-overlay" *ngIf="lastSubtitles.length > 0">
+    <div
+      *ngFor="let sub of lastSubtitles; trackBy: trackSubtitle"
+      class="subtitle-item"
+      [class.subtitle-own]="sub.speakerName === userName">
+      <span class="subtitle-speaker">
+        {{ sub.speakerName }}
+        <span class="subtitle-lang-badge"
+  *ngIf="sub.translatedText && sub.translatedText !== sub.originalText">
+  {{ sub.sourceLang.toUpperCase() }}→{{ preferredLang.toUpperCase() }}
+</span>
+      </span>
+      <span class="subtitle-arrow">›</span>
+
+      <!-- Mes propres messages : texte original + bouton traduction -->
+      <ng-container *ngIf="sub.isMine">
+        <span class="subtitle-text">{{ sub.originalText }}</span>
+        <button
+          *ngIf="sub.translatedText && sub.translatedText !== sub.originalText"
+          class="subtitle-translate-btn"
+          (click)="sub.showTranslation = !sub.showTranslation"
+          title="Voir/masquer la traduction">🔤</button>
+        <span class="subtitle-original" *ngIf="sub.showTranslation">
+          → {{ sub.translatedText }}
+        </span>
+      </ng-container>
+
+      <!-- Messages des autres : traduction automatique -->
+      <ng-container *ngIf="!sub.isMine">
+        <span class="subtitle-text">
+          {{ showOriginalSubtitles ? sub.originalText : (sub.translatedText || sub.originalText) }}
+        </span>
+        <span class="subtitle-original"
+          *ngIf="!showOriginalSubtitles && sub.translatedText && sub.translatedText !== sub.originalText">
+          ({{ sub.originalText }})
+        </span>
+      </ng-container>
+    </div>
+  </div>
+
+  <!-- ── Erreur ── -->
+  <div class="video-error" *ngIf="error">
+    <span class="error-icon">⚠️</span>
+    <span>{{ error }}</span>
+    <button (click)="error = ''">Fermer</button>
+  </div>
+
+  <!-- ── Overlay finalisation ── -->
+  <div class="finalizing-overlay" *ngIf="isFinalizing">
+    <div class="finalizing-spinner"></div>
+    <div class="finalizing-text">Génération du rapport IA…</div>
+    <div class="finalizing-hint">Veuillez patienter, cela peut prendre quelques secondes.</div>
+  </div>
+
+  <!-- ── Rapport IA post-réunion ── -->
+  <div class="report-modal-overlay" *ngIf="showReportModal">
+    <div class="report-modal">
+      <div class="report-modal-header">
+        <h2 class="report-modal-title">🧠 Compte-rendu IA de la réunion</h2>
+      </div>
+      <div class="report-modal-body">
+        <section class="report-section">
+          <h3 class="report-section-title">📋 Résumé</h3>
+          <p class="report-summary">{{ meetingReport?.summary }}</p>
+        </section>
+        <section class="report-section" *ngIf="meetingReport?.tasks?.length">
+          <h3 class="report-section-title">✅ Tâches détectées</h3>
+          <ul class="report-list">
+            <li *ngFor="let task of meetingReport!.tasks">{{ task }}</li>
+          </ul>
+        </section>
+        <section class="report-section" *ngIf="meetingReport?.deadlines?.length">
+          <h3 class="report-section-title">⏰ Deadlines</h3>
+          <ul class="report-list">
+            <li *ngFor="let d of meetingReport!.deadlines">{{ d }}</li>
+          </ul>
+        </section>
+        <section class="report-section" *ngIf="meetingReport?.decisions?.length">
+          <h3 class="report-section-title">🎯 Décisions</h3>
+          <ul class="report-list">
+            <li *ngFor="let dec of meetingReport!.decisions">{{ dec }}</li>
+          </ul>
+        </section>
+      </div>
+      <div class="report-modal-footer">
+        <button class="btn-close-report" (click)="closeReport()">
+          Fermer et quitter
+        </button>
+      </div>
+    </div>
+  </div>
+
+</div>

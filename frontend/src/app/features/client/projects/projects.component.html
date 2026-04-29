@@ -1,0 +1,289 @@
+<div class="client-layout">
+  <!-- GLASS NAVBAR -->
+  <nav class="glass-navbar">
+    <div class="nav-container">
+      <div class="nav-brand">
+        <div class="logo-3d">
+          <div class="logo-cube">
+            <div class="cube-face front">⚡</div>
+            <div class="cube-face back">⚡</div>
+            <div class="cube-face right">⚡</div>
+            <div class="cube-face left">⚡</div>
+          </div>
+        </div>
+        <span class="logo-text">Freelance<span class="logo-accent">Hub</span></span>
+      </div>
+
+      <div class="nav-center">
+        <div class="search-container">
+          <input 
+            class="search-input" 
+            type="text" 
+            placeholder="🔍 Rechercher un projet..." 
+            [(ngModel)]="searchQuery"
+            (input)="applyFilter()"
+          >
+        </div>
+      </div>
+
+      <div class="nav-right">
+        <div class="notifications-dropdown" *ngIf="totalUnread > 0">
+          <button class="notif-btn" (click)="toggleNotifications()">
+            <div class="bell-wrapper">
+              🔔
+              <span class="notif-badge">{{ totalUnread > 99 ? '99+' : totalUnread }}</span>
+            </div>
+          </button>
+        </div>
+
+        <div class="user-menu" (click)="toggleUserMenu()">
+          <div class="user-avatar">
+            {{ getInitials(authService.currentUser?.name || '') }}
+          </div>
+          <div class="user-details" *ngIf="authService.currentUser">
+            <span class="user-name">{{ getUserFirstName() }}</span>
+            <span class="user-badge">PRO</span>
+          </div>
+          <span class="dropdown-icon">▼</span>
+        </div>
+
+        <button class="logout-btn" (click)="logout()">
+          🚪
+        </button>
+      </div>
+    </div>
+
+    <!-- Mobile Search -->
+    <div class="mobile-search">
+      <input class="mobile-search-input" type="text" placeholder="🔍 Rechercher..."
+             [(ngModel)]="searchQuery" (input)="applyFilter()">
+    </div>
+  </nav>
+
+  <!-- MAIN CONTENT -->
+  <main class="main-content">
+    <!-- HERO SECTION -->
+    <div class="hero-section">
+      <div class="hero-badge">
+        <span class="badge-dot"></span>
+        ⚡ MARKETPLACE FREELANCE ⚡
+      </div>
+      <h1 class="hero-title">
+        Des projets
+        <span class="gradient-text">exceptionnels</span>
+        <br>pour des talents uniques
+      </h1>
+      <p class="hero-subtitle">
+        Découvrez des projets innovants sélectionnés pour vous
+      </p>
+      <div class="hero-stats">
+        <div class="stat">
+          <span class="stat-value">{{ projects.length }}</span>
+          <span class="stat-label">Projets</span>
+        </div>
+        <div class="stat">
+          <span class="stat-value">{{ getTotalFreelancers() }}</span>
+          <span class="stat-label">Freelancers</span>
+        </div>
+        <div class="stat">
+          <span class="stat-value">{{ getTotalTransactions() }}</span>
+          <span class="stat-label">Transactions</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- CATEGORIES FILTER -->
+    <div class="categories-section">
+      <div class="categories-scroll">
+        <button 
+          *ngFor="let cat of categories" 
+          class="category-card"
+          [class.active]="selectedCategory === cat"
+          (click)="filterCategory(cat)">
+          <span class="category-icon">{{ getCategoryIcon(cat) }}</span>
+          <span class="category-name">{{ cat === 'all' ? 'Tous' : cat }}</span>
+          <span class="category-count">{{ getCategoryCount(cat) }}</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- PROJECTS GRID -->
+    <div class="projects-section">
+      <div class="section-header">
+        <div>
+          <h2 class="section-title">🔥 Projets à la une</h2>
+          <p class="section-subtitle">{{ filteredProjects.length }} projets disponibles</p>
+        </div>
+        <div class="sort-options">
+          <select class="sort-select" [(ngModel)]="sortBy" (change)="applyFilter()">
+            <option value="recent">Plus récents</option>
+            <option value="price-asc">Prix croissant</option>
+            <option value="price-desc">Prix décroissant</option>
+            <option value="popular">Plus populaires</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- Loading State -->
+      <div class="loading-grid" *ngIf="loading">
+        <div class="skeleton-card" *ngFor="let i of [1,2,3,4,5,6]">
+          <div class="skeleton-img"></div>
+          <div class="skeleton-content">
+            <div class="skeleton-line"></div>
+            <div class="skeleton-line short"></div>
+            <div class="skeleton-line medium"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Empty State -->
+      <div class="empty-state" *ngIf="!loading && filteredProjects.length === 0">
+        <div class="empty-icon">🎯</div>
+        <h3>Aucun projet trouvé</h3>
+        <p>Essayez de modifier votre recherche ou catégorie</p>
+        <button class="btn-reset" (click)="resetFilters()">Réinitialiser les filtres</button>
+      </div>
+
+      <!-- Projects Masonry Grid -->
+      <div class="projects-masonry" *ngIf="!loading && filteredProjects.length > 0">
+        <div class="project-card" *ngFor="let project of filteredProjects; let i = index"
+             [style.animation-delay]="i * 0.05 + 's'">
+          
+          <!-- Image Section -->
+          <div class="card-media">
+            <img *ngIf="project.imageUrl" [src]="project.imageUrl" [alt]="project.title"
+                 (error)="handleImageError($event)">
+            <div class="media-placeholder" *ngIf="!project.imageUrl">
+              <div class="placeholder-icon">{{ getCategoryEmoji(project.category) }}</div>
+            </div>
+            
+            <!-- Status Badge -->
+            <div class="status-badge" [class.sold]="project.status === 'SOLD_OUT'">
+              <span class="status-dot"></span>
+              {{ project.status === 'AVAILABLE' ? 'Disponible' : 'Vendu' }}
+            </div>
+
+            <!-- Sold Count -->
+            <div class="sold-count" *ngIf="project.soldCount && project.soldCount > 0">
+              <span class="fire-icon">🔥</span>
+              {{ project.soldCount }} vente{{ project.soldCount > 1 ? 's' : '' }}
+            </div>
+          </div>
+
+          <!-- Content -->
+          <div class="card-content">
+            <div class="card-header">
+              <span class="category-chip">{{ project.category }}</span>
+            </div>
+
+            <h3 class="card-title">{{ project.title }}</h3>
+            <p class="card-description">{{ project.description | slice:0:100 }}...</p>
+
+            <!-- Organizer Info -->
+            <div class="organizer-info">
+              <div class="org-avatar small">
+                {{ getInitials(project.organizerName) }}
+              </div>
+              <div class="org-details">
+                <span class="org-name">{{ project.organizerName }}</span>
+                <span class="org-role">Freelancer</span>
+              </div>
+            </div>
+
+            <!-- Price & Actions -->
+            <div class="card-footer">
+              <div class="price-container">
+                <span class="price-currency">€</span>
+                <span class="price-value">{{ project.price | number }}</span>
+                <span class="price-period">/ projet</span>
+              </div>
+              
+              <div class="action-buttons">
+                <button class="action-btn chat-btn" (click)="openChat(project)">
+                  💬
+                  <span class="unread-indicator" *ngIf="project.unreadCount && project.unreadCount > 0">
+                    {{ project.unreadCount }}
+                  </span>
+                </button>
+                
+                <button class="action-btn buy-btn" 
+                        [class.pending]="project.purchaseStatus === 'PENDING'"
+                        [class.accepted]="project.purchaseStatus === 'ACCEPTED'"
+                        [class.rejected]="project.purchaseStatus === 'REJECTED'"
+                        [disabled]="!isPurchasable(project)"
+                        (click)="openBuyModal(project)">
+                  <span *ngIf="project.purchaseStatus === 'PENDING'">⏳</span>
+                  <span *ngIf="project.purchaseStatus === 'ACCEPTED'">✅</span>
+                  <span *ngIf="project.purchaseStatus === 'REJECTED'">❌</span>
+                  <span *ngIf="!project.purchaseStatus">🛒</span>
+                  {{ getPurchaseBtnLabel(project) }}
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <!-- FLOATING CHAT BUTTON -->
+  <div class="floating-chat" *ngIf="!activeChatProject && totalUnread > 0" (click)="openLastChat()">
+    <div class="chat-3d">
+      💬
+    </div>
+    <span class="chat-badge">{{ totalUnread }}</span>
+  </div>
+
+  <!-- CHAT PANEL (full-featured with all 14 capabilities) -->
+  <app-chat-panel
+    *ngIf="activeChatProject"
+    [project]="activeChatProject"
+    (close)="closeChat()"
+  ></app-chat-panel>
+
+  <!-- NOTIFICATION TOAST -->
+  <app-notification-toast></app-notification-toast>
+
+  <!-- BUY MODAL -->
+  <div class="modal-overlay" *ngIf="showBuyModal" (click)="closeBuyModal()"></div>
+  <div class="premium-modal" *ngIf="showBuyModal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <div class="modal-icon-wrapper">
+          🛒
+        </div>
+        <h2>Confirmer l'achat</h2>
+        <button class="modal-close" (click)="closeBuyModal()">✕</button>
+      </div>
+
+      <div class="modal-body">
+        <div class="project-preview">
+          <div class="preview-icon">{{ getCategoryEmoji(buyingProject?.category || '') }}</div>
+          <div class="preview-info">
+            <h4>{{ buyingProject?.title }}</h4>
+            <p>par {{ buyingProject?.organizerName }}</p>
+            <div class="preview-price">{{ buyingProject?.price | currency:'EUR':'symbol':'1.0-0' }}</div>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label>Message pour le freelancer</label>
+          <textarea class="form-control modern" [(ngModel)]="buyMessage" rows="3"
+                    placeholder="Décrivez votre projet, vos besoins spécifiques..."></textarea>
+        </div>
+
+        <div class="error-message" *ngIf="buyError">
+          <span>⚠️</span> {{ buyError }}
+        </div>
+      </div>
+
+      <div class="modal-footer">
+        <button class="btn-secondary" (click)="closeBuyModal()">Annuler</button>
+        <button class="btn-primary" (click)="confirmBuy()" [disabled]="buying">
+          <span *ngIf="!buying">Confirmer l'achat</span>
+          <div class="loader" *ngIf="buying"></div>
+        </button>
+      </div>
+    </div>
+  </div>
+</div>

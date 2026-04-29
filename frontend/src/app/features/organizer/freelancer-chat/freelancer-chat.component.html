@@ -1,0 +1,849 @@
+<div class="chat-shell" [class.dark]="isDarkMode" (click)="closeEmojiPicker()">
+
+  <!-- ══════════════════════════════════════════════════════════════
+       NOTIFICATION TOAST
+       ══════════════════════════════════════════════════════════════ -->
+  <div class="notif-toast" *ngIf="notifToast" [class]="'notif-toast ' + notifToast.type">
+    {{ notifToast.message }}
+  </div>
+
+  <!-- ══════════════════════════════════════════════════════════════
+       STT CHOICE MODAL
+       ══════════════════════════════════════════════════════════════ -->
+  <div class="modal-backdrop" *ngIf="showSttChoice" (click)="dismissSttChoice()">
+    <div class="modal stt-modal" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <h3>🎙️ Transcription disponible</h3>
+        <button (click)="dismissSttChoice()">✕</button>
+      </div>
+      <div class="modal-body">
+        <p class="field-label">Texte reconnu :</p>
+        <div class="stt-preview">{{ sttTranscript }}</div>
+        <p class="modal-hint">Envoyer comme audio ou utiliser le texte transcrit ?</p>
+      </div>
+      <div class="modal-footer">
+        <button class="btn-secondary" (click)="dismissSttChoice()">Ignorer</button>
+        <button class="btn-secondary" (click)="sendVoiceAsAudio()">🎙️ Audio</button>
+        <button class="btn-primary" (click)="sendVoiceAsText()">✉️ Texte</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════════════════════════════
+       SIDEBAR
+       ══════════════════════════════════════════════════════════════ -->
+  <aside class="sidebar">
+
+    <!-- Header -->
+    <div class="sidebar-header">
+      <div class="sidebar-title">
+        <span class="brand-icon">💬</span>
+        <h1>Messages</h1>
+        <span class="badge-count" *ngIf="getTotalUnread() > 0">{{ getTotalUnread() }}</span>
+      </div>
+      <div class="sidebar-header-actions">
+        <button class="icon-btn" (click)="toggleTheme()" [title]="isDarkMode ? 'Mode clair' : 'Mode sombre'">
+          {{ isDarkMode ? '☀️' : '🌙' }}
+        </button>
+        <button class="icon-btn" (click)="openMeetingModal()" title="Réunion instantanée">📹</button>
+        <button class="icon-btn" (click)="logout()" title="Déconnexion">🚪</button>
+      </div>
+    </div>
+
+    <!-- Search -->
+    <div class="search-bar">
+      <span class="search-icon">🔍</span>
+      <input
+        type="text"
+        placeholder="Rechercher…"
+        [(ngModel)]="searchQuery"
+        class="search-input"
+      />
+      <button *ngIf="searchQuery" class="clear-btn" (click)="searchQuery=''">✕</button>
+    </div>
+
+    <!-- Filter Tabs -->
+    <div class="filter-tabs">
+      <button class="tab-btn" [class.active]="filterMode==='all'"      (click)="setFilter('all')">Tous</button>
+      <button class="tab-btn" [class.active]="filterMode==='unread'"   (click)="setFilter('unread')">Non lus</button>
+      <button class="tab-btn" [class.active]="filterMode==='favorites'"(click)="setFilter('favorites')">⭐</button>
+    </div>
+
+    <!-- Conv List -->
+    <div class="conv-list">
+      <div *ngIf="filteredConversations.length === 0" class="empty-state">
+        <span>💬</span><p>Aucune conversation trouvée</p>
+      </div>
+
+      <div
+        *ngFor="let conv of filteredConversations"
+        class="conv-item"
+        [class.active]="selectedConv?.roomKey === conv.roomKey"
+        [class.unread]="conv.unreadCount > 0"
+        (click)="selectConversation(conv)"
+      >
+        <div class="avatar-wrap">
+          <div class="avatar">
+            <img *ngIf="conv.otherUserAvatar" [src]="conv.otherUserAvatar" [alt]="conv.otherUserName" />
+            <span *ngIf="!conv.otherUserAvatar">{{ getInitials(conv.otherUserName) }}</span>
+          </div>
+          <span class="online-dot" *ngIf="conv.otherUserOnline"></span>
+        </div>
+
+        <div class="conv-info">
+          <div class="conv-top">
+            <span class="conv-name">{{ conv.otherUserName }}</span>
+            <span class="conv-time">{{ formatTime(conv.lastMessageTime) }}</span>
+          </div>
+          <div class="conv-bottom">
+            <span class="conv-project">{{ conv.projectTitle }}</span>
+            <span class="conv-last" *ngIf="conv.lastMessage">{{ conv.lastMessage | slice:0:38 }}…</span>
+          </div>
+        </div>
+
+        <div class="conv-badges">
+          <span class="unread-badge" *ngIf="conv.unreadCount > 0">{{ conv.unreadCount }}</span>
+          <button
+            class="fav-btn"
+            [class.active]="isFavorite(conv)"
+            (click)="toggleFavorite(conv, $event)"
+          >{{ isFavorite(conv) ? '⭐' : '☆' }}</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Sidebar Footer -->
+    <div class="sidebar-footer">
+      <button class="tts-toggle" [class.active]="ttsEnabled" (click)="toggleTTS()">
+        {{ ttsEnabled ? '🔊' : '🔇' }} Notifications vocales
+      </button>
+    </div>
+  </aside>
+
+  <!-- ══════════════════════════════════════════════════════════════
+       MAIN CHAT
+       ══════════════════════════════════════════════════════════════ -->
+  <main class="chat-main">
+
+    <!-- No conversation -->
+    <div *ngIf="!selectedConv" class="no-conv">
+      <div class="no-conv-inner">
+        <span class="no-conv-icon">💬</span>
+        <h2>Sélectionnez une conversation</h2>
+        <p>Choisissez un client dans la liste pour commencer.</p>
+      </div>
+    </div>
+
+    <ng-container *ngIf="selectedConv">
+
+      <!-- ── Chat Header ── -->
+      <header class="chat-header">
+        <div class="chat-header-left">
+          <div class="avatar sm">
+            <span>{{ getInitials(selectedConv.otherUserName) }}</span>
+          </div>
+          <div class="header-info">
+            <h2>{{ selectedConv.otherUserName }}</h2>
+            <span class="header-sub">
+              <span class="status-dot" [class.online]="selectedConv.otherUserOnline"></span>
+              {{ selectedConv.otherUserOnline ? 'En ligne' : 'Hors ligne' }}
+              · {{ selectedConv.projectTitle }}
+            </span>
+          </div>
+        </div>
+
+        <div class="chat-header-right">
+          <!-- Auto-translate incoming toggle -->
+          <div class="auto-translate-wrap" title="Traduire automatiquement les messages reçus">
+            <button class="header-action-btn" [class.active]="autoTranslateIncoming"
+                    (click)="autoTranslateIncoming = !autoTranslateIncoming">
+              🌐 Auto
+            </button>
+            <select *ngIf="autoTranslateIncoming" [(ngModel)]="autoTranslateLang" class="lang-select-sm">
+              <option *ngFor="let l of availableLangs" [value]="l.code">{{ l.label }}</option>
+            </select>
+          </div>
+
+          <button class="header-action-btn" [class.active]="showPinnedPanel" (click)="togglePinnedPanel()" title="Épinglés">
+            📌 {{ pinnedMessages.length }}
+          </button>
+          <button class="header-action-btn" [class.active]="showSharedPanel" (click)="toggleSharedPanel()" title="Partagés">
+            📎
+          </button>
+          <button class="header-action-btn" [class.active]="showMembersPanel" (click)="openMembersPanel()" title="Membres">
+            👥 {{ allParticipants.length }}
+          </button>
+          <button class="header-action-btn" [class.active]="showScheduledList" (click)="showScheduledList = !showScheduledList" title="Programmés">
+            🕐 {{ scheduledMessages.length }}
+          </button>
+
+          <!-- Meeting dropdown -->
+          <div class="meeting-menu-wrap" style="position:relative">
+            <button class="header-action-btn primary" (click)="$event.stopPropagation(); showMeetingMenu = !showMeetingMenu">
+              📹 Réunion ▾
+            </button>
+            <div class="meeting-dropdown" *ngIf="showMeetingMenu" (click)="$event.stopPropagation()">
+              <button (click)="openMeetingModal()">⚡ Instantanée</button>
+              <button (click)="openScheduleMeetingForm()">📅 Planifiée</button>
+              <button (click)="createPermanentLink()">🔗 Lien permanent</button>
+            </div>
+          </div>
+        </div>
+      </header>
+
+      <!-- ── Pinned Panel ── -->
+      <div class="pinned-panel" *ngIf="showPinnedPanel && pinnedMessages.length > 0">
+        <div class="pinned-header">
+          <span>📌 Messages épinglés ({{ pinnedMessages.length }})</span>
+          <button (click)="showPinnedPanel = false">✕</button>
+        </div>
+        <div class="pinned-list">
+          <div *ngFor="let pm of pinnedMessages" class="pinned-item" (click)="scrollToPinnedMessage(pm)">
+            <span class="pinned-author">{{ pm.senderName }}</span>
+            <span class="pinned-content">{{ pm.content | slice:0:80 }}</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── AI Summary Banner ── -->
+      <div class="meeting-summary-banner" *ngIf="aiSummary">
+        <div class="summary-header">
+          <span>🤖 Résumé de réunion IA</span>
+          <button (click)="dismissSummary()">✕</button>
+        </div>
+        <p class="summary-text">{{ aiSummary.summary }}</p>
+        <div class="summary-tasks" *ngIf="aiSummary.tasks?.length">
+          <strong>Tâches :</strong>
+          <ul><li *ngFor="let task of aiSummary.tasks">{{ task }}</li></ul>
+        </div>
+        <div class="summary-tasks" *ngIf="aiSummary.decisions?.length">
+          <strong>Décisions :</strong>
+          <ul><li *ngFor="let d of aiSummary.decisions">{{ d }}</li></ul>
+        </div>
+      </div>
+
+      <!-- ── Translate before send bar ── -->
+      <div class="translate-bar" *ngIf="translateBeforeSend">
+        <span>🌐 Traduction auto avant envoi →</span>
+        <select [(ngModel)]="sendTargetLang" class="lang-select">
+          <option *ngFor="let l of availableLangs" [value]="l.code">{{ l.label }}</option>
+        </select>
+        <button class="btn-xs danger" (click)="translateBeforeSend = false">✕</button>
+      </div>
+
+      <!-- ── Right Panels ── -->
+
+      <!-- Shared Content -->
+      <div class="right-panel" *ngIf="showSharedPanel">
+        <div class="panel-header">
+          <span>📎 Contenu partagé</span>
+          <button (click)="showSharedPanel = false">✕</button>
+        </div>
+        <div class="shared-tabs">
+          <button [class.active]="currentSharedTab==='images'" (click)="currentSharedTab='images'">
+            🖼️ ({{ sharedContent.images.length }})
+          </button>
+          <button [class.active]="currentSharedTab==='files'" (click)="currentSharedTab='files'">
+            📄 ({{ sharedContent.files.length }})
+          </button>
+          <button [class.active]="currentSharedTab==='links'" (click)="currentSharedTab='links'">
+            🔗 ({{ sharedContent.links.length }})
+          </button>
+        </div>
+
+        <div class="shared-grid" *ngIf="currentSharedTab==='images'">
+          <div *ngIf="!sharedContent.images.length" class="empty-tab">Aucune image</div>
+          <div *ngFor="let img of sharedContent.images" class="shared-img-thumb" (click)="openImagePreview(img)">
+            <img [src]="img.fileUrl" [alt]="img.fileName" />
+          </div>
+        </div>
+
+        <div class="panel-scroll" *ngIf="currentSharedTab==='files'">
+          <div *ngIf="!sharedContent.files.length" class="empty-tab">Aucun fichier</div>
+          <a *ngFor="let f of sharedContent.files" [href]="f.fileUrl" target="_blank" class="shared-file-item">
+            📄 {{ f.fileName | slice:0:28 }}
+            <span class="file-date">{{ formatTime(f.sentAt) }}</span>
+          </a>
+        </div>
+
+        <div class="panel-scroll" *ngIf="currentSharedTab==='links'">
+          <div *ngIf="!sharedContent.links.length" class="empty-tab">Aucun lien</div>
+          <div *ngFor="let lm of sharedContent.links" class="shared-link-item">
+            <span class="link-sender">{{ lm.senderName }}</span>
+            <a *ngFor="let url of extractLinks(lm.content)" [href]="url" target="_blank" class="link-url">
+              {{ url | slice:0:50 }}…
+            </a>
+          </div>
+        </div>
+      </div>
+
+      <!-- Members Panel -->
+      <div class="right-panel" *ngIf="showMembersPanel">
+        <div class="panel-header">
+          <span>👥 Membres ({{ allParticipants.length }})</span>
+          <button (click)="showMembersPanel = false">✕</button>
+        </div>
+        <div class="panel-scroll">
+          <div *ngIf="!allParticipants.length" class="empty-tab">Chargement…</div>
+          <div *ngFor="let p of allParticipants" class="member-item">
+            <div class="avatar xs">{{ getInitials(p.name) }}</div>
+            <div class="member-info">
+              <span class="member-name">
+                {{ p.name }}
+                <span class="online-pill" *ngIf="isOnline(p.name)">● en ligne</span>
+              </span>
+              <span class="member-role">{{ getMemberRole(p) }}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Scheduled Messages Panel -->
+      <div class="right-panel scheduled-panel" *ngIf="showScheduledList">
+        <div class="panel-header">
+          <span>🕐 Messages programmés ({{ scheduledMessages.length }})</span>
+          <button (click)="showScheduledList = false">✕</button>
+        </div>
+        <div class="panel-scroll">
+          <div *ngIf="!scheduledMessages.length" class="empty-tab">Aucun message programmé</div>
+          <div *ngFor="let sm of scheduledMessages" class="scheduled-item">
+            <div class="scheduled-content">{{ sm.content | slice:0:80 }}</div>
+            <div class="scheduled-meta">
+              <span>📅 {{ sm.nextSendAt | date:'dd/MM HH:mm' }}</span>
+              <span class="recurrence-chip" [ngStyle]="getRecurrenceChipStyle(sm.recurrenceType)">
+                {{ getRecurrenceLabel(sm.recurrenceType) }}
+              </span>
+              <span class="countdown-chip">{{ getScheduledCountdown(sm.nextSendAt) }}</span>
+            </div>
+            <div class="scheduled-actions">
+              <button class="btn-xs secondary" (click)="startEditScheduledMsg(sm)">✏️ Modifier</button>
+              <button class="btn-xs danger" (click)="cancelScheduledMessage(sm.id)">✕ Annuler</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── Video Recording Overlay ── -->
+      <div class="video-overlay" *ngIf="videoRecording.phase !== 'idle'">
+        <div class="video-panel">
+          <div class="video-header">
+            <span>🎥 Enregistrement vidéo</span>
+            <div class="video-header-controls">
+              <select [(ngModel)]="videoQuality" class="quality-select" *ngIf="videoRecording.phase === 'preview'">
+                <option value="480p">480p</option>
+                <option value="720p">720p</option>
+                <option value="1080p">1080p</option>
+              </select>
+              <button (click)="closeVideoRecorder()">✕</button>
+            </div>
+          </div>
+
+          <!-- Preview -->
+          <div *ngIf="videoRecording.phase === 'preview'" class="video-body">
+            <video #videoLiveEl class="video-live" autoplay muted playsinline></video>
+            <div class="video-footer">
+              <button class="btn-secondary" (click)="switchVideoCamera()">🔄 Caméra</button>
+              <button class="btn-primary" (click)="startVideoCountdown()">▶ Commencer</button>
+            </div>
+          </div>
+
+          <!-- Countdown -->
+          <div *ngIf="videoRecording.phase === 'countdown'" class="video-body video-countdown-wrap">
+            <video #videoLiveEl class="video-live" autoplay muted playsinline></video>
+            <div class="countdown-overlay">
+              <span [class.go]="videoCountdown === 'GO'">{{ videoCountdown }}</span>
+            </div>
+          </div>
+
+          <!-- Recording -->
+          <div *ngIf="videoRecording.phase === 'recording'" class="video-body">
+            <video #videoLiveEl class="video-live" autoplay muted playsinline></video>
+            <div class="audio-bars">
+              <span *ngFor="let bar of audioBars" [style.height.px]="bar / 8 < 4 ? 4 : bar / 8"></span>
+            </div>
+            <div class="video-footer recording-footer">
+              <span class="rec-live">🔴 {{ formatRecordingTime(videoRecording.duration) }} / 2:00</span>
+              <div class="rec-controls">
+                <button class="btn-secondary" (click)="toggleVideoPause()">
+                  {{ videoIsPaused ? '▶ Reprendre' : '⏸ Pause' }}
+                </button>
+                <button class="btn-danger" (click)="stopVideoCapture()">⏹ Arrêter</button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Review -->
+          <div *ngIf="videoRecording.phase === 'review'" class="video-body">
+            <video #videoReviewEl class="video-live" controls></video>
+            <div class="video-caption-wrap">
+              <input
+                type="text"
+                [(ngModel)]="videoCaption"
+                class="caption-input"
+                placeholder="Ajouter une légende… (optionnel)"
+              />
+            </div>
+            <div class="video-footer">
+              <button class="btn-secondary" (click)="retakeVideo()">🔄 Recommencer</button>
+              <button class="btn-primary" (click)="sendVideoMessage()" [disabled]="uploading">
+                <span *ngIf="!uploading">📤 Envoyer</span>
+                <span *ngIf="uploading" class="spinner-sm"></span>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── Image Lightbox ── -->
+      <div class="lightbox" *ngIf="lightboxItem" (click)="closeImagePreview()">
+        <div class="lightbox-inner" (click)="$event.stopPropagation()">
+          <button class="lightbox-close" (click)="closeImagePreview()">✕</button>
+          <img [src]="lightboxItem.fileUrl" [alt]="lightboxItem.fileName" />
+          <a [href]="lightboxItem.fileUrl" download class="lightbox-download">⬇ Télécharger</a>
+        </div>
+      </div>
+
+      <!-- ══════════════════════════════════════════════════════════
+           MESSAGES AREA
+           ══════════════════════════════════════════════════════════ -->
+      <div class="messages-area" (click)="closeEmojiPicker()">
+
+        <div *ngIf="loading" class="messages-loading">
+          <div class="spinner"></div><span>Chargement…</span>
+        </div>
+
+        <ng-container *ngIf="!loading">
+          <div *ngIf="messages.length === 0" class="no-messages">
+            <span>🚀</span>
+            <p>Commencez la conversation avec {{ selectedConv.otherUserName }}</p>
+          </div>
+
+          <div
+            *ngFor="let msg of messages"
+            class="msg-row"
+            [class.me]="isMe(msg)"
+            [class.them]="!isMe(msg)"
+            [id]="'msg-' + msg.id"
+          >
+            <!-- Avatar (others only) -->
+            <div class="msg-avatar" *ngIf="!isMe(msg)">
+              <div class="avatar xs">{{ getInitials(msg.senderName) }}</div>
+            </div>
+
+            <div class="msg-bubble-wrap">
+              <div
+                class="msg-bubble"
+                [class.pinned]="msg.pinned"
+                [class.deleting]="deletingMsgId === msg.id"
+                (mouseenter)="hoveredMessageId = msg.id"
+                (mouseleave)="hoveredMessageId = null"
+              >
+                <span class="msg-sender" *ngIf="!isMe(msg)">{{ msg.senderName }}</span>
+
+                <!-- EDIT MODE -->
+                <div *ngIf="editingMsg?.id === msg.id" class="edit-mode">
+                  <textarea
+                    [(ngModel)]="editingMsg!.content"
+                    class="edit-textarea"
+                    (keydown.enter)="saveEdit()"
+                    (keydown.escape)="cancelEdit()"
+                    rows="2"
+                    autofocus
+                  ></textarea>
+                  <div class="edit-actions">
+                    <button class="btn-xs secondary" (click)="cancelEdit()">Annuler</button>
+                    <button class="btn-xs primary" (click)="saveEdit()">✓ Sauvegarder</button>
+                  </div>
+                </div>
+
+                <!-- TEXT -->
+                <p
+                  *ngIf="editingMsg?.id !== msg.id && msg.messageType === 'TEXT'"
+                  class="msg-text"
+                  [innerHTML]="msg.content"
+                ></p>
+
+                <!-- IMAGE -->
+                <div *ngIf="msg.messageType === 'IMAGE'" class="msg-image-wrap">
+                  <img [src]="msg.fileUrl" [alt]="msg.fileName" class="msg-image" (click)="openImagePreview(msg)" />
+                </div>
+
+                <!-- FILE -->
+                <div *ngIf="msg.messageType === 'FILE'" class="msg-file">
+                  <span class="file-icon">📄</span>
+                  <div class="file-info">
+                    <a [href]="msg.fileUrl" target="_blank" class="file-name">{{ msg.fileName }}</a>
+                    <span class="file-type">{{ msg.fileType }}</span>
+                  </div>
+                  <a [href]="msg.fileUrl" download class="file-dl">⬇</a>
+                </div>
+
+                <!-- VOICE -->
+                <div *ngIf="msg.messageType === 'VOICE'" class="msg-audio">
+                  <span class="audio-icon">🎙️</span>
+                  <audio [src]="msg.fileUrl" controls class="audio-player"></audio>
+                </div>
+
+                <!-- VIDEO -->
+                <div *ngIf="msg.messageType === 'VIDEO'" class="msg-video">
+                  <video [src]="msg.fileUrl" controls class="video-player" preload="metadata"></video>
+                </div>
+
+                <!-- MEETING_LINK / MEETING_INVITE -->
+                <div *ngIf="msg.messageType === 'MEETING_LINK' || msg.messageType === 'MEETING_INVITE'" class="msg-meeting">
+                  <span class="meeting-icon">📹</span>
+                  <div class="meeting-info">
+                    <span class="meeting-label">📹 Réunion</span>
+                    <span class="meeting-sub">{{ parseMeetingData(msg.content).subject || 'Réunion' }}</span>
+                  </div>
+                  <button class="btn-xs primary"
+                    (click)="joinMeetingFromChat(parseMeetingData(msg.content).roomId)"
+                    [disabled]="!parseMeetingData(msg.content).roomId">
+                    Rejoindre
+                  </button>
+                </div>
+
+                <!-- MEETING_SUMMARY -->
+                <div *ngIf="msg.messageType === 'MEETING_SUMMARY'" class="msg-summary">
+                  <div class="summary-badge">🤖 Compte-rendu IA</div>
+                  <ng-container *ngIf="parseMeetingData(msg.content) as s">
+                    <p class="summary-text-inline" *ngIf="s.summary">{{ s.summary }}</p>
+                    <div *ngIf="s.tasks?.length" class="summary-section">
+                      <strong>📋 Tâches :</strong>
+                      <ul><li *ngFor="let t of s.tasks">{{ t }}</li></ul>
+                    </div>
+                    <div *ngIf="s.decisions?.length" class="summary-section">
+                      <strong>✅ Décisions :</strong>
+                      <ul><li *ngFor="let d of s.decisions">{{ d }}</li></ul>
+                    </div>
+                    <div *ngIf="s.participants" class="summary-participants">
+                      👥 {{ s.participants }}
+                    </div>
+                  </ng-container>
+                </div>
+
+                <!-- Translation -->
+                <div class="msg-translation" *ngIf="getTranslation(msg.id)">
+                  <span class="translation-label">🌐 Traduction :</span>
+                  <p class="translation-text">{{ getTranslation(msg.id) }}</p>
+                  <button class="translation-close" (click)="translateMessage(msg)">✕</button>
+                </div>
+                <div class="translation-loading" *ngIf="isTranslating(msg.id)">
+                  <span class="spinner-sm"></span> Traduction…
+                </div>
+
+                <!-- Pinned indicator -->
+                <span class="pinned-badge" *ngIf="msg.pinned">📌 Épinglé</span>
+
+                <!-- Footer -->
+                <div class="msg-footer">
+                  <span class="msg-time">{{ formatMsgTime(msg.sentAt) }}</span>
+                  <span class="msg-edited" *ngIf="msg.edited">· modifié</span>
+                  <span class="msg-read" *ngIf="isMe(msg) && msg.read">✓✓</span>
+                </div>
+
+                <!-- MESSAGE ACTIONS TOOLBAR -->
+                <div class="msg-actions" [class.me]="isMe(msg)" *ngIf="hoveredMessageId === msg.id">
+                  <button class="action-btn" (click)="openEmojiPicker(msg.id, $event)" title="Réagir">😊</button>
+                  <button class="action-btn" (click)="translateMessage(msg)" title="Traduire" *ngIf="msg.messageType === 'TEXT'">🌐</button>
+                  <button class="action-btn" (click)="speakMessage(msg)" title="Lire" *ngIf="msg.messageType === 'TEXT'">🔊</button>
+                  <button class="action-btn" (click)="msg.pinned ? unpinMessage(msg) : pinMessage(msg)" [title]="msg.pinned ? 'Désépingler' : 'Épingler'">📌</button>
+                  <button class="action-btn" *ngIf="canEdit(msg)" (click)="editMessage(msg)" title="Modifier">✏️</button>
+                  <button class="action-btn danger" *ngIf="canDelete(msg)" (click)="deleteMessage(msg.id)" title="Supprimer">🗑️</button>
+                </div>
+
+                <!-- Reaction Picker -->
+                <div
+                  class="reaction-picker"
+                  *ngIf="showReactionPicker && reactionPickerMsgId === msg.id"
+                  (click)="$event.stopPropagation()"
+                >
+                  <span *ngFor="let e of emojis" class="emoji-opt" (click)="addReaction(msg.id, e)">{{ e }}</span>
+                </div>
+              </div>
+
+              <!-- Reactions Bar -->
+              <div class="reactions-bar" *ngIf="(msg.reactions?.length ?? 0) > 0">
+                <span
+                  *ngFor="let rg of getReactionGroups(msg)"
+                  class="reaction-chip"
+                  [class.mine]="isMyReaction(rg.emoji, msg)"
+                  [title]="rg.users.join(', ')"
+                  (click)="addReaction(msg.id, rg.emoji)"
+                >{{ rg.emoji }} {{ rg.count }}</span>
+              </div>
+            </div>
+          </div>
+
+          <div #messagesEnd></div>
+        </ng-container>
+      </div>
+
+      <!-- ── Typing Indicator ── -->
+      <div class="typing-indicator" *ngIf="typingUsers.size > 0">
+        <div class="typing-dots"><span></span><span></span><span></span></div>
+        <span>{{ typingText }}</span>
+      </div>
+
+      <!-- ══════════════════════════════════════════════════════════
+           INPUT AREA
+           ══════════════════════════════════════════════════════════ -->
+      <div class="input-area">
+
+        <!-- STT transcript preview -->
+        <div class="stt-bar" *ngIf="voiceRecording.isRecording && sttTranscript">
+          <span class="stt-label">📝</span>
+          <span class="stt-text">{{ sttTranscript }}{{ sttInterim }}</span>
+        </div>
+
+        <!-- Voice recording bar -->
+        <div class="voice-recording-bar" *ngIf="voiceRecording.isRecording">
+          <span class="rec-dot">●</span>
+          <span class="rec-duration">{{ formatRecordingTime(voiceRecording.duration) }}</span>
+          <div class="rec-waveform">
+            <span></span><span></span><span></span><span></span><span></span>
+          </div>
+          <button class="btn-xs danger" (click)="cancelVoiceRecording()">✕ Annuler</button>
+          <button class="btn-xs primary" (click)="stopVoiceRecording()">⏹ Envoyer</button>
+        </div>
+
+        <!-- Screen recording bar -->
+        <div class="screen-recording-bar" *ngIf="isScreenRecording()">
+          <span class="rec-dot">⏺</span>
+          <span class="rec-duration">Enregistrement : {{ formatRecordingTime(screenRecordingDuration()) }}</span>
+          <button class="btn-xs primary" (click)="stopScreenRecording()">⏹ Arrêter</button>
+          <button class="btn-xs danger" (click)="cancelScreenRecording()">✕ Annuler</button>
+        </div>
+
+        <!-- Screen review panel -->
+        <div class="screen-review-panel" *ngIf="screenPreviewUrl() && !isScreenRecording()">
+          <div class="screen-review-header">
+            <span>🖥️ Aperçu de l'enregistrement</span>
+            <button class="btn-xs danger" (click)="cancelScreenRecording()">✕</button>
+          </div>
+          <video [src]="screenPreviewUrl()" controls class="screen-preview-video"></video>
+          <div class="screen-review-footer">
+            <input
+              type="text"
+              [(ngModel)]="screenCaption"
+              class="modal-input sm"
+              placeholder="Ajouter une légende…"
+            />
+            <button class="btn-xs primary" (click)="sendScreenRecording()" [disabled]="uploading">
+              <span *ngIf="!uploading">📤 Envoyer</span>
+              <span *ngIf="uploading"><span class="spinner-sm"></span></span>
+            </button>
+            <button class="btn-xs danger" (click)="cancelScreenRecording()">🗑 Supprimer</button>
+          </div>
+        </div>
+
+        <!-- Upload progress -->
+        <div class="upload-progress-bar" *ngIf="uploading">
+          <div class="progress-fill" [style.width.%]="uploadProgress"></div>
+          <span>Envoi… {{ uploadProgress }}%</span>
+        </div>
+
+        <!-- Schedule panel (inline) -->
+        <div class="schedule-inline" *ngIf="showSchedulePanel">
+          <div class="schedule-inline-header">
+            <span>🕐 {{ editingScheduledId ? 'Modifier le message' : 'Programmer un message' }}</span>
+            <button (click)="closeSchedulePanel()">✕</button>
+          </div>
+          <div class="schedule-fields">
+            <textarea
+              [(ngModel)]="schedulingContent"
+              class="schedule-textarea"
+              placeholder="Contenu du message…"
+              rows="2"
+            ></textarea>
+            <div class="schedule-datetime">
+              <input type="date" [(ngModel)]="scheduleMsgDate" class="modal-input sm" [min]="today" />
+              <input type="time" [(ngModel)]="scheduleMsgTime" class="modal-input sm" />
+            </div>
+            <div class="recurrence-selector">
+              <button
+                *ngFor="let r of ['ONCE','DAILY','WEEKLY','WEEKDAYS','CUSTOM']"
+                class="rec-btn" [class.active]="recurrenceType === r"
+                (click)="recurrenceType = $any(r)"
+              >{{ getRecurrenceLabel($any(r)) }}</button>
+            </div>
+            <div class="days-selector" *ngIf="recurrenceType === 'CUSTOM' || recurrenceType === 'WEEKLY'">
+              <button
+                *ngFor="let day of ['MONDAY','TUESDAY','WEDNESDAY','THURSDAY','FRIDAY','SATURDAY','SUNDAY']"
+                class="day-btn" [class.active]="isRecurrenceDay(day)"
+                (click)="toggleRecurrenceDay(day)"
+              >{{ getDayLabel(day) }}</button>
+            </div>
+            <div class="schedule-actions">
+              <button class="btn-secondary" (click)="closeSchedulePanel()">Annuler</button>
+              <button
+                class="btn-primary"
+                (click)="scheduleMessage()"
+                [disabled]="!(schedulingContent || newMessage).trim() || !scheduleMsgDate || !scheduleMsgTime || sending"
+              >
+                <span *ngIf="!sending">📅 {{ editingScheduledId ? 'Modifier' : 'Programmer' }}</span>
+                <span *ngIf="sending" class="spinner-sm"></span>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- @Mention Dropdown -->
+        <div class="mention-dropdown" *ngIf="showMentionDropdown && mentionSuggestions.length > 0">
+          <div
+            *ngFor="let p of mentionSuggestions; let i = index"
+            class="mention-item"
+            [class.active]="mentionSelectedIndex === i"
+            (click)="selectMention(p)"
+          >
+            <div class="avatar xs">{{ getInitials(p.name) }}</div>
+            <div class="mention-info">
+              <span class="mention-name">{{ p.name }}</span>
+              <span class="mention-role">{{ getMemberRole(p) }}</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Main input row -->
+        <div class="input-row">
+          <input
+            #fileInput
+            type="file"
+            class="hidden-input"
+            accept="image/*,audio/*,video/*,.pdf,.doc,.docx,.xls,.xlsx,.txt,.zip"
+            (change)="onFileSelected($event)"
+          />
+
+          <!-- Toolbar Left -->
+          <div class="input-toolbar-left">
+            <button class="tool-btn" (click)="triggerFileUpload()" title="Fichier / Image">📎</button>
+            <button
+              class="tool-btn"
+              [class.recording]="voiceRecording.isRecording"
+              (click)="voiceRecording.isRecording ? stopVoiceRecording() : startVoiceRecording()"
+              [disabled]="uploading"
+              title="Vocal"
+            >🎙️</button>
+            <button
+              class="tool-btn"
+              (click)="openVideoRecorder()"
+              [disabled]="videoRecording.phase !== 'idle' || uploading"
+              title="Vidéo"
+            >🎥</button>
+            <!-- Screen Recording button -->
+            <button
+              *ngIf="!isScreenRecording()"
+              class="tool-btn"
+              (click)="startScreenRecording()"
+              [disabled]="uploading || !!screenPreviewUrl()"
+              title="Enregistrer l'écran"
+            >🖥️</button>
+            <button
+              class="tool-btn"
+              [class.active]="translateBeforeSend"
+              (click)="translateBeforeSend = !translateBeforeSend"
+              title="Traduire avant envoi"
+            >🌐</button>
+          </div>
+
+          <!-- Textarea -->
+          <div class="textarea-wrap">
+            <textarea
+              #msgInput
+              [(ngModel)]="newMessage"
+              (input)="onMessageInput($event)"
+              (keydown)="onKeydown($event)"
+              [placeholder]="inputPlaceholder"
+              class="msg-textarea"
+              rows="1"
+              [disabled]="voiceRecording.isRecording || sending"
+            ></textarea>
+            <div class="translating-bar" *ngIf="isTranslatingBeforeSend">
+              <span class="spinner-sm"></span> Traduction en cours…
+            </div>
+          </div>
+
+          <!-- Toolbar Right -->
+          <div class="input-toolbar-right">
+            <button
+              class="tool-btn"
+              [class.active]="showSchedulePanel"
+              (click)="toggleSchedulePanel()"
+              title="Programmer"
+            >🕐</button>
+            <button
+              class="send-btn"
+              (click)="sendMessage()"
+              [disabled]="!newMessage.trim() || sending || isTranslatingBeforeSend"
+              title="Envoyer (Entrée)"
+            >
+              <span *ngIf="!sending">➤</span>
+              <span *ngIf="sending" class="spinner-sm"></span>
+            </button>
+          </div>
+        </div>
+      </div>
+
+    </ng-container>
+  </main>
+
+  <!-- ══════════════════════════════════════════════════════════════
+       MODAL: MEETING (Instant)
+       ══════════════════════════════════════════════════════════════ -->
+  <div class="modal-backdrop" *ngIf="showMeetingModal" (click)="showMeetingModal = false">
+    <div class="modal" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <h3>📹 Démarrer une réunion instantanée</h3>
+        <button (click)="showMeetingModal = false">✕</button>
+      </div>
+      <div class="modal-body">
+        <label class="field-label">Durée estimée (minutes)</label>
+        <input type="number" [(ngModel)]="meetingDuration" class="modal-input" min="5" max="180" step="5" />
+        <p class="modal-hint">
+          Une IA générera automatiquement un résumé, les tâches et décisions identifiées après la réunion.
+        </p>
+      </div>
+      <div class="modal-footer">
+        <button class="btn-secondary" (click)="showMeetingModal = false">Annuler</button>
+        <button class="btn-primary" (click)="createMeeting()" [disabled]="meetingLoading || isCreatingMeeting">
+          <span *ngIf="!meetingLoading">⚡ Démarrer</span>
+          <span *ngIf="meetingLoading"><span class="spinner-sm"></span> Connexion…</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════════════════════════════
+       MODAL: SCHEDULE MEETING
+       ══════════════════════════════════════════════════════════════ -->
+  <div class="modal-backdrop" *ngIf="showScheduleForm" (click)="showScheduleForm = false">
+    <div class="modal" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <h3>📅 Planifier une réunion</h3>
+        <button (click)="showScheduleForm = false">✕</button>
+      </div>
+      <div class="modal-body">
+        <label class="field-label">Sujet de la réunion</label>
+        <input type="text" [(ngModel)]="scheduleSubject" class="modal-input" placeholder="Réunion de suivi…" />
+
+        <label class="field-label">Date</label>
+        <input type="date" [(ngModel)]="scheduleDate" class="modal-input" [min]="today" />
+
+        <label class="field-label">Heure</label>
+        <input type="time" [(ngModel)]="scheduleTime" class="modal-input" />
+      </div>
+      <div class="modal-footer">
+        <button class="btn-secondary" (click)="showScheduleForm = false">Annuler</button>
+        <button
+          class="btn-primary"
+          (click)="submitScheduleMeeting()"
+          [disabled]="!scheduleDate || !scheduleTime || isCreatingMeeting"
+        >
+          <span *ngIf="!isCreatingMeeting">📅 Planifier</span>
+          <span *ngIf="isCreatingMeeting"><span class="spinner-sm"></span> …</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+</div>

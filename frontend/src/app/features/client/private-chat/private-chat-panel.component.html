@@ -1,0 +1,67 @@
+<div class="pchat-overlay" (click)="close.emit()"></div>
+<div class="pchat-panel">
+  <!-- Header -->
+  <div class="pchat-header">
+    <div class="pchat-avatar-wrap">
+      <div class="pchat-avatar">{{ getInitials(freelancerName) }}</div>
+      <span class="status-dot" [class.online]="freelancerOnline"></span>
+    </div>
+    <div class="pchat-header-info">
+      <span class="pchat-partner">{{ freelancerName }}</span>
+      <span class="pchat-status" [class.online]="freelancerOnline">
+        {{ freelancerOnline ? '🟢 En ligne' : '⚫ Hors ligne' }}
+      </span>
+      <span class="pchat-project" *ngIf="projectTitle">📦 {{ projectTitle }}</span>
+    </div>
+    <button class="pchat-close" (click)="close.emit()">✕</button>
+  </div>
+
+  <!-- Messages -->
+  <div class="pchat-messages">
+    <div class="loading-wrap" *ngIf="loading">
+      <div class="spinner"></div>
+    </div>
+
+    <div class="empty-msgs" *ngIf="!loading && messages.length === 0">
+      <p>Démarrez une conversation avec {{ freelancerName }}</p>
+    </div>
+
+    <div
+      class="msg-wrap"
+      *ngFor="let msg of messages"
+      [class.sent]="isMe(msg)"
+      [class.received]="!isMe(msg)"
+    >
+      <div class="msg-avatar-sm" *ngIf="!isMe(msg)">{{ getInitials(msg.senderName) }}</div>
+      <div class="msg-bubble">
+        <div class="msg-text">{{ msg.content }}</div>
+        <div class="msg-meta">
+          <span class="msg-time">{{ formatTime(msg.sentAt) }}</span>
+          <span class="msg-check" *ngIf="isMe(msg)">{{ msg.read ? '✓✓' : '✓' }}</span>
+        </div>
+      </div>
+    </div>
+
+    <div #messagesEnd></div>
+  </div>
+
+  <!-- Input -->
+  <div class="pchat-input-bar">
+    <textarea
+      #msgInput
+      class="pchat-input"
+      placeholder="Écrivez un message..."
+      [(ngModel)]="newMessage"
+      (keydown)="onKeydown($event)"
+      rows="1"
+    ></textarea>
+    <button
+      class="pchat-send"
+      (click)="sendMessage()"
+      [disabled]="sending || !newMessage.trim()"
+    >
+      <span *ngIf="!sending">➤</span>
+      <span *ngIf="sending" class="spinner-sm"></span>
+    </button>
+  </div>
+</div>

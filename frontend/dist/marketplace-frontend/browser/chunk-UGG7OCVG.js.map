@@ -1,0 +1,7 @@
+{
+  "version": 3,
+  "sources": ["src/app/features/organizer/organizer.routes.ts"],
+  "sourcesContent": ["import { Routes } from '@angular/router';\n\nexport const organizerRoutes: Routes = [\n  { path: '', redirectTo: 'dashboard', pathMatch: 'full' },\n  {\n    path: 'dashboard',\n    loadComponent: () => import('./dashboard/dashboard.component').then(m => m.DashboardComponent)\n  },\n  {\n    path: 'projects',\n    loadComponent: () => import('./projects/org-projects.component').then(m => m.OrgProjectsComponent)\n  }\n];\n"],
+  "mappings": ";;;AAEO,IAAM,kBAA0B;EACrC,EAAE,MAAM,IAAI,YAAY,aAAa,WAAW,OAAM;EACtD;IACE,MAAM;IACN,eAAe,MAAM,OAAO,qBAAiC,EAAE,KAAK,OAAK,EAAE,kBAAkB;;EAE/F;IACE,MAAM;IACN,eAAe,MAAM,OAAO,qBAAmC,EAAE,KAAK,OAAK,EAAE,oBAAoB;;;",
+  "names": []
+}

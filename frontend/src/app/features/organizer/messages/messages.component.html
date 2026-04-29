@@ -1,0 +1,165 @@
+<div class="messages-container">
+  <!-- Sidebar conversations -->
+  <aside class="conversations-sidebar" [class.mobile-hidden]="selectedConversation && isMobile">
+    <div class="sidebar-header">
+      <div class="header-title">
+        <h2>Messagerie</h2>
+      </div>
+      <div class="search-box">
+        <span class="search-icon">🔍</span>
+        <input 
+          type="text" 
+          class="search-input" 
+          placeholder="Rechercher une conversation..."
+          [(ngModel)]="searchQuery"
+        >
+      </div>
+    </div>
+
+    <div class="conversations-list">
+      @for (conv of filteredConversations; track conv.projectId) {
+        <div 
+          class="conversation-item"
+          [class.active]="selectedConversation?.projectId === conv.projectId"
+          [class.unread]="conv.unreadCount > 0"
+          (click)="selectConversation(conv)"
+        >
+          <div class="conv-avatar">
+            <div class="avatar-img">{{ getInitials(conv.projectTitle) }}</div>
+            <span class="online-dot" *ngIf="conv.isOnline"></span>
+          </div>
+          <div class="conv-info">
+            <div class="conv-name">{{ conv.projectTitle }}</div>
+            <div class="conv-last-message">
+              {{ conv.lastMessage || 'Aucun message' }}
+            </div>
+          </div>
+          <div class="conv-meta">
+            <span class="conv-time" *ngIf="conv.lastMessageTime">
+              {{ formatTime(conv.lastMessageTime) }}
+            </span>
+            <span class="unread-badge" *ngIf="conv.unreadCount > 0">
+              {{ conv.unreadCount }}
+            </span>
+          </div>
+        </div>
+      }
+
+      @if (filteredConversations.length === 0) {
+        <div class="empty-conversations">
+          <div class="empty-icon">💬</div>
+          <p>Aucune conversation</p>
+          <p class="empty-hint">Commencez un projet pour discuter avec vos clients</p>
+          <button class="btn-new-project" routerLink="/organizer/projects">
+            + Nouveau projet
+          </button>
+        </div>
+      }
+    </div>
+  </aside>
+
+  <!-- Zone de chat -->
+  <main class="chat-area" [class.mobile-full]="selectedConversation && isMobile">
+    @if (selectedConversation && selectedProject) {
+      <!-- Header du chat -->
+      <div class="chat-header">
+        <button class="mobile-back" (click)="selectedConversation = null" *ngIf="isMobile">
+          ←
+        </button>
+        <div class="chat-user">
+          <div class="chat-avatar">
+            {{ getInitials(selectedConversation.projectTitle) }}
+          </div>
+          <div class="chat-user-info">
+            <h3 class="chat-user-name">{{ selectedConversation.projectTitle }}</h3>
+            <p class="chat-user-status" [class.online]="selectedConversation.isOnline">
+              {{ selectedConversation.isOnline ? 'En ligne' : 'Hors ligne' }}
+            </p>
+          </div>
+        </div>
+        <div class="chat-actions">
+          <button class="action-btn" title="Voir le projet" (click)="goBack()">
+            📁
+          </button>
+        </div>
+      </div>
+
+      <!-- Messages -->
+      <div class="chat-messages" #messagesContainer>
+        @if (loadingMessages) {
+          <div class="loading-messages">
+            <div class="spinner"></div>
+            <p>Chargement des messages...</p>
+          </div>
+        } @else {
+          @for (msg of messages; track msg.id) {
+            <div class="message" [class.message-me]="isMe(msg)" [class.message-other]="!isMe(msg)">
+              @if (!isMe(msg)) {
+                <div class="msg-avatar">
+                  {{ getInitials(msg.senderName) }}
+                </div>
+              }
+              <div class="msg-bubble">
+                <div class="msg-sender" *ngIf="!isMe(msg)">{{ msg.senderName }}</div>
+                <div class="msg-content">{{ msg.content || (msg.fileName || 'Fichier') }}</div>
+                <div class="msg-time">{{ formatMessageTime(msg.sentAt) }}</div>
+              </div>
+            </div>
+          }
+
+          <!-- Indicateur de frappe -->
+          @if (typingText) {
+            <div class="typing-indicator">
+              <div class="typing-avatar">{{ getInitials(typingText) }}</div>
+              <div class="typing-bubble">
+                <span class="typing-text">{{ typingText }}</span>
+                <span class="typing-dots">...</span>
+              </div>
+            </div>
+          }
+
+          <div #messagesEnd></div>
+        }
+      </div>
+
+      <!-- Zone de saisie -->
+      <div class="chat-input-area">
+        <div class="input-wrapper">
+          <textarea 
+            #messageInput
+            class="message-input"
+            [(ngModel)]="newMessage"
+            (keydown)="onKeydown($event)"
+            (input)="onTyping(); adjustTextarea()"
+            placeholder="Écrivez votre message..."
+            rows="1"
+          ></textarea>
+          <button 
+            class="send-btn" 
+            (click)="sendMessage()"
+            [disabled]="!newMessage.trim() || sending"
+          >
+            @if (!sending) {
+              <span>➤</span>
+            } @else {
+              <span class="spinner-sm"></span>
+            }
+          </button>
+        </div>
+        <div class="input-hint">
+          Entrée pour envoyer · Shift+Entrée pour nouvelle ligne
+        </div>
+      </div>
+    } @else {
+      <!-- État vide -->
+      <div class="empty-chat-state">
+        <div class="empty-chat-icon">💬</div>
+        <h3>Messagerie</h3>
+        <p>Sélectionnez une conversation pour commencer à discuter</p>
+        <button class="btn-new-chat" routerLink="/organizer/projects">
+          + Nouveau projet
+        </button>
+      </div>
+    }
+  </main>
+</div>

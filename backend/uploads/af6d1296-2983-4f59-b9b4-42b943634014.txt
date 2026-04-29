@@ -1,0 +1,26 @@
+git add .
+git status
+git commit -m "ToutsRestController" 
+git push -u origin main
+
+
+
+Initialisation Git dans votre projet:
+cd chemin/vers/votre/projet
+git init
+git remote add origin https://github.com/salmahaouari/SKI.git
+git status
+git add .
+git commit -m "SkieurController"
+git branch -M main
+git push -u origin main
+
+
+
+!h@Salm5MpdA#
+salmahaweri15@gmail.com
+lifeisnotfair2684
+
+
+mongoimport --db atelier2 --collection cities --type json --file ""
+db.cities.aggregate([ {$group: },{$project: },{ $sort: },{ statut:1 } ])
