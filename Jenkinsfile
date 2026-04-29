@@ -1,5 +1,10 @@
 pipeline {
-    agent any
+    agent {
+        docker {
+            image 'maven:3.9.6-eclipse-temurin-17'
+            args '-v /root/.m2:/root/.m2'
+        }
+    }
 
     stages {
         stage('Build') {
@@ -21,14 +26,8 @@ pipeline {
         stage('SonarQube Analysis') {
             steps {
                 dir('profile_project_service') {
-                    sh 'mvn sonar:sonar -Dsonar.host.url=http://sonarqube:9000'
+                    sh 'mvn sonar:sonar -Dsonar.host.url=http://sonarqube:9000 -Dsonar.login=admin -Dsonar.password=admin'
                 }
-            }
-        }
-
-        stage('Docker Build') {
-            steps {
-                sh 'docker build -t matchy-profile-service ./profile_project_service'
             }
         }
     }
