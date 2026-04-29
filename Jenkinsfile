@@ -24,11 +24,11 @@ pipeline {
         }
 
         stage('SonarQube Analysis') {
-            steps {
-                dir('profile_project_service') {
-                    sh 'mvn sonar:sonar -Dsonar.host.url=http://sonarqube:9000 -Dsonar.login=admin -Dsonar.password=admin'
-                }
-            }
+    steps {
+        dir('profile_project_service') {
+            sh 'mvn sonar:sonar -Dsonar.host.url=http://sonarqube:9000 -Dsonar.token=d014168596948dd626709c5a9714617b70620b4c'
         }
+    }
+}
     }
 }
