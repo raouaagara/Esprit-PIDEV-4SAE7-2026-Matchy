@@ -14,8 +14,8 @@ spec:
     spec:
       containers:
       - name: matchy-service
-        image: matchy-profile-service:latest
-        imagePullPolicy: Never 
+        image: raouaaa/matchy-profile-service:latest
+        imagePullPolicy: Always
         ports:
         - containerPort: 8082
         env:
