@@ -23,31 +23,10 @@ pipeline {
 
         stage('SonarQube Analysis') {
             steps {
-                withCredentials([string(credentialsId: 'sonar-token', variable: 'SONAR_TOKEN')]) {
-                    dir('backend') {
-                        sh """
-                            mvn sonar:sonar \
-                              -Dsonar.projectKey=chat-service \
-                              -Dsonar.host.url=${SONAR_HOST_URL} \
-                              -Dsonar.login=${SONAR_TOKEN}
-                        """
-                    }
-                    dir('discovery-server') {
-                        sh """
-                            mvn sonar:sonar \
-                              -Dsonar.projectKey=discovery-server \
-                              -Dsonar.host.url=${SONAR_HOST_URL} \
-                              -Dsonar.login=${SONAR_TOKEN}
-                        """
-                    }
-                    dir('api-gateway') {
-                        sh """
-                            mvn sonar:sonar \
-                              -Dsonar.projectKey=api-gateway \
-                              -Dsonar.host.url=${SONAR_HOST_URL} \
-                              -Dsonar.login=${SONAR_TOKEN}
-                        """
-                    }
+                withSonarQubeEnv('SonarQube') {
+                    sh "mvn sonar:sonar -f backend/pom.xml"
+                    sh "mvn sonar:sonar -f discovery-server/pom.xml"
+                    sh "mvn sonar:sonar -f api-gateway/pom.xml"
                 }
             }
         }
